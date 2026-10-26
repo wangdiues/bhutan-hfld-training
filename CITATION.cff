@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this course, please cite it as below."
+title: "Bhutan HFLD Training: an open course on ART-TREES HFLD activity data with Google Earth Engine"
+type: software
+authors:
+  - name: "Wangdi"
+    email: "wangdiues@gmail.com"
+license: "CC-BY-4.0"
+repository-code: "https://github.com/wangdiues/bhutan-hfld-training"
+url: "https://wangdiues.github.io/bhutan-hfld-training/"
+version: "0.1.0"
+date-released: "2026-10-26"
+keywords:
+  - Google Earth Engine
+  - ART-TREES
+  - HFLD
+  - REDD+
+  - MRV
+  - land cover
+  - area estimation
+  - Bhutan
+references:
+  - type: generic
+    title: "Bhutan ART-TREES HFLD Readiness Training"
+    authors:
+      - name: "Ate Poortinga"
+      - name: "Samuel"
+    institution:
+      name: "Conservation International"
+    year: 2026
+    month: 5
+    notes: "Original training materials (slides, exercises, calculators), adapted with permission."
