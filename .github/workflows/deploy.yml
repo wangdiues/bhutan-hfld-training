@@ -1,40 +1,87 @@
-name: Deploy to GitHub Pages
+name: Check and deploy
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Allow one deployment at a time; don't cancel a run that is already deploying.
+# One deployment at a time; never cancel a run that is already deploying.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:
+  checks:
+    name: Build and check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # full history so Starlight's "last updated" dates are correct
-      - name: Build with Astro
-        uses: withastro/action@v6
+
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
+          cache: npm
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (includes internal link validation)
+        run: npm run build
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Colour contrast of theme tokens
+        run: npm run check:contrast
+
+      - name: Accessibility scan (axe, WCAG 2 AA) of every page
+        run: |
+          npx astro preview --port 4321 &
+          npx wait-on --timeout 60000 http://localhost:4321/bhutan-hfld-training/
+          npm run check:a11y -- --sitemap http://localhost:4321/bhutan-hfld-training/sitemap-0.xml \
+            --sitemap-find "https://wangdiues.github.io" --sitemap-replace "http://localhost:4321"
+
+      - name: External link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Internal links are already validated at build time; check external ones only.
+          args: >-
+            --no-progress --scheme https --scheme http
+            --exclude '^https://code\.earthengine\.google\.com'
+            --exclude '^https://wangdiues\.github\.io'
+            --exclude '^https://github\.com/wangdiues/bhutan-hfld-training/edit/'
+            --accept '200..=299,403,429'
+            'dist/**/*.html'
+          fail: true
+
+      - name: Upload site artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
 
   deploy:
-    needs: build
+    name: Deploy to GitHub Pages
+    needs: checks
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v5

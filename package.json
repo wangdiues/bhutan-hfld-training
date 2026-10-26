@@ -7,7 +7,10 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "check:contrast": "python scripts/check-contrast.py",
+    "check:a11y": "pa11y-ci --config .pa11yci.json"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.7",
@@ -17,5 +20,10 @@
     "astro": "^7.2.10",
     "sharp": "^0.35.3",
     "starlight-links-validator": "^0.27.0"
+  },
+  "devDependencies": {
+    "pa11y-ci": "^5.0.0",
+    "vitest": "^5.0.5",
+    "wait-on": "^9.5.1"
   }
 }
