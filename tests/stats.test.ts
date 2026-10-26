@@ -1,0 +1,119 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { accuracyArea } from '../src/lib/stats/accuracyArea';
+import {
+	allocateEqual,
+	allocateMinimum,
+	allocateProportional,
+	sampleSize,
+	samplingDensity,
+} from '../src/lib/stats/sampleSize';
+
+const fixture = (name: string) =>
+	JSON.parse(readFileSync(join(import.meta.dirname, 'fixtures', name), 'utf-8'));
+
+/** Relative tolerance 1e-6 (absolute for values near zero). */
+function close(actual: number | null, expected: number | null) {
+	if (expected === null) return expect(actual).toBeNull();
+	expect(actual).not.toBeNull();
+	const tol = Math.max(Math.abs(expected) * 1e-6, 1e-12);
+	expect(Math.abs((actual as number) - expected)).toBeLessThanOrEqual(tol);
+}
+const closeAll = (a: (number | null)[], e: (number | null)[]) => {
+	expect(a).toHaveLength(e.length);
+	a.forEach((x, i) => close(x, e[i]));
+};
+
+describe('Lab 1 — sample size matches the Day 5 workbook', () => {
+	const { inputs, expected } = fixture('sample-size.workbook.json');
+	const area = (name: string) => inputs.strataReport.find((r: { name: string }) => r.name === name).areaHa;
+	const forest = area('Forest');
+	const nonForest = ['null', 'Cropland', 'Grassland', 'Wetland', 'Settlement', 'Other Land'].reduce(
+		(s, name) => s + area(name),
+		0,
+	);
+	const areas = [
+		...inputs.forestSplitPercent.map((pct: number) => (forest * pct) / 100),
+		nonForest,
+		area('Deforestation'),
+	];
+	const totalAreaHa = inputs.strataReport.reduce((s: number, r: { areaHa: number }) => s + r.areaHa, 0);
+	const strata = expected.strata.map((name: string, i: number) => ({
+		name,
+		areaHa: areas[i],
+		expectedProportion: inputs.expectedProportion[i],
+	}));
+	const run = (z: number) =>
+		sampleSize({ strata, targetIndex: 4, marginOfErrorPercent: inputs.marginOfErrorPercent, z, totalAreaHa });
+	const r = run(inputs.z90);
+
+	it('builds strata and weights', () => {
+		closeAll(areas, expected.areaHa);
+		closeAll(r.weights, expected.weight);
+		closeAll(r.stdDevs, expected.stdDev);
+		close(r.sumWS, expected.sumWS);
+	});
+	it('computes the target SE and total sample size', () => {
+		close(r.targetSE, expected.targetSE90);
+		close(run(inputs.z95).targetSE, expected.targetSE95);
+		close(r.n, expected.totalSamples);
+	});
+	it('allocates equally, proportionally and by minimum', () => {
+		closeAll(allocateEqual(r.n, areas), expected.equal);
+		closeAll(allocateProportional(r.n, r.weights), expected.proportional);
+		for (const m of inputs.minimumPerStratum) {
+			const got = allocateMinimum(r.n, areas, m, ['share', 'share', 'share', 'zero', 'minimum']);
+			closeAll(got, expected.minimum[String(m)]);
+		}
+	});
+	it('computes sampling density', () => {
+		closeAll(samplingDensity(areas, allocateEqual(r.n, areas)), expected.densityEqual);
+		closeAll(samplingDensity(areas, allocateProportional(r.n, r.weights)), expected.densityProportional);
+	});
+});
+
+describe('Lab 2 — accuracy and area match the Day 5 workbook', () => {
+	const { inputs, expected } = fixture('accuracy-area.workbook.json');
+	const r = accuracyArea({ ...inputs, varianceRule: 'workbook' });
+
+	it('computes sample-based accuracy and kappa', () => {
+		closeAll(r.rowTotals, expected.rowTotals);
+		closeAll(r.colTotals, expected.colTotals);
+		closeAll(r.sampleBased.usersAccuracy, expected.usersAccuracy);
+		closeAll(r.sampleBased.producersAccuracy, expected.producersAccuracy);
+		close(r.sampleBased.overallAccuracy, expected.overallAccuracy);
+		close(r.sampleBased.kappa, expected.kappa);
+	});
+	it('computes weights, proportions and adjusted areas', () => {
+		closeAll(r.weights, expected.stratumWeight);
+		close(r.totalAreaHa, expected.totalAreaHa);
+		r.cellProportions.forEach((row, i) => closeAll(row, expected.cellProportions[i]));
+		closeAll(r.referenceProportion, expected.referenceProportion);
+		closeAll(r.adjustedAreaHa, expected.adjustedAreaHa);
+	});
+	it('computes standard errors and 90% uncertainty', () => {
+		closeAll(r.seProportion, expected.seProportion);
+		closeAll(r.seAreaHa, expected.seAreaHa);
+		closeAll(r.uncertaintyPercent, expected.uncertaintyPercent90);
+	});
+	it('flags the empty Non-Forest stratum', () => {
+		expect(r.emptyStrata).toEqual([1]);
+		expect(r.areaWeighted.overallAccuracy).toBeNull();
+	});
+});
+
+describe('Olofsson variance rule vs the workbook rule', () => {
+	it('keeps cells with exactly one sample (the workbook drops them)', () => {
+		const input = { mappedAreaHa: [900, 100], matrix: [[98, 1], [3, 47]], z: 1.6449 };
+		const olofsson = accuracyArea(input);
+		const workbook = accuracyArea({ ...input, varianceRule: 'workbook' });
+		expect(olofsson.seProportion[1]).toBeGreaterThan(workbook.seProportion[1]);
+		expect(olofsson.adjustedAreaHa).toEqual(workbook.adjustedAreaHa);
+	});
+	it('reproduces the D5 slide example of adjusting a deforestation estimate', () => {
+		// 17,000 ha mapped as deforestation; 18 of 23 samples confirmed → 13,304 ha.
+		const r = accuracyArea({ mappedAreaHa: [83000, 17000], matrix: [[100, 0], [5, 18]], z: 1.6449 });
+		close(r.cellProportions[1][1] * r.totalAreaHa, 17000 * (18 / 23));
+	});
+});

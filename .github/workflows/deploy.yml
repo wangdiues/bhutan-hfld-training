@@ -51,17 +51,21 @@ jobs:
           npm run check:a11y -- --sitemap http://localhost:4321/bhutan-hfld-training/sitemap-0.xml \
             --sitemap-find "https://wangdiues.github.io" --sitemap-replace "http://localhost:4321"
 
-      - name: External link check
+      - name: Stage the site under its base path for link checking
+        run: mkdir -p _site && cp -r dist _site/bhutan-hfld-training
+
+      - name: Link check (internal and external)
         uses: lycheeverse/lychee-action@v2
         with:
-          # Internal links are already validated at build time; check external ones only.
+          # Root-relative links (/bhutan-hfld-training/...) resolve against _site, like on GitHub Pages.
           args: >-
-            --no-progress --scheme https --scheme http
+            --no-progress
+            --root-dir ${{ github.workspace }}/_site
             --exclude '^https://code\.earthengine\.google\.com'
             --exclude '^https://wangdiues\.github\.io'
             --exclude '^https://github\.com/wangdiues/bhutan-hfld-training/edit/'
             --accept '200..=299,403,429'
-            'dist/**/*.html'
+            '_site/**/*.html'
           fail: true
 
       - name: Upload site artifact

@@ -25,3 +25,4 @@ scripts/convert/out/
 
 # editor / OS
 Thumbs.db
+_site/
