@@ -1,0 +1,125 @@
+{
+  "source": "Exercise D5-Confusion Matrix, Accuracy Assessment, Area Adjustment.xlsx (Sheet1), cached values as saved",
+  "note": "Rows = map (stratum) class, columns = reference class. The Non-Forest row is empty in the workbook, so its user's accuracy is #DIV/0! (null here).",
+  "inputs": {
+    "classes": [
+      "Forest",
+      "Non-Forest",
+      "Deforestation"
+    ],
+    "mappedAreaHa": [
+      2675342.29192151,
+      2687478.54,
+      12136.2459005927
+    ],
+    "matrix": [
+      [
+        1595.0,
+        50.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        20.0,
+        10.0,
+        120.0
+      ]
+    ],
+    "z": 1.6449
+  },
+  "expected": {
+    "rowTotals": [
+      1650,
+      0,
+      150
+    ],
+    "colTotals": [
+      1615,
+      60,
+      125
+    ],
+    "n": 1800,
+    "usersAccuracy": [
+      0.9666666667,
+      null,
+      0.8
+    ],
+    "producersAccuracy": [
+      0.9876160991,
+      0,
+      0.96
+    ],
+    "overallAccuracy": 0.9527777778,
+    "expectedAgreement": 0.8282407407,
+    "kappa": 0.7250673854,
+    "stratumWeight": [
+      0.4977420756,
+      0.5000000002,
+      0.002257924245
+    ],
+    "totalAreaHa": 5374957.078,
+    "cellProportions": [
+      [
+        0.481150673,
+        0.0150830932,
+        0.00150830932
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0.000301056566,
+        0.000150528283,
+        0.001806339396
+      ]
+    ],
+    "referenceProportion": [
+      0.4814517296,
+      0.01523362148,
+      0.003314648716
+    ],
+    "adjustedAreaHa": [
+      2587782.382,
+      81880.0616,
+      17816.09457
+    ],
+    "varianceTerms": [
+      [
+        4.841094292e-06,
+        4.414791033e-06,
+        4.538957031e-07
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        3.953878278e-09,
+        2.129011381e-09,
+        5.474600693e-09
+      ]
+    ],
+    "seProportion": [
+      0.002201147013,
+      0.002101646984,
+      0.0006777686211
+    ],
+    "seAreaHa": [
+      11831.07071,
+      11296.26233,
+      3642.977247
+    ],
+    "uncertaintyPercent90": [
+      0.7520310964,
+      22.69321926,
+      33.63438182
+    ]
+  }
+}
