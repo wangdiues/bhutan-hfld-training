@@ -26,3 +26,6 @@ scripts/convert/out/
 # editor / OS
 Thumbs.db
 _site/
+
+# Python
+__pycache__/

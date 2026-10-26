@@ -26,7 +26,6 @@ Every push to `main` deploys to GitHub Pages through GitHub Actions.
 | `src/components/` | Site components (credit block, quizzes, labs) |
 | `scripts/gee/` | Google Earth Engine scripts, one per exercise |
 | `scripts/convert/` | Pipeline that converts the original docx/pptx into lessons |
-| `public/slides/` | Slide decks as PDF |
 
 ## License
 - Code: [MIT](LICENSE)

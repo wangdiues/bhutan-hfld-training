@@ -79,3 +79,16 @@ h1#_top::after {
 		scroll-behavior: auto !important;
 	}
 }
+
+/*
+ * Tables wrap instead of scrolling sideways: easier to read on phones (WCAG 1.4.10 reflow),
+ * and no scroll region that keyboard users would need to focus.
+ */
+.sl-markdown-content table {
+	display: table;
+	width: 100%;
+	table-layout: auto;
+}
+.sl-markdown-content :is(th, td) {
+	overflow-wrap: anywhere;
+}

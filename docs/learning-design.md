@@ -17,7 +17,7 @@ Task M0-06 · 2026-10-26 · Sources: the training agenda's daily objectives; WEB
 
 **Prerequisites for everyone:** a Google account with Earth Engine access (registered to a Cloud project); a laptop with Chrome or Firefox; basic GIS ideas (raster, vector, projection). No programming experience is assumed.
 
-**Access constraints:** connections are unreliable outside Thimphu, so the site works offline (M6-05), pages stay light, and slides are compressed PDFs.
+**Access constraints:** connections are unreliable outside Thimphu, so the site works offline (M6-05), pages stay light, and slide content is published as web pages (text, tables and reviewed WebP images), not PDFs.
 
 ## 2. Course outcome
 
