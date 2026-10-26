@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightLinksValidator from 'starlight-links-validator';
 
 // GitHub Pages project site: https://<user>.github.io/<repo>/
 const GITHUB_USER = 'wangdiues';
@@ -32,15 +33,25 @@ export default defineConfig({
 				baseUrl: `https://github.com/${GITHUB_USER}/${REPO}/edit/main/`,
 			},
 			lastUpdated: true,
+			plugins: [starlightLinksValidator()],
 			sidebar: [
 				{
-					label: 'Guides',
-					items: [{ label: 'Example Guide', slug: 'guides/example' }],
+					label: 'Learn',
+					items: [
+						{ slug: 'start-here' },
+						{ label: 'Day 1 · Earth Engine foundations', collapsed: true, items: [{ autogenerate: { directory: 'day-1' } }] },
+						{ label: 'Day 2 · Composites', collapsed: true, items: [{ autogenerate: { directory: 'day-2' } }] },
+						{ label: 'Day 3 · Classification', collapsed: true, items: [{ autogenerate: { directory: 'day-3' } }] },
+						{ label: 'Day 4 · Land cover & embeddings', collapsed: true, items: [{ autogenerate: { directory: 'day-4' } }] },
+						{ label: 'Day 5 · Accuracy & area', collapsed: true, items: [{ autogenerate: { directory: 'day-5' } }] },
+						{ slug: 'capstone' },
+					],
 				},
-				{
-					label: 'Reference',
-					items: [{ autogenerate: { directory: 'reference' } }],
-				},
+				{ label: 'Labs', collapsed: true, items: [{ autogenerate: { directory: 'labs' } }] },
+				{ label: 'How-to guides', collapsed: true, items: [{ autogenerate: { directory: 'how-to' } }] },
+				{ label: 'Explanation', collapsed: true, items: [{ autogenerate: { directory: 'explanation' } }] },
+				{ label: 'Reference', collapsed: true, items: [{ autogenerate: { directory: 'reference' } }] },
+				{ label: 'About', collapsed: true, items: [{ autogenerate: { directory: 'about' } }] },
 			],
 		}),
 	],
