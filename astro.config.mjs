@@ -15,6 +15,16 @@ export default defineConfig({
 			title: 'Bhutan HFLD Training',
 			description:
 				'An open course on producing ART-TREES HFLD activity data for Bhutan with Google Earth Engine.',
+			logo: {
+				light: './src/assets/logo-light.svg',
+				dark: './src/assets/logo-dark.svg',
+			},
+			customCss: [
+				'@fontsource-variable/inter',
+				'@fontsource-variable/source-serif-4',
+				'@fontsource-variable/jetbrains-mono',
+				'./src/styles/theme.css',
+			],
 			social: [
 				{ icon: 'github', label: 'GitHub', href: `https://github.com/${GITHUB_USER}/${REPO}` },
 			],

@@ -1,0 +1,81 @@
+/*
+ * Bhutan HFLD Training — design tokens.
+ * Forest green accent, Bhutanese saffron highlight, slightly green-tinted neutrals.
+ * Contrast of every text/background pair is checked by scripts/check-contrast.py (WCAG AA ≥ 4.5:1).
+ */
+
+/* Dark mode (Starlight default) */
+:root {
+	--sl-font: 'Inter Variable', system-ui, sans-serif;
+	--sl-font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+	--hfld-font-heading: 'Source Serif 4 Variable', Georgia, serif;
+
+	--sl-color-accent-low: #10301f;
+	--sl-color-accent: #3c9a66;
+	--sl-color-accent-high: #a9e2c0;
+
+	--sl-color-white: #ffffff;
+	--sl-color-gray-1: #eaf0ec;
+	--sl-color-gray-2: #c3ccc6;
+	--sl-color-gray-3: #8d9891;
+	--sl-color-gray-4: #56605a;
+	--sl-color-gray-5: #363f3a;
+	--sl-color-gray-6: #232a26;
+	--sl-color-black: #161b18;
+
+	/* Course-specific tokens */
+	--hfld-saffron: #f2b13a;
+	--hfld-saffron-text: #f7c96e;
+	--hfld-saffron-bg: #3a2a0c;
+}
+
+/* Light mode (Starlight inverts the gray scale) */
+:root[data-theme='light'] {
+	--sl-color-accent-low: #d6ede0;
+	--sl-color-accent: #1a6a42;
+	--sl-color-accent-high: #0c3a23;
+
+	--sl-color-white: #161b18;
+	--sl-color-gray-1: #232a26;
+	--sl-color-gray-2: #363f3a;
+	--sl-color-gray-3: #56605a;
+	--sl-color-gray-4: #8d9891;
+	--sl-color-gray-5: #c3ccc6;
+	--sl-color-gray-6: #eef3ef;
+	--sl-color-gray-7: #f6f9f7;
+	--sl-color-black: #ffffff;
+
+	--hfld-saffron: #c77a00;
+	--hfld-saffron-text: #7a4600;
+	--hfld-saffron-bg: #fdf1dc;
+}
+
+/* Editorial serif headings; body and UI stay in Inter for legibility. */
+.sl-markdown-content :is(h1, h2, h3),
+h1#_top,
+.hero h1 {
+	font-family: var(--hfld-font-heading);
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+/* Saffron rule under the page title: a small Bhutanese accent. */
+h1#_top::after {
+	content: '';
+	display: block;
+	width: 3rem;
+	height: 0.25rem;
+	margin-top: 0.75rem;
+	border-radius: 2px;
+	background: var(--hfld-saffron);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

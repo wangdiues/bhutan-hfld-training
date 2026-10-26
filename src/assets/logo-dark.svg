@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Bhutan HFLD Training">
+  <circle cx="35" cy="13" r="5.5" fill="#f2b13a"/>
+  <path d="M3 40 L17 16 L24 27 L30 19 L45 40 Z" fill="#3c9a66"/>
+  <path d="M17 16 L21 23 L18.5 22 L17 25 L15.5 22 L13 23 Z" fill="#eaf0ec"/>
+  <path d="M30 40 L30 36 M30 36 L24 36 L30 26 L36 36 Z" fill="#a9e2c0" stroke="#a9e2c0" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M25.5 32 L30 24.5 L34.5 32 Z" fill="#a9e2c0"/>
+  <rect x="29.2" y="36" width="1.6" height="4" fill="#a9e2c0"/>
+</svg>
