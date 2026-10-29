@@ -1,0 +1,59 @@
+---
+/**
+ * Collapsible theory panel (task M3-04). Keep it to 5 lines or fewer and link the full
+ * Explanation page with `more`. Maths uses $…$ / $$…$$ (remark-math + rehype-katex).
+ */
+interface Props {
+	title: string;
+	/** Path of the full explanation, without the base, e.g. "/explanation/spectral-indices/". */
+	more?: string;
+	open?: boolean;
+}
+
+const { title, more, open = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<details class="hfld-theory" open={open}>
+	<summary><span class="hfld-theory__kicker">Theory</span> {title}</summary>
+	<div class="hfld-theory__body">
+		<slot />
+		{more && <p class="hfld-theory__more"><a href={`${base}${more}`}>Read the full explanation</a></p>}
+	</div>
+</details>
+
+<style>
+	.hfld-theory {
+		border: 1px solid var(--sl-color-purple);
+		border-radius: 0.375rem;
+		background: var(--sl-color-purple-low);
+	}
+	.hfld-theory summary {
+		cursor: pointer;
+		padding: 0.75rem 1rem;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.hfld-theory summary:focus-visible {
+		outline: 2px solid var(--sl-color-purple-high);
+		outline-offset: 2px;
+	}
+	.hfld-theory__kicker {
+		color: var(--sl-color-purple-high);
+		text-transform: uppercase;
+		font-size: var(--sl-text-xs);
+		letter-spacing: 0.06em;
+		margin-inline-end: 0.25rem;
+	}
+	.hfld-theory__body {
+		padding: 0 1rem 1rem;
+	}
+	.hfld-theory__body > :global(:first-child) {
+		margin-top: 0;
+	}
+	.hfld-theory__body :global(.katex-display) {
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding-block: 0.25rem;
+	}
+</style>

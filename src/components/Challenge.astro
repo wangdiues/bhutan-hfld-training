@@ -1,0 +1,121 @@
+---
+/**
+ * Practice exercise with faded scaffolding (task M3-07):
+ *   complete — complete the code (most of it is given)
+ *   blanks   — fill in the blanks (___)
+ *   scratch  — write it from scratch
+ * The default slot holds the task and any starter code. Hints and the solution are
+ * hidden in native <details> (keyboard accessible, work without JavaScript). The solution
+ * is either a named "solution" slot or a script path under scripts/gee/.
+ */
+import { Code } from '@astrojs/starlight/components';
+
+interface Props {
+	level: 'complete' | 'blanks' | 'scratch';
+	title?: string;
+	/** Minutes. */
+	time?: number;
+	hints?: string[];
+	/** Path under scripts/gee/ holding the solution, e.g. "day-1/custom-functions.js". */
+	solution?: string;
+}
+
+const levels = {
+	complete: { label: 'Level 1 · Complete the code', short: 'Complete the code' },
+	blanks: { label: 'Level 2 · Fill in the blanks', short: 'Fill in the blanks' },
+	scratch: { label: 'Level 3 · From scratch', short: 'From scratch' },
+} as const;
+
+const { level, title, time, hints = [], solution } = Astro.props;
+const lv = levels[level];
+let solutionCode: string | undefined;
+if (solution) {
+	const files = import.meta.glob('/scripts/gee/**/*.js', { query: '?raw', import: 'default', eager: true }) as Record<
+		string,
+		string
+	>;
+	solutionCode = files[`/scripts/gee/${solution}`];
+	if (solutionCode === undefined) throw new Error(`Challenge: scripts/gee/${solution} does not exist`);
+}
+const hasSolution = Boolean(solutionCode) || Astro.slots.has('solution');
+const headingId = `challenge-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<section class:list={['hfld-challenge', `hfld-challenge--${level}`]} aria-labelledby={headingId}>
+	<header class="hfld-challenge__head">
+		<p class="hfld-challenge__level">{lv.label}</p>
+		<h3 id={headingId} class="hfld-challenge__title">{title ?? lv.short}</h3>
+		{time && <p class="hfld-challenge__time">About {time} minutes</p>}
+	</header>
+	<div class="hfld-challenge__body"><slot /></div>
+	{
+		hints.map((h, i) => (
+			<details class="hfld-challenge__reveal">
+				<summary>Hint {hints.length > 1 ? i + 1 : ''}</summary>
+				<p>{h}</p>
+			</details>
+		))
+	}
+	{
+		hasSolution && (
+			<details class="hfld-challenge__reveal hfld-challenge__solution">
+				<summary>Show the solution</summary>
+				{solutionCode ? <Code code={solutionCode.trimEnd()} lang="js" wrap /> : <slot name="solution" />}
+			</details>
+		)
+	}
+</section>
+
+<style>
+	.hfld-challenge {
+		margin-block: 1.5rem;
+		padding: 1rem 1.25rem;
+		border: 1px solid var(--sl-color-accent);
+		border-radius: 0.5rem;
+		background: var(--sl-color-accent-low);
+	}
+	.hfld-challenge__head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		column-gap: 1rem;
+	}
+	.hfld-challenge__level {
+		flex-basis: 100%;
+		margin: 0;
+		color: var(--sl-color-accent-high);
+		font-size: var(--sl-text-xs);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+	.hfld-challenge .hfld-challenge__title {
+		margin: 0.25rem 0 0;
+		font-size: var(--sl-text-h4);
+	}
+	.hfld-challenge__time {
+		margin: 0;
+		color: var(--sl-color-gray-2);
+		font-size: var(--sl-text-sm);
+	}
+	.hfld-challenge__body {
+		margin-top: 0.75rem;
+	}
+	.hfld-challenge__body > :global(:first-child) {
+		margin-top: 0;
+	}
+	.hfld-challenge__reveal {
+		margin-top: 0.75rem;
+		border-top: 1px solid var(--sl-color-gray-5);
+		padding-top: 0.5rem;
+	}
+	.hfld-challenge__reveal summary {
+		cursor: pointer;
+		font-weight: 600;
+		color: var(--sl-color-accent-high);
+	}
+	.hfld-challenge__reveal summary:focus-visible {
+		outline: 2px solid var(--sl-color-accent-high);
+		outline-offset: 2px;
+	}
+</style>

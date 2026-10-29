@@ -1,0 +1,125 @@
+---
+title: "Lesson components"
+description: "The building blocks every lesson uses, shown working, for contributors and reviewers."
+sidebar:
+  order: 9
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Term from '~/components/Term.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import VersionNote from '~/components/VersionNote.astro';
+
+This page shows every lesson component working. Contributors can copy from it; reviewers can check the components here in both themes. The lesson template is in `.claude/skills/build-lesson/lesson-template.mdx`.
+
+<LessonHeader
+  questions={["How do I mask clouds in a Landsat collection?", "How do I apply one function to every image?"]}
+  objectives={["Write a cloud-masking function that takes and returns an image", "Map the function across a filtered collection and make a median composite"]}
+  teaching={20}
+  exercises={25}
+  prerequisites={["Image collections, filtering and reducers", "An Earth Engine account"]}
+/>
+
+## Code with a download button
+
+`<CodeBlock>` shows a whole script from `scripts/gee/`, or a range of its lines, with lines highlighted. The buttons open the trainers' original script in the Code Editor and download the course copy.
+
+<CodeBlock script="day-1/custom-functions.js" lines={[68, 81]} mark={[70, "77-80"]} />
+
+Code in a lesson can also have a geemap (Python) tab:
+
+<Tabs syncKey="language">
+  <TabItem label="JavaScript (Code Editor)">
+```js
+var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+```
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+ndvi = image.normalizedDifference(["B8", "B4"]).rename("NDVI")
+```
+  </TabItem>
+</Tabs>
+
+<OpenInGEE script="day-2/spectral-indices.js" hash="946119d88943098d0e8c6bc7fb7bcc12" />
+
+## Glossary terms
+
+A <Term id="composite" /> is built by applying a <Term id="reducer" /> to an <Term id="image-collection">image collection</Term>. Each lesson links its first use of a term such as <Term id="ndvi" />, <Term id="primitive" />, <Term id="stratum" />, <Term id="users-accuracy" />, <Term id="producers-accuracy" />, <Term id="confusion-matrix" /> and <Term id="area-adjusted-estimate" />.
+
+## Theory panels
+
+<Theory title="NDVI" more="/explanation/" open>
+NDVI contrasts near-infrared, which healthy leaves reflect strongly, with red, which chlorophyll absorbs <Cite id="tucker1979" />:
+
+$$
+\text{NDVI} = \frac{\rho_{\text{NIR}} - \rho_{\text{Red}}}{\rho_{\text{NIR}} + \rho_{\text{Red}}}
+$$
+</Theory>
+
+<Theory title="Area-adjusted estimate (Olofsson et al. 2014)">
+With map-class weights $W_i = A_{m,i} / A_{tot}$ and sample counts $n_{ij}$, the estimated area proportion of reference class $j$ and its standard error are <Cite id="olofsson2014" at="eqs. 9–10" />:
+
+$$
+\hat{p}_{\cdot j} = \sum_i W_i \frac{n_{ij}}{n_{i\cdot}}, \qquad
+S(\hat{p}_{\cdot j}) = \sqrt{\sum_i W_i^2 \, \frac{\frac{n_{ij}}{n_{i\cdot}}\left(1 - \frac{n_{ij}}{n_{i\cdot}}\right)}{n_{i\cdot} - 1}}
+$$
+
+The 90% confidence interval of the area is $\hat{A}_j \pm 1.645 \, A_{tot} \, S(\hat{p}_{\cdot j})$.
+</Theory>
+
+## Callouts and version notes
+
+<Callout type="mistake">
+Forgetting `return` in a function you pass to `.map()` gives a collection of nulls.
+</Callout>
+
+<VersionNote standard="TREES 3.0" differs="TREES 2.0">
+An example of content that changed between versions of the standard. Each real note cites the TREES 3.0 section.
+</VersionNote>
+
+## Practice
+
+<Challenge level="complete" time={10} hints={["The function must take an image and return an image.", "Use quality.gt(cloud_thresh) for the cloudy pixels."]} solution="day-1/custom-functions.js">
+Complete `cloudfunction` so that it masks pixels with a cloud score above `cloud_thresh`:
+
+```js
+var cloudfunction = function(image) {
+  var quality = ee.Algorithms.Landsat.simpleCloudScore(image).select('cloud');
+  var cloud01 = ___;
+  return image.updateMask(___);
+};
+```
+</Challenge>
+
+<Challenge level="scratch" time={20}>
+Build a cloud-free 2025 median composite of Paro Dzongkhag from Landsat 9.
+
+<Fragment slot="solution">
+Filter `LANDSAT/LC09/C02/T1_TOA` by the Paro boundary and 2025, map the cloud mask from the first challenge, then call `.median()` and `.clip()`.
+</Fragment>
+</Challenge>
+
+<Quiz id="components-demo" questions={[
+  { q: "What does a function passed to ImageCollection.map() have to return?", options: ["Nothing", "An image", "A number"], answer: 1, explain: "map() builds a new collection from whatever the function returns, so it must return an ee.Image." },
+  { q: "A median composite removes most clouds because clouds are usually the brightest values at a pixel.", answer: true, explain: "Clouds are bright and transient, so the median of many dates usually picks a clear value." },
+  { q: "Which value does TREES use for reporting uncertainty?", options: ["A 68% interval", "A 90% confidence interval", "A 99% interval"], answer: 1, explain: "Uncertainty is reported as the half-width of the 90% confidence interval, relative to the estimate." },
+]} />
+
+<KeyPoints points={["Components keep lessons consistent: write content, not markup.", "Every adapted lesson ends with a Credit block."]} />
+
+<References />
+
+<Credit
+  source="EXERCISE D1: Writing Custom Functions and Mapping Across Image Collections"
+  changes={["Demonstration only: snippets reused to show the components"]}
+/>

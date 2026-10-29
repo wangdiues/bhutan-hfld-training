@@ -1,0 +1,210 @@
+---
+/**
+ * Check-your-understanding quiz (task M3-05): multiple choice and true/false.
+ * Server-rendered radio groups (one fieldset per question), so it is keyboard accessible
+ * with native controls. A small custom element marks answers, reveals each explanation
+ * and saves the score in localStorage (wrapped in try/catch; works without it).
+ */
+interface Question {
+	q: string;
+	/** Omit for true/false questions. */
+	options?: string[];
+	/** Index into options, or true/false for a true/false question. */
+	answer: number | boolean;
+	explain: string;
+}
+interface Props {
+	/** Stable id, used as the storage key, e.g. "day-1-javascript-basics". */
+	id: string;
+	questions: Question[];
+	title?: string;
+}
+
+const { id, questions, title = 'Check your understanding' } = Astro.props;
+const items = questions.map((qn) => {
+	const tf = typeof qn.answer === 'boolean';
+	const options = tf ? ['True', 'False'] : (qn.options ?? []);
+	const correct = tf ? (qn.answer ? 0 : 1) : (qn.answer as number);
+	if (correct < 0 || correct >= options.length) throw new Error(`Quiz ${id}: answer out of range in "${qn.q}"`);
+	return { ...qn, options, correct };
+});
+---
+
+<hfld-quiz class="hfld-quiz not-content" data-id={id}>
+	<form>
+		<p class="hfld-quiz__title" id={`${id}-title`}>{title}</p>
+		{
+			items.map((qn, i) => (
+				<fieldset class="hfld-quiz__q" data-correct={qn.correct}>
+					<legend>
+						<span class="hfld-quiz__n">{i + 1}.</span> {qn.q}
+					</legend>
+					{qn.options.map((opt, j) => (
+						<label class="hfld-quiz__opt">
+							<input type="radio" name={`${id}-q${i}`} value={j} />
+							<span>{opt}</span>
+						</label>
+					))}
+					<p class="hfld-quiz__feedback" aria-live="polite" hidden>
+						<strong class="hfld-quiz__verdict" />{' '}
+						<span>{qn.explain}</span>
+					</p>
+				</fieldset>
+			))
+		}
+		<div class="hfld-quiz__actions">
+			<button type="submit">Check answers</button>
+			<button type="reset" class="hfld-quiz__secondary">Try again</button>
+			<p class="hfld-quiz__score" role="status"></p>
+		</div>
+	</form>
+</hfld-quiz>
+
+<script>
+	class HfldQuiz extends HTMLElement {
+		connectedCallback() {
+			const form = this.querySelector('form')!;
+			const key = `hfld-quiz:${this.dataset.id}`;
+			const score = this.querySelector<HTMLElement>('.hfld-quiz__score')!;
+			const questions = [...this.querySelectorAll<HTMLFieldSetElement>('.hfld-quiz__q')];
+
+			form.addEventListener('submit', (e) => {
+				e.preventDefault();
+				let right = 0;
+				questions.forEach((fs) => {
+					const chosen = fs.querySelector<HTMLInputElement>('input:checked');
+					const correct = Number(fs.dataset.correct);
+					const ok = chosen !== null && Number(chosen.value) === correct;
+					if (ok) right++;
+					const fb = fs.querySelector<HTMLElement>('.hfld-quiz__feedback')!;
+					fb.hidden = false;
+					fb.querySelector('.hfld-quiz__verdict')!.textContent = ok
+						? 'Correct.'
+						: chosen
+							? `Not quite. The answer is "${fs.querySelectorAll('label')[correct].textContent!.trim()}".`
+							: 'No answer chosen.';
+					fs.dataset.state = ok ? 'right' : 'wrong';
+				});
+				score.textContent = `You got ${right} of ${questions.length}.`;
+				try {
+					localStorage.setItem(key, JSON.stringify({ right, total: questions.length, at: Date.now() }));
+				} catch {
+					/* storage unavailable (private mode): the quiz still works */
+				}
+			});
+
+			form.addEventListener('reset', () => {
+				questions.forEach((fs) => {
+					fs.querySelector<HTMLElement>('.hfld-quiz__feedback')!.hidden = true;
+					delete fs.dataset.state;
+				});
+				score.textContent = '';
+			});
+
+			try {
+				const saved = JSON.parse(localStorage.getItem(key) ?? 'null');
+				if (saved) score.textContent = `Last time you got ${saved.right} of ${saved.total}.`;
+			} catch {
+				/* ignore */
+			}
+		}
+	}
+	customElements.define('hfld-quiz', HfldQuiz);
+</script>
+
+<style>
+	.hfld-quiz {
+		display: block;
+		margin-block: 2rem;
+		padding: 1rem 1.25rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		background: var(--sl-color-gray-6);
+	}
+	.hfld-quiz__title {
+		margin: 0 0 0.75rem;
+		font-family: var(--hfld-font-heading);
+		font-size: var(--sl-text-h4);
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.hfld-quiz__q {
+		margin: 0 0 1rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-inline-start-width: 0.25rem;
+		border-radius: 0.375rem;
+	}
+	.hfld-quiz__q[data-state='right'] {
+		border-inline-start-color: var(--sl-color-green);
+	}
+	.hfld-quiz__q[data-state='wrong'] {
+		border-inline-start-color: var(--sl-color-red);
+	}
+	/* Float the legend into the box so long questions wrap inside the border. */
+	.hfld-quiz__q legend {
+		float: inline-start;
+		width: 100%;
+		margin-bottom: 0.25rem;
+		padding: 0;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.hfld-quiz__opt {
+		clear: both;
+		display: flex;
+		gap: 0.5rem;
+		align-items: flex-start;
+		padding: 0.375rem 0.25rem;
+		color: var(--sl-color-gray-1);
+		cursor: pointer;
+	}
+	.hfld-quiz__opt input {
+		margin-top: 0.3rem;
+		accent-color: var(--sl-color-accent);
+	}
+	.hfld-quiz__feedback {
+		margin: 0.5rem 0 0;
+		color: var(--sl-color-gray-1);
+	}
+	.hfld-quiz__q[data-state='right'] .hfld-quiz__verdict {
+		color: var(--sl-color-green-high);
+	}
+	.hfld-quiz__q[data-state='wrong'] .hfld-quiz__verdict {
+		color: var(--sl-color-red-high);
+	}
+	.hfld-quiz__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	.hfld-quiz button {
+		min-height: 2.75rem;
+		padding: 0.5rem 1rem;
+		border: 1px solid var(--sl-color-accent);
+		border-radius: 0.375rem;
+		background: var(--sl-color-accent);
+		color: var(--sl-color-black);
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	:root[data-theme='light'] .hfld-quiz button:not(.hfld-quiz__secondary) {
+		color: #ffffff;
+	}
+	.hfld-quiz button.hfld-quiz__secondary {
+		background: transparent;
+		color: var(--sl-color-accent-high);
+	}
+	.hfld-quiz button:focus-visible,
+	.hfld-quiz__opt input:focus-visible {
+		outline: 2px solid var(--sl-color-accent-high);
+		outline-offset: 2px;
+	}
+	.hfld-quiz__score {
+		margin: 0;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+</style>

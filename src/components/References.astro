@@ -1,0 +1,55 @@
+---
+/**
+ * Reference list for the page (task M3-09): every work cited with <Cite> above it, in
+ * order of first citation. Pass `ids` to add works that are not cited in the text.
+ */
+import references from '~/data/references.json';
+
+interface Props {
+	ids?: string[];
+}
+
+const locals = Astro.locals as { hfldCited?: string[] };
+const ids = [...new Set([...(locals.hfldCited ?? []), ...(Astro.props.ids ?? [])])];
+const list = ids.map((id) => {
+	const r = references.find((x) => x.id === id);
+	if (!r) throw new Error(`References: "${id}" is not in src/data/references.json`);
+	return r;
+});
+---
+
+{
+	list.length > 0 && (
+		<section class="hfld-references" aria-labelledby="references">
+			<h2 id="references">References</h2>
+			<ol>
+				{list.map((r) => (
+					<li id={`ref-${r.id}`}>
+						{r.text}
+						{r.url && (
+							<>
+								{' '}
+								<a href={r.url}>{r.url.replace(/^https?:\/\//, '')}</a>
+							</>
+						)}
+					</li>
+				))}
+			</ol>
+		</section>
+	)
+}
+
+<style>
+	.hfld-references ol {
+		padding-inline-start: 1.5rem;
+		font-size: var(--sl-text-sm);
+	}
+	.hfld-references li {
+		overflow-wrap: anywhere;
+	}
+	.hfld-references li:target {
+		background: var(--sl-color-accent-low);
+		outline: 2px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+</style>

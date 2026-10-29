@@ -92,3 +92,21 @@ h1#_top::after {
 .sl-markdown-content :is(th, td) {
 	overflow-wrap: anywhere;
 }
+
+/* Glossary page (reference/glossary): one entry per div so each has an anchor. */
+.hfld-glossary > div {
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--sl-color-gray-5);
+	scroll-margin-top: calc(var(--sl-nav-height, 4rem) + 1rem);
+}
+.hfld-glossary dt {
+	font-weight: 600;
+	color: var(--sl-color-white);
+}
+.hfld-glossary dd {
+	margin: 0.25rem 0 0;
+}
+.hfld-glossary > div:target {
+	background: var(--sl-color-accent-low);
+	border-radius: 0.375rem;
+}

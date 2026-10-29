@@ -1,0 +1,31 @@
+---
+/**
+ * A whole course script from scripts/gee/, shown with Expressive Code (copy button, line
+ * highlighting via `mark`) and followed by the OpenInGEE buttons (task M3-02).
+ */
+import { Code } from '@astrojs/starlight/components';
+import OpenInGEE from './OpenInGEE.astro';
+
+interface Props {
+	/** Path under scripts/gee/, e.g. "day-1/custom-functions.js". */
+	script: string;
+	hash?: string;
+	/** Lines to highlight, e.g. [3, "5-7"]. */
+	mark?: (number | string)[];
+	/** Show only these lines of the file (1-based, inclusive), e.g. [14, 30]. */
+	lines?: [number, number];
+}
+
+const { script, hash, mark, lines } = Astro.props;
+const files = import.meta.glob('/scripts/gee/**/*.js', { query: '?raw', import: 'default', eager: true }) as Record<
+	string,
+	string
+>;
+const raw = files[`/scripts/gee/${script}`];
+if (raw === undefined) throw new Error(`CodeBlock: scripts/gee/${script} does not exist`);
+const code = lines ? raw.split('\n').slice(lines[0] - 1, lines[1]).join('\n') : raw.trimEnd();
+const markRanges = mark?.map((m) => (typeof m === 'number' ? m : { range: m }));
+---
+
+<Code code={code} lang="js" title={script.split('/').pop()} mark={markRanges} />
+<OpenInGEE script={script} hash={hash} />

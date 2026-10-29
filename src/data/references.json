@@ -1,0 +1,43 @@
+[
+	{
+		"id": "olofsson2014",
+		"short": "Olofsson et al. 2014",
+		"text": "Olofsson, P., Foody, G. M., Herold, M., Stehman, S. V., Woodcock, C. E., & Wulder, M. A. (2014). Good practices for estimating area and assessing accuracy of land change. Remote Sensing of Environment, 148, 42–57.",
+		"url": "https://doi.org/10.1016/j.rse.2014.02.015"
+	},
+	{
+		"id": "cochran1977",
+		"short": "Cochran 1977",
+		"text": "Cochran, W. G. (1977). Sampling Techniques (3rd ed.). John Wiley & Sons."
+	},
+	{
+		"id": "gorelick2017",
+		"short": "Gorelick et al. 2017",
+		"text": "Gorelick, N., Hancher, M., Dixon, M., Ilyushchenko, S., Thau, D., & Moore, R. (2017). Google Earth Engine: Planetary-scale geospatial analysis for everyone. Remote Sensing of Environment, 202, 18–27.",
+		"url": "https://doi.org/10.1016/j.rse.2017.06.031"
+	},
+	{
+		"id": "breiman2001",
+		"short": "Breiman 2001",
+		"text": "Breiman, L. (2001). Random forests. Machine Learning, 45(1), 5–32.",
+		"url": "https://doi.org/10.1023/A:1010933404324"
+	},
+	{
+		"id": "saah2020",
+		"short": "Saah et al. 2020",
+		"text": "Saah, D., Tenneson, K., Poortinga, A., et al. (2020). Primitives as building blocks for constructing land cover maps. International Journal of Applied Earth Observation and Geoinformation, 85, 101979.",
+		"url": "https://doi.org/10.1016/j.jag.2019.101979"
+	},
+	{
+		"id": "trees3",
+		"short": "ART 2026",
+		"text": "Architecture for REDD+ Transactions (2026). The REDD+ Environmental Excellence Standard (TREES), Version 3.0. ART Secretariat, Winrock International.",
+		"url": "https://www.artredd.org/trees/"
+	},
+	{
+		"id": "tucker1979",
+		"short": "Tucker 1979",
+		"text": "Tucker, C. J. (1979). Red and photographic infrared linear combinations for monitoring vegetation. Remote Sensing of Environment, 8(2), 127–150.",
+		"url": "https://doi.org/10.1016/0034-4257(79)90013-0"
+	}
+]

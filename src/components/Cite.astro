@@ -1,0 +1,46 @@
+---
+/**
+ * In-text citation (task M3-09): <Cite id="olofsson2014" /> renders "(Olofsson et al. 2014)"
+ * linked to the page's reference list. Each id is recorded on Astro.locals so that
+ * <References /> at the end of the page lists exactly the works cited above it.
+ */
+import references from '~/data/references.json';
+
+interface Props {
+	id: string;
+	/** Text after the year, e.g. "p. 45" or "§4.2". */
+	at?: string;
+	/** Render "Olofsson et al. (2014)" instead of "(Olofsson et al. 2014)". */
+	narrative?: boolean;
+}
+
+const { id, at, narrative = false } = Astro.props;
+const ref = references.find((r) => r.id === id);
+if (!ref) throw new Error(`Cite: "${id}" is not in src/data/references.json`);
+
+const locals = Astro.locals as { hfldCited?: string[] };
+locals.hfldCited ??= [];
+if (!locals.hfldCited.includes(id)) locals.hfldCited.push(id);
+
+const year = ref.short.match(/\d{4}[a-z]?$/)?.[0] ?? '';
+const who = ref.short.replace(/\s*\d{4}[a-z]?$/, '');
+const tail = at ? `, ${at}` : '';
+---
+
+{
+	narrative ? (
+		<a class="hfld-cite" href={`#ref-${id}`}>
+			{who} ({year}{tail})
+		</a>
+	) : (
+		<a class="hfld-cite" href={`#ref-${id}`}>
+			({ref.short}{tail})
+		</a>
+	)
+}
+
+<style>
+	.hfld-cite {
+		white-space: nowrap;
+	}
+</style>

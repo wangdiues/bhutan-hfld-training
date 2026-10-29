@@ -2,6 +2,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 // GitHub Pages project site: https://<user>.github.io/<repo>/
 const GITHUB_USER = 'wangdiues';
@@ -11,6 +13,11 @@ const REPO = 'bhutan-hfld-training';
 export default defineConfig({
 	site: `https://${GITHUB_USER}.github.io`,
 	base: `/${REPO}`,
+	// $…$ and $$…$$ maths in lessons, rendered at build time (no client JavaScript).
+	markdown: {
+		remarkPlugins: [remarkMath],
+		rehypePlugins: [rehypeKatex],
+	},
 	integrations: [
 		starlight({
 			title: 'Bhutan HFLD Training',
@@ -24,6 +31,7 @@ export default defineConfig({
 				'@fontsource-variable/inter',
 				'@fontsource-variable/source-serif-4',
 				'@fontsource-variable/jetbrains-mono',
+				'katex/dist/katex.min.css',
 				'./src/styles/theme.css',
 			],
 			social: [

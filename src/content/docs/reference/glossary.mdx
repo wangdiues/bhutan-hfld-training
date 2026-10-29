@@ -1,9 +1,20 @@
 ---
 title: "Glossary"
+description: "Terms used in the course, from Earth Engine basics to ART-TREES accuracy and area estimation."
 sidebar:
   order: 3
 ---
+import glossary from '~/data/glossary.json';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+export const entries = [...glossary].sort((a, b) => a.term.localeCompare(b.term));
+
+Terms underlined with dots in the lessons link here. Hover over them or tab to them to see the definition without leaving the page.
+
+<dl class="hfld-glossary">
+	{entries.map((g) => (
+		<div id={g.id}>
+			<dt>{g.term}</dt>
+			<dd>{g.definition}</dd>
+		</div>
+	))}
+</dl>

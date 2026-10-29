@@ -1,0 +1,65 @@
+---
+/**
+ * Inline glossary term (task M3-06). Links to the glossary entry; the definition appears
+ * on hover and on keyboard focus (CSS only) and is exposed to screen readers through
+ * aria-describedby.
+ *
+ *   <Term id="ndvi">NDVI</Term>     (the slot defaults to the glossary term)
+ */
+import glossary from '~/data/glossary.json';
+
+interface Props {
+	id: string;
+}
+
+const { id } = Astro.props;
+const entry = glossary.find((g) => g.id === id);
+if (!entry) throw new Error(`Term: "${id}" is not in src/data/glossary.json`);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const tipId = `term-${id}-${Math.random().toString(36).slice(2, 7)}`;
+---
+
+<span class="hfld-term"
+	><a href={`${base}reference/glossary/#${id}`} aria-describedby={tipId}><slot>{entry.term}</slot></a><span
+		class="hfld-term__tip"
+		role="tooltip"
+		id={tipId}><strong>{entry.term}:</strong> {entry.definition}</span
+	></span
+>
+
+<style>
+	.hfld-term {
+		position: relative;
+	}
+	.hfld-term a {
+		color: inherit;
+		text-decoration: underline dotted;
+		text-underline-offset: 0.2em;
+	}
+	.hfld-term__tip {
+		position: absolute;
+		z-index: 10;
+		inset-inline-start: 0;
+		top: calc(100% + 0.25rem);
+		width: max-content;
+		max-width: min(20rem, 80vw);
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--sl-color-gray-4);
+		border-radius: 0.375rem;
+		background: var(--sl-color-black);
+		color: var(--sl-color-gray-1);
+		font-size: var(--sl-text-sm);
+		font-weight: 400;
+		line-height: 1.4;
+		box-shadow: var(--sl-shadow-md);
+		visibility: hidden;
+		opacity: 0;
+		transition: opacity 0.15s;
+		pointer-events: none;
+	}
+	.hfld-term:hover .hfld-term__tip,
+	.hfld-term:focus-within .hfld-term__tip {
+		visibility: visible;
+		opacity: 1;
+	}
+</style>
