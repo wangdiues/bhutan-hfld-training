@@ -11,6 +11,9 @@
  *   https://code.earthengine.google.com/0dbd04fc75df2f21ecf44b3ffcec69ec
  */
 
+/* global mapSelect, AOI, scale, proj */
+// Part 2 continues Part 1: paste this below sample-size.js, which defines these variables.
+
 // ----  ----
 // ---------------------------------------------------------------------
 //Remap the Stratification Map to our sampling classes

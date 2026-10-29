@@ -12,6 +12,9 @@
  *   https://code.earthengine.google.com/f6ac698d62c5a93294b37c210166c41c
  */
 
+/* global forest, nonForest */
+// forest, nonForest: Code Editor imports. Collect them as point FeatureCollections with a class property.
+
 // ---- PART 1: Load and Visualize Input Data ----
 var image = ee.Image("projects/bhutan-hfld-readiness-training/assets/landsatComposite/bhutan_ls89_2025_TashiY");
 // Visual check

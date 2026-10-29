@@ -161,9 +161,9 @@ def postprocess(md, codes, slug):
             # split the run into code blocks and definition lists.
             code = "\n".join(code).split("\n")  # a Word paragraph may hold several lines
             is_def = lambda l: bool(DEFINITION.match(l) or ARROW_ITEM.match(l))
-            for is_def, group in itertools.groupby(code, key=is_def):
+            for defs, group in itertools.groupby(code, key=is_def):
                 group = list(group)
-                if is_def:
+                if defs:
                     items = []
                     for l in group:
                         m = DEFINITION.match(l)

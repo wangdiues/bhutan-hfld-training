@@ -1,0 +1,9 @@
+# ruff for the Python tooling and the geemap (.py) versions of the GEE scripts (task M2-06).
+line-length = 120
+include = ["scripts/**/*.py"]
+extend-exclude = ["scripts/convert/out"]
+
+[lint]
+select = ["E", "F", "W", "I", "B"]
+# House style of the tooling scripts: long data lines, short loop names (l for line), small lambdas.
+ignore = ["E501", "E741", "E731"]

@@ -21,7 +21,16 @@ import sys
 import zipfile
 
 sys.path.insert(0, os.path.dirname(__file__))
-from docx2mdx import ARROW_ITEM, DEFINITION, PARA_RE, PRIVATE_USE, ROOT, is_code_paragraph, normalise_code, paragraph_text  # noqa: E402
+from docx2mdx import (  # noqa: E402
+    ARROW_ITEM,
+    DEFINITION,
+    PARA_RE,
+    PRIVATE_USE,
+    ROOT,
+    is_code_paragraph,
+    normalise_code,
+    paragraph_text,
+)
 
 GEE_OUT = os.path.join(ROOT, "scripts", "gee")
 

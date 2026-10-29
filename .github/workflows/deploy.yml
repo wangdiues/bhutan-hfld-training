@@ -41,6 +41,11 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Lint the GEE scripts (ESLint) and Python tooling (ruff)
+        run: |
+          pip install ruff==0.15.0
+          npm run lint
+
       - name: Colour contrast of theme tokens
         run: npm run check:contrast
 

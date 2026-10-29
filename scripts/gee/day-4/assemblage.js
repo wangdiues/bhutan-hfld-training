@@ -11,6 +11,9 @@
  *   https://code.earthengine.google.com/f3ac214d04f1543897bba62c26a9a878
  */
 
+/* global init */
+// init(): called but not defined in the source document (TODO M4-22: restore it from the original Code Editor script).
+
 // ---- Part 1: Import AOI ----
 // ============================================================
 // 1. LOAD BASE IMAGE (AOI)

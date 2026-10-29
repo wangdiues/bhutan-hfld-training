@@ -11,6 +11,9 @@
  *   https://code.earthengine.google.com/d294311d88eee5ab7cb82a26bbf33640
  */
 
+/* global geometry */
+// geometry: a Code Editor import. Draw a point or polygon over Bhutan before running.
+
 // ---- 3. Step 1 - Define study area and reporting year ----
 var countries = ee.FeatureCollection('projects/bhutan-hfld-readiness-training/assets/Bhutan')
 var Bhutan = countries;

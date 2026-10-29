@@ -11,6 +11,9 @@
  *   https://code.earthengine.google.com/946119d88943098d0e8c6bc7fb7bcc12
  */
 
+/* global geometry */
+// geometry: a Code Editor import. Draw a point or polygon over Bhutan before running.
+
 // ---- Section 1: Load the Sentinel-2 Image ----
 // Load the Sentinel-2 image
 var s2img = ee.Image("COPERNICUS/S2_SR_HARMONIZED/20240109T044141_20240109T044757_T45RYL");

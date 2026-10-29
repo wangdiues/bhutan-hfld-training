@@ -13,6 +13,9 @@
  *   https://code.earthengine.google.com/375a74248c8bb15184ccf2c95c1d6db5
  */
 
+/* global proj_area */
+// proj_area: used but not defined in the source document (TODO M4-28: probably the AOI geometry; confirm with the original script).
+
 // ---- Part 1: load administrative boundaries and define aoi (bhutan) ----
 var utils = require('users/yourecoveredinbees/CarbonDevelopmentTeam:CDT_Utilities/api');
 //Projection parameters

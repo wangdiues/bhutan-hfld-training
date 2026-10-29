@@ -12,6 +12,9 @@
  *   https://code.earthengine.google.com/cca70a27a7d28a5fe8bd1e03b88ec6ba
  */
 
+/* global alphaEarth */
+// alphaEarth: used but not defined in the source document (TODO M4-21: define it from GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL).
+
 // ---- AlphaEarth embeddings ----
 var visRGB_jan = {
   bands: ['B4_jan_apr','B3_jan_apr','B2_jan_apr'],
