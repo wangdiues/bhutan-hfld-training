@@ -1,17 +1,239 @@
 ---
-title: "Custom functions and map()"
+title: "Custom functions and mapping"
+description: Filter a Landsat collection to Bhutan and a year, write your own functions, turn cloud masking into a function, and map it across every image in a collection.
 sidebar:
   order: 6
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I apply the same processing to every image in a collection?", "Why does my variable 'not exist' after I run a function?"]}
+  objectives={[
+    "Write a function that takes and returns an ee.Image.",
+    "Map it over a collection with map().",
+    "Tell client-side errors from server-side errors.",
+  ]}
+  teaching={15} exercises={25}
+  prerequisites={["Image collections, filtering and reducers"]}
+/>
 
-## In this lesson you will
+In this exercise you work with image collections, stacks of images of the same kind, and learn to write functions. By the end you will have a cloud-masking function, mapped over a year of Landsat 8 images, and a cloud-free median composite of Bhutan.
 
-- Write a function that takes and returns an `ee.Image`
-- `map()` it over a collection
-- Tell client-side from server-side errors
+Open the [Code Editor](https://code.earthengine.google.com/) and start a new script: click the arrow next to **Reset** and choose **Clear script**.
 
-**Time:** about 15 min teaching + 25 min practice.
+## Part 1: Create a Landsat image collection
+
+An image collection is a set of images of the same kind. For example, every Landsat 8 image in Earth Engine is in one collection. You can work with the whole collection, or use filters to make smaller ones for a study area or a time period. Data: [Landsat 8 Collection 2 Tier 1 and real-time TOA](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_RT_TOA).
+
+<CodeBlock script="day-1/custom-functions.js" lines={[20, 23]} />
+
+**What is mapped?** The collection has hundreds of thousands of images, but `Map.addLayer()` shows only the most recent image at each place.
+
+<Callout type="mistake" title="Printing the whole collection">
+`print(L8_collection)` fails with "Collection query aborted after accumulating over 5000 elements". Earth Engine refuses to list that many images in the Console. Filter the collection first, and print its `size()` instead of the collection itself.
+</Callout>
+
+## Part 2: Filter by a study area
+
+In the exercise you draw your study area: choose the **polygon** tool at the top left of the map, click around your area (your Dzongkhag, or your home town), and double-click to close it. A `geometry` record appears under *Imports*. Click its name and rename it `StudyArea`. Click the blue box next to the import to see the generated code.
+
+The course script uses all of Bhutan instead, from the US Department of State's [LSIB boundaries](https://developers.google.com/earth-engine/datasets/catalog/USDOS_LSIB_SIMPLE_2017), so it runs without drawing:
+
+<CodeBlock script="day-1/custom-functions.js" lines={[14, 18]} />
+
+Now keep only the images that intersect the study area, centre the map on it, and count the images two ways: with `size()`, and by converting the collection to a list and asking for its `length()`. Watch the Console: which is faster?
+
+<CodeBlock script="day-1/custom-functions.js" lines={[25, 32]} />
+
+## Part 3: Filter by date and explore
+
+`filterDate()` keeps images between a start date (included) and an end date (excluded). Then explore the collection: statistics of an image property, the least cloudy image, and the 10 most recent images. [The Earth Engine guide to image collections](https://developers.google.com/earth-engine/guides/ic_info) lists more methods.
+
+<CodeBlock script="day-1/custom-functions.js" lines={[34, 44]} />
+
+## Part 4: A median composite
+
+A reducer combines all the images into one, pixel by pixel. The median removes most clouds, because a pixel is rarely cloudy in most images of a year:
+
+<CodeBlock script="day-1/custom-functions.js" lines={[46, 48]} />
+
+Look at the print statements. `L8_SA_2025` is an **image collection**; `median_L8_2025` is a single **image**. The composite covers only the Landsat paths and rows that touch Bhutan. Are there still clouds? Even with a median, some cloudy pixels remain. It is better to mask the clouds in each image *before* taking the median. To do that, you need a function.
+
+## Part 5: Functions
+
+As scripts grow, functions keep them organised. A function wraps a piece of code (one statement or hundreds of lines) and gives it a name, so you can reuse it. For example, one function might get the data, another analyse it, and a third export it. A function is useful whenever you repeat the same steps, such as computing NDVI for many images.
+
+<CodeBlock script="day-1/custom-functions.js" lines={[50, 54]} />
+
+- `function` is written in lower case, before the name.
+- The **name** follows the same rules as variable names: it can't start with a number, and it should say what the function does.
+- The **input parameters** go in brackets after the name, separated by commas. Leave the brackets empty if there are none.
+- The **code** goes between curly braces.
+- A function only runs when you **call** it: its name, the inputs in brackets, and a semicolon.
+
+Here is a function that adds two numbers:
+
+<CodeBlock script="day-1/custom-functions.js" lines={[56, 66]} />
+
+### Local and global variables
+
+Try printing `Sum` after the function runs: the Console says **Sum is not defined in this scope**. A variable created with `var` inside a function is **local**: it exists only inside the function. To get the result out, the function uses `return`, and you store the call in a **global** variable, `Sum_test`. The Console shows 157 twice: once from the `print` inside the function, and once from `Sum_test`.
+
+## Part 6: A cloud-masking function
+
+Turn cloud masking into a function that takes an image and returns it with clouds masked. `ee.Algorithms.Landsat.simpleCloudScore()` gives each pixel a cloud likelihood from 0 to 100. Pixels above the threshold, 40, are masked. Then test the function on one scene over western Bhutan:
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-1/custom-functions.js" lines={[68, 86]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+cloud_thresh = 40
+
+
+def cloudfunction(image):
+    cloud_score = ee.Algorithms.Landsat.simpleCloudScore(image)
+    cloud01 = cloud_score.select("cloud").gt(cloud_thresh)
+    cloudmask = image.mask().And(cloud01.Not())
+    return image.mask(cloudmask)
+
+
+lc8_image = ee.Image("LANDSAT/LC08/C02/T1_RT_TOA/LC08_138041_20260101")
+lc8_image_no_clouds = cloudfunction(lc8_image)
+
+m = geemap.Map()
+m.centerObject(lc8_image, 8)
+m.addLayer(lc8_image_no_clouds, {"bands": ["B6", "B5", "B4"], "min": 0.1, "max": 0.5}, "Landsat8scene_cloudmasked")
+m
+```
+In Python, `and`, `or` and `not` are reserved words, so the Earth Engine methods are spelled `And()`, `Or()` and `Not()`.
+  </TabItem>
+</Tabs>
+
+<Callout type="why">
+Why this matters: a function with one input (an image) and one output (an image) is exactly what `map()` needs. Every cloud mask, index and correction on Day 2 is written this way.
+</Callout>
+
+## Part 7: Map the function across the collection
+
+`map()` applies a function to every image in a collection and returns a new collection (N images in, N images out). Map the cloud mask over the 2025 collection, then take the median of the masked images:
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-1/custom-functions.js" lines={[88, 96]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+study_area = (
+    ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017").filter(ee.Filter.eq("country_na", "Bhutan")).geometry()
+)
+l8_sa_2025 = (
+    ee.ImageCollection("LANDSAT/LC08/C02/T1_RT_TOA").filterBounds(study_area).filterDate("2025-01-01", "2025-12-31")
+)
+median_no_clouds = l8_sa_2025.map(cloudfunction).median()
+
+m = geemap.Map()
+m.centerObject(study_area, 7)
+m.addLayer(median_no_clouds, {"min": 0.05, "max": 0.8, "bands": ["B6", "B5", "B4"]}, "median composite of cloud free images")
+m
+```
+  </TabItem>
+</Tabs>
+
+Compare the two median layers: the composite of cloud-masked images has far fewer cloudy patches.
+
+<Theory title="Client and server">
+Your script runs in two places. Plain JavaScript (variables, `function`, `if`, loops) runs in your **browser**, the client. Earth Engine objects (`ee.Image`, `ee.Number`, `ee.ImageCollection`) are instructions sent to Google's **servers**, which do the work only when you `print()`, add a layer or export. That is why `calculate_Sum` uses `ee.Number(…).add()`, why you use `map()` instead of a JavaScript `for` loop over a collection, and why you can't use an `ee.Number` in a JavaScript `if`.
+</Theory>
+
+### Client errors and server errors
+
+| | Client-side error | Server-side error |
+|---|---|---|
+| Where it happens | In your browser, before anything is sent to Earth Engine | On Google's servers, while Earth Engine computes |
+| Typical message | `Sum is not defined in this scope`; `… is not a function` | `Image.select: Pattern 'B8' did not match any bands`; `User memory limit exceeded` |
+| Typical cause | A typo, a local variable used outside its function, a missing `return` | A band or property that doesn't exist, too much data at once |
+| Fix | Read the line number and check names and scope | Print the object (`bandNames()`, `first()`), filter more, or use a larger scale |
+
+[Debugging Earth Engine](/bhutan-hfld-training/how-to/debug-earth-engine/) has more examples.
+
+## The full script
+
+<CodeBlock script="day-1/custom-functions.js" />
+
+<OpenInGEE script="day-1/custom-functions.js" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `function name(params) { …; return x; }` | Defines a reusable function |
+| `collection.map(fn)` | Applies a function to every image; returns a collection |
+| `collection.size()`, `collection.toList(n).length()` | Count the images |
+| `collection.aggregate_stats(property)` | Statistics of a property across images |
+| `collection.sort(property, ascending).limit(n)` | The first n images in a given order |
+| `ee.Algorithms.Landsat.simpleCloudScore(image)` | Adds a 0–100 cloud likelihood band to a Landsat TOA image |
+| `image.mask()`, `image.updateMask()` | Read or set which pixels are valid |
+
+## Common mistakes
+
+- **No `return`.** A mapped function without `return` gives an error or an empty collection.
+- **Returning the wrong type.** A function for `map()` over an image collection must return an image. Returning a number or a string fails.
+- **Using `print()` or `Map.addLayer()` inside a mapped function.** They run on the client, which `map()` can't do. Remove them.
+- **Using the wrong dataset with `simpleCloudScore`.** It expects Landsat TOA reflectance; with surface reflectance the scores are wrong.
+- **An end date that is excluded.** `filterDate('2025-01-01', '2025-12-31')` leaves out 31 December. Use `'2026-01-01'` to include the whole year.
+
+<Callout type="bhutan">
+Bhutan context: the Landsat scene in Part 6 (path 138, row 41, 1 January 2026) covers western Bhutan. A year-long median over the whole country still has gaps and haze in the south during the monsoon. Day 2 replaces this simple mask with better cloud and shadow masking and seasonal windows.
+</Callout>
+
+## Practice
+
+<Challenge level="scratch" time={25} hints={["Start from the cloud-masking function: one input (an image), one output (an image).", "image.normalizedDifference(['B8', 'B4']) computes NDVI for Sentinel-2.", "addBands() keeps the original bands and adds the new one.", "After map(), select('NDVI') and reduce with max() or median()."]} solution="day-1/custom-functions-solution.js">
+Write a function that adds an **NDVI** band to a Sentinel-2 image, map it over all 2025 Sentinel-2 images around Thimphu with less than 20% cloud, and show the **maximum** NDVI of the year on the map.
+
+Use the collection `COPERNICUS/S2_SR_HARMONIZED`, and the point `ee.Geometry.Point([89.64, 27.47])`.
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-1-custom-functions" questions={[
+  { q: "You run calculate_Sum(99, 106); and then print(Sum);. What happens?", options: ["It prints 205", "A client-side error: Sum is not defined in this scope", "A server-side error: memory limit exceeded", "It prints undefined"], answer: 1, explain: "Sum is a local variable inside the function. Use return and store the result in a global variable, as with Sum_test." },
+  { q: "What must a function return to be used with imageCollection.map()?", options: ["A number", "An ee.Image", "A string", "Nothing"], answer: 1, explain: "map() builds a new image collection, so the function must take an image and return an image." },
+  { q: "The error \"Image.select: Pattern 'B8' did not match any bands\" is a server-side error.", answer: true, explain: "The JavaScript is valid; Earth Engine fails while computing because the image has no band with that name. Print bandNames() to check." },
+  { q: "Why mask clouds in each image before taking the median?", options: ["It makes the script shorter", "The median of masked images ignores cloudy pixels, so fewer clouds remain in the composite", "median() does not work on unmasked images", "It changes the Landsat path and row"], answer: 1, explain: "Masked pixels are left out of the median, so it is computed from clear observations only." },
+]} />
+
+<KeyPoints points={[
+  "Functions wrap reusable code; use return to get results out, because variables declared inside a function are local.",
+  "A function for map() takes one ee.Image and returns one ee.Image; map() applies it to every image.",
+  "Mask clouds per image, then reduce (median) to get a cleaner composite.",
+  "Client-side errors come from the JavaScript in your browser; server-side errors come from Earth Engine's computation.",
+]} />
+
+<Credit
+  source="EXERCISE D1: Writing Custom Functions and Mapping Across Image Collections"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; the step-by-step snippets merged into one script that runs top to bottom",
+    "StudyArea defaults to Bhutan's boundary (USDOS LSIB) instead of a polygon drawn around Manila or the learner's town",
+    "Added a client- and server-side error comparison, Python (geemap) versions, a from-scratch NDVI exercise and a quiz",
+  ]}
+/>
