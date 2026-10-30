@@ -1,6 +1,6 @@
 ---
 title: "Importing and exporting data"
-description: Work with feature collections (buffer, clip, merge, union), upload shapefiles and CSV files as assets, and export images, tables and videos to Google Drive and to assets.
+description: Work with feature collections (buffer, clip, merge, union), upload shapefiles and CSV files as assets, and export images, tables and videos.
 sidebar:
   order: 6
 ---
@@ -57,7 +57,7 @@ The four classic GIS operations all exist in Earth Engine:
 | **Merge** | combines several feature collections into one | `collection.merge(other)` |
 | **Union** | dissolves overlapping features into one | `collection.union()`, `geometry.union(other)` |
 
-<CodeBlock script="day-2/feature-basics.js" lines={[23, 50]} />
+<CodeBlock script="day-2/feature-basics.js" lines={[23, 53]} />
 
 <Callout type="mistake" title="Vector work is not Earth Engine's strength">
 Earth Engine handles these operations, but complex vector editing (snapping, topology, digitising boundaries) is easier in QGIS or ArcGIS. Prepare clean vector data there, then upload it.
@@ -233,7 +233,7 @@ task = ee.batch.Export.image.toDrive(
 The nine classes, in order 0–8: water, trees, grass, flooded vegetation, crops, shrub and scrub, built, bare, snow and ice.
 
 <Callout type="mistake" title="mosaic() keeps the latest label">
-`dw.mosaic()` keeps, for each pixel, the label of the **most recent** image of 2023, which may be cloudy or from the monsoon. For an annual map, the most frequent label is usually better: `dw.select('label').mode()`.
+`dw.mosaic()` keeps, for each pixel, the label of whichever image is last in the collection (the most recent only if you sort by date first), so it shows one date, which may fall in the monsoon or another unrepresentative time. For an annual map, the most frequent label is usually better: `dw.select('label').mode()`.
 </Callout>
 
 ### 3. Google Open Buildings as GeoJSON
@@ -258,7 +258,7 @@ Export a time-lapse of Landsat 5 images (1984–2011, cloud cover below 10%) for
 
 ## Common mistakes
 
-- **Uploading a shapefile without the .prj.** Earth Engine can't place it. Include .shp, .shx, .dbf and .prj (or a .zip).
+- **Uploading a shapefile without the .prj.** Earth Engine then assumes WGS84, so data in a projected system (such as a UTM zone) lands in the wrong place. Include .shp, .shx, .dbf and .prj (or a .zip).
 - **CSV with latitude and longitude swapped,** or in a projected CRS without setting it in Advanced options.
 - **Forgetting to click Run** in the Tasks tab: scripts only create tasks.
 - **"Too many pixels in the region"**: raise `maxPixels`, use a coarser `scale`, or a smaller region.
@@ -270,12 +270,12 @@ Bhutan context: for HFLD reporting, keep the official national and Dzongkhag bou
 
 ## Practice
 
-<Challenge level="complete" time={20} hints={["Change the filter to one Dzongkhag: the GAUL 2015 level 2 property for districts is ADM2_NAME.", "Use mode() for an annual label.", "Start the task in the Tasks tab."]}>
+<Challenge level="complete" time={20} hints={["Dzongkhags are first-level units: use the GAUL 2015 level 1 collection and its ADM1_NAME property.", "Use mode() for an annual label.", "Start the task in the Tasks tab."]}>
 Export the **2023 Dynamic World** land cover for **one Dzongkhag** (for example Paro) to your Google Drive, using the most frequent label of the year.
 
 ```js
-var countries = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level2");
-var AOI = countries.filter(ee.Filter.eq('ADM2_NAME', '___'));
+var countries = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level1");
+var AOI = countries.filter(ee.Filter.eq('ADM1_NAME', '___'));
 var dw = ee.ImageCollection('GOOGLE/DYNAMICWORLD/V1')
   .filterDate('2023-01-01', '2024-01-01')
   .filterBounds(AOI);
@@ -292,8 +292,8 @@ Export.image.toDrive({
 
 <Fragment slot="solution">
 ```js
-var countries = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level2");
-var AOI = countries.filter(ee.Filter.eq('ADM2_NAME', 'Paro'));
+var countries = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level1");
+var AOI = countries.filter(ee.Filter.eq('ADM1_NAME', 'Paro'));
 var dw = ee.ImageCollection('GOOGLE/DYNAMICWORLD/V1')
   .filterDate('2023-01-01', '2024-01-01')
   .filterBounds(AOI);
@@ -307,7 +307,7 @@ Export.image.toDrive({
   maxPixels: 1e13
 });
 ```
-Print `AOI.size()` first: if it is 0, check the spelling of the Dzongkhag in GAUL with `aggregate_array('ADM2_NAME')`.
+Print `AOI.size()` first: if it is 0, check the spelling of the Dzongkhag in GAUL with `countries.filter(ee.Filter.eq('ADM0_NAME', 'Bhutan')).aggregate_array('ADM1_NAME')`.
 </Fragment>
 </Challenge>
 
@@ -323,7 +323,7 @@ Print `AOI.size()` first: if it is 0, check the spelling of the Dzongkhag in GAU
 <KeyPoints points={[
   "Feature collections are vector layers; buffer, clip, merge and union work on them.",
   "Upload shapefiles (.shp, .shx, .dbf, .prj) and CSV files (with X and Y columns) as assets.",
-  "Export images, tables and videos to Drive, assets or Cloud Storage; each export is a task you start in the Tasks tab.",
+  "Export images and tables to Drive, assets or Cloud Storage, and videos to Drive or Cloud Storage; each export is a task you start in the Tasks tab.",
   "Use mode() rather than mosaic() for an annual Dynamic World map.",
 ]} />
 
@@ -337,5 +337,7 @@ Print `AOI.size()` first: if it is 0, check the spelling of the Dzongkhag in GAU
     "Exercise blanks filled with a worked Bhutan solution (logged in M2-02)",
     "New: buffer, clip, merge and union examples (the slides used Esri figures, not reused)",
     "Notes added on Planet NICFI access, export size, and mode() instead of mosaic() for an annual Dynamic World map",
+    "Slide 19's toAsset example listed a folder parameter, which toAsset does not have; the asset path goes in assetId",
+    "Slide 13 (review question), slide 15 (a training Drive folder) and slide 25 (animation functions) not carried over",
   ]}
 />

@@ -112,12 +112,12 @@ D1 WORKING WITH IMAGE COLLECTIONS.pptx,22,s22-f4cd33d0c0.webp,picture,drop,logo,
 "D1 Introduction to GEE_ Features, Capabilities, and Access.pptx",28,s28-dad3a36f2e.webp,picture,drop,product logo or icon,
 "D1 Introduction to GEE_ Features, Capabilities, and Access.pptx",29,s29-dadb2f1599.webp,picture,drop,stock photo,
 "D1 Introduction to GEE_ Features, Capabilities, and Access.pptx",29,s29-f4cd33d0c0.webp,picture,drop,logo,
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,3,s03-355f081e2f.webp,picture,redraw,stock GIS layers graphic; redraw,
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,3,s03-355f081e2f.webp,picture,drop,stock GIS layers graphic; replaced by text or Bhutan examples in the lesson (M4-13),
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,3,s03-e941e0c5e8.webp,picture,drop,decorative,
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,4,s04-e4f12230e2.webp,picture,redraw,Esri geoprocessing diagram (buffer); redraw,
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,5,s05-e81ea762e8.webp,picture,redraw,Esri geoprocessing diagram (clip); redraw,
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,6,s06-8fb9c5f1dd.webp,picture,redraw,Esri geoprocessing diagram (merge); redraw,
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,7,s07-33b7044336.webp,picture,redraw,Esri geoprocessing diagram (union); redraw,
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,4,s04-e4f12230e2.webp,picture,drop,Esri geoprocessing diagram (buffer); replaced by text or Bhutan examples in the lesson (M4-13),
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,5,s05-e81ea762e8.webp,picture,drop,Esri geoprocessing diagram (clip); replaced by text or Bhutan examples in the lesson (M4-13),
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,6,s06-8fb9c5f1dd.webp,picture,drop,Esri geoprocessing diagram (merge); replaced by text or Bhutan examples in the lesson (M4-13),
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,7,s07-33b7044336.webp,picture,drop,Esri geoprocessing diagram (union); replaced by text or Bhutan examples in the lesson (M4-13),
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,8,s08-52211b71dd.webp,picture,drop,product logo or icon,
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,8,s08-d54b9dec11.webp,picture,drop,product logo or icon,
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,8,s08-ee3e17458b.webp,picture,drop,product logo or icon,
@@ -125,18 +125,18 @@ D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,9,s09-e7
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,9,s09-4281f5a77f.webp,picture,keep,screenshot or trainers' own figure,"The files that make up one shapefile: .cpg, .dbf, .prj, .sbn, .sbx, .shp, .shp.xml and .shx."
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,10,s10-6cabc97baf.webp,picture,keep,screenshot or trainers' own figure,"The 'Upload a new shapefile asset' dialog with the selected files, asset ID and advanced options."
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,11,s11-a6f0c8f29b.webp,picture,keep,screenshot or trainers' own figure,"The 'Upload a new CSV asset' dialog with the source file, asset ID and advanced options."
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,11,s11-2e2dd75acf.webp,picture,redraw,non-Bhutan CSV example (Manila); redo with Bhutan points,
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,11,s11-2e2dd75acf.webp,picture,drop,non-Bhutan CSV example (Manila); replaced by text or Bhutan examples in the lesson (M4-13),
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,11,s11-1461348c47.webp,picture,keep,screenshot or trainers' own figure,The Assets tab NEW menu with the CSV file option highlighted.
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,12,s12-cdbbed5ac4.webp,picture,keep,screenshot or trainers' own figure,Code Editor showing the Tasks tab with a list of completed asset uploads.
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,12,s12-87f81ad68b.webp,picture,drop,decorative,
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,13,s13-de15eee512.webp,picture,redraw,non-Bhutan example (Philippines); retake over Bhutan,
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,13,s13-d43c97ae71.webp,picture,redraw,non-Bhutan example (Cambodia); retake over Bhutan,
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,13,s13-de15eee512.webp,picture,drop,non-Bhutan example (Philippines); replaced by text or Bhutan examples in the lesson (M4-13),
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,13,s13-d43c97ae71.webp,picture,drop,non-Bhutan example (Cambodia); replaced by text or Bhutan examples in the lesson (M4-13),
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,14,s14-c7fc8f5bf5.webp,picture,keep,screenshot or trainers' own figure,Code Editor map with Bhutan's national boundary imported from an asset and shown in red.
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,16,s16-95deaa705c.webp,picture,drop,decorative,
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,22,s22-d20405be79.webp,picture,drop,product logo or icon,
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,22,s22-84d748a15c.webp,picture,drop,product logo or icon,
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,22,s22-bcb2f87fa7.webp,picture,drop,product logo or icon,
-D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,23,s23-1c70fab5cf.webp,picture,redraw,figure from a published paper (Philippines path/row); redraw,
+D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,23,s23-1c70fab5cf.webp,picture,drop,figure from a published paper (Philippines path/row); replaced by text or Bhutan examples in the lesson (M4-13),
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,24,s24-612d61d1b2.webp,picture,drop,code shown as an image; use a text code block,
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,24,s24-ca6c694d1f.webp,picture,keep,screenshot or trainers' own figure,Google Drive folder containing a file exported from Earth Engine.
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,27,s27-c4e7bff2e5.webp,picture,drop,third-party figure (Google/DeepMind deck),

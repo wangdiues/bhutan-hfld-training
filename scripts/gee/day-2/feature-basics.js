@@ -23,23 +23,26 @@ Map.centerObject(studyArea, 8);
 // ---- Buffer: a zone of a set width around a feature ----
 var thimphu = ee.Geometry.Point([89.64, 27.47]);
 var paro = ee.Geometry.Point([89.41, 27.43]);
-var thimphuZone = thimphu.buffer(10000);  // 10 km, in metres
-var paroZone = paro.buffer(10000);
-Map.addLayer(thimphuZone, {color: 'blue'}, 'Buffer: 10 km around Thimphu');
+var thimphuZone = thimphu.buffer(15000);  // 15 km, in metres
+var paroZone = paro.buffer(15000);
+Map.addLayer(thimphuZone, {color: 'blue'}, 'Buffer: 15 km around Thimphu');
 
 // ---- Clip: keep only the part inside a boundary ----
 // Vector: intersect a geometry with the boundary. Raster: image.clip(boundary).
 var bhutanGeom = Bhutan.geometry();
-var clippedZone = paroZone.intersection(bhutanGeom, ee.ErrorMargin(1));
+// A 15 km buffer around Phuentsholing crosses into India; keep only the part inside Bhutan.
+var phuentsholingZone = ee.Geometry.Point([89.39, 26.85]).buffer(15000);
+var clippedZone = phuentsholingZone.intersection(bhutanGeom, ee.ErrorMargin(1));
+Map.addLayer(clippedZone, {color: 'green'}, 'Clip: Phuentsholing buffer inside Bhutan');
 var elevation = ee.Image('USGS/SRTMGL1_003').clip(thimphuZone);
 Map.addLayer(elevation, {min: 2000, max: 4500}, 'Clip: elevation inside the Thimphu buffer');
 
 // ---- Merge: combine two feature collections into one ----
 var towns = ee.FeatureCollection([
   ee.Feature(thimphuZone, {name: 'Thimphu'}),
-  ee.Feature(clippedZone, {name: 'Paro'})
+  ee.Feature(paroZone, {name: 'Paro'})
 ]);
-var more = ee.FeatureCollection([ee.Feature(ee.Geometry.Point([89.86, 27.58]).buffer(10000), {name: 'Punakha'})]);
+var more = ee.FeatureCollection([ee.Feature(ee.Geometry.Point([89.86, 27.58]).buffer(15000), {name: 'Punakha'})]);
 var merged = towns.merge(more);
 print('Merged features:', merged.size());
 Map.addLayer(merged, {color: 'orange'}, 'Merge: three buffers in one collection');
