@@ -1,17 +1,215 @@
 ---
-title: "Satellite embeddings"
+title: "Satellite embeddings (AlphaEarth)"
+description: What Google's Satellite Embedding dataset is, what a 64-dimensional embedding encodes, how cosine similarity finds similar places and change, and good practices for using embeddings in mapping.
 sidebar:
   order: 4
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import { Image } from 'astro:assets';
+import catalog from '~/assets/day-4/satellite-embeddings/s12-330eeb36f1.webp';
+import thimphuSim from '~/assets/day-4/satellite-embeddings/s17-293d4555c6.webp';
+import paroSim from '~/assets/day-4/satellite-embeddings/s19-41d60fb63c.webp';
+import forestChange from '~/assets/day-4/satellite-embeddings/s22-ab7c783328.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["What is in a satellite embedding?", "How can I find places like this one, or places that changed?"]}
+  objectives={[
+    "Explain what a 64-dimensional annual embedding encodes.",
+    "Explain cosine similarity.",
+    "List good practices (match labels to years, quality over quantity).",
+  ]}
+  teaching={25} exercises={10}
+  prerequisites={["Forest primitives with machine learning"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/satellite-embeddings/) give a visual summary (third-party figures removed).
 
-- Explain what a 64-dimensional annual embedding encodes
-- Explain cosine similarity
-- List good practices (match labels to years, quality over quantity)
+## A new kind of image collection
 
-**Time:** about 25 min teaching + 10 min practice.
+Earth observation now produces far more images than anyone can process by hand, and turning them into maps usually needs a long chain of pre-processing (cloud masking, compositing, covariates) before any modelling. **Satellite embeddings** take a different route: a model learns, once, to summarise everything the satellites saw at each place over a year into a short list of numbers, and those numbers are published as an image collection ready to use.
+
+The model is **AlphaEarth Foundations**, from Google DeepMind <Cite id="brown2025" />. It works like a *virtual satellite*: from sparse, irregular observations (optical, radar, lidar, climate and other sources), it produces a consistent, continuous summary of the surface for any place and year. The outputs are designed for practitioners, rather like an AI-made composite, and many different applications can be built on them.
+
+## The Satellite Embedding dataset
+
+```js
+var embeddings = ee.ImageCollection('GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL');
+```
+
+<Image src={catalog} alt="Earth Engine Data Catalog page for the Satellite Embedding V1 dataset, with its availability, provider and code snippet." />
+
+- **One image per year** per area (annual summaries, from 2017).
+- **64 bands**, named `A00` to `A63`: the **embedding vector** of each pixel. Together they form an *embedding field*.
+- **10 m** pixels.
+- Each pixel's vector has **unit length**: its 64 values, squared and summed, equal 1.
+
+[Dataset page in the catalog](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL).
+
+### What is embedded in an embedding?
+
+For each 10 m pixel, the model looks at a window of about 1.28 km × 1.28 km around it and at the **whole calendar year** of observations from each sensor. It can use any information in that window, so the embedding encodes:
+
+- what the pixel looks like across many sensors (spectral, radar, structure);
+- how it **changes through the year** (seasonality, phenology), learned from image sequences rather than single dates;
+- some of its **spatial context** (what surrounds it).
+
+The 64 axes are learned, not named: no single axis means "forest" or "water". What matters is where a pixel's vector points: similar places point in similar directions.
+
+<Callout type="why">
+Why this matters: an embedding already contains seasonal and multi-sensor information that you would otherwise build by hand as composites and covariates. That is why embeddings often need fewer training samples for a good map.
+</Callout>
+
+## What can you do with embeddings?
+
+| Task | What it means | Example |
+|---|---|---|
+| **Similarity search** | find other places like a sample | built-up areas like central Thimphu |
+| **Classification** | accurate maps with less training data | crop types, land cover |
+| **Regression** | scale up measurements | above-ground biomass |
+| **Change detection** | spot change and track processes | forest clearing |
+
+## Under the hood: cosine similarity
+
+Each pixel's embedding is a vector in 64-dimensional space. Two vectors are similar when they point in the same direction. Because the vectors have unit length, their **dot product** (multiply the 64 pairs of values and add them up) equals the cosine of the angle between them:
+
+<Theory title="Dot product = cosine similarity">
+For unit vectors $\mathbf{a}$ and $\mathbf{b}$, $\mathbf{a}\cdot\mathbf{b} = \sum_{i=0}^{63} a_i b_i = \cos\theta$. It runs from **1** (same direction: very similar) through **0** (at right angles: unrelated) to **−1** (opposite).
+</Theory>
+
+### Similarity search
+
+Sample the embedding at one place, then compute its dot product with every other pixel: the result is a map of similarity, at 10 m, made on demand.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-4/satellite-embeddings.js" lines={[14, 35]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+area = ee.Geometry.Point([89.64, 27.47]).buffer(8000)
+emb2024 = (
+    ee.ImageCollection("GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL")
+    .filterDate("2024-01-01", "2025-01-01").filterBounds(area).mosaic()
+)
+built_up = ee.Geometry.Point([89.6419, 27.4661])
+bands = emb2024.bandNames()
+ref = emb2024.sample(region=built_up, scale=10).first()
+ref_vector = ee.Image.constant(ref.toDictionary(bands).values(bands)).rename(bands)
+similarity = emb2024.multiply(ref_vector).reduce(ee.Reducer.sum())
+
+m = geemap.Map()
+m.centerObject(area, 13)
+m.addLayer(similarity.clip(area), {"min": 0, "max": 1, "palette": ["000004", "b73779", "fcfdbf"]}, "Similarity")
+m
+```
+  </TabItem>
+</Tabs>
+
+The trainers' example: built-up areas in Thimphu and in Paro, from one sampled point each. Bright pixels are the most similar.
+
+<Image src={thimphuSim} alt="Similarity map around Thimphu: pixels whose embeddings resemble the sampled built-up point are bright." />
+
+<Image src={paroSim} alt="Similarity search result for a sampled point at 89.4032, 27.4334, with the colour bar from less to more similar." />
+
+- Sample **several points** of the same kind and average their vectors to define what you are looking for more robustly.
+- Average embeddings over a patch to compare areas rather than pixels.
+- Google's [similarity search demo](https://goo.gle/satellite-embedding-similarity-demo) lets you try this without code.
+
+### Similarity in time: stability and change
+
+Compare the same pixel's embedding in two years. High similarity means the place stayed the same; low similarity flags change:
+
+<CodeBlock script="day-4/satellite-embeddings.js" lines={[37, 41]} />
+
+The model was trained to keep embeddings consistent through time, so similarity between years is a meaningful measure of stability. But "change" can mean a change of the **surface** (clearing, new buildings) or of the **environment** (a wet year against a dry one): check what you find.
+
+<Image src={forestChange} alt="Forest change map of Bhutan 2017 to 2025 from embedding similarity; changed pixels appear red or blue on white." />
+
+## Classification and regression
+
+Embeddings work well with simple and tree-based classifiers, because classes tend to be separable in the embedding space. You can use them in place of composites and covariates in an existing workflow, with **no pre-processing**, and scale up with Earth Engine. The next lesson, [Land cover and similarity with embeddings](/bhutan-hfld-training/day-4/embeddings-classification-similarity/), classifies Bhutan's land cover from them.
+
+Expect good results with fewer training samples, and excellent results with large, high-quality ones. Embeddings also handle rare classes better and support continuous variables (regression), and they don't need wall-to-wall training labels.
+
+## Good practices
+
+- **Quality over quantity.** A few hundred well-placed, correct labels beat thousands of noisy ones.
+- **Match labels to years.** Use the embedding of the year your label describes.
+- **"Annualise" labels.** Labels should describe the whole year, as the embedding does, not one day.
+- **Points are easier than polygons** for mapping; to classify polygons or patches, average the embeddings inside them.
+- **Remember the space is learned and unit-length.** Use dot products (cosine similarity) to compare; don't read single axes as physical quantities.
+
+Explore the 64-dimensional space and cosine similarity in the [embedding similarity visualiser](/bhutan-hfld-training/labs/embedding-similarity/).
+
+<Callout type="bhutan">
+Bhutan context: cloud cover limits optical composites in the monsoon; embeddings are built from many sensors, including radar, over the whole year, so they can help where Sentinel-2 alone struggles. Check them against your own maps before relying on them for reporting, and document which year's embeddings you used.
+</Callout>
+
+## Learn more
+
+- Google DeepMind: [AlphaEarth Foundations helps map our planet in unprecedented detail](https://deepmind.google/discover/blog/alphaearth-foundations-helps-map-our-planet-in-unprecedented-detail/)
+- The AlphaEarth Foundations paper: [arxiv.org/abs/2507.22291](https://arxiv.org/abs/2507.22291)
+- Earth Engine tutorial series, starting with [Introduction to the Satellite Embedding dataset](https://developers.google.com/earth-engine/tutorials/community/satellite-embedding-01-introduction), then unsupervised and supervised classification, regression and similarity search
+
+## Common mistakes
+
+- **Mixing years**: labels from 2020 with 2024 embeddings.
+- **Interpreting one band** (`A16`) as a physical variable.
+- **Using Euclidean distances on rescaled values.** Keep the unit vectors and use dot products.
+- **Reading all low similarity as land-cover change**; some is seasonal or climatic.
+
+## Practice
+
+<Challenge level="complete" time={10} hints={["Change the coordinates of builtUp.", "Pick a point in dense forest above Thimphu, for example on a slope east of the valley."]}>
+Run the script, then move the sampled point from central Thimphu to **forest** on the valley slopes. How does the similarity map change? Then switch on the 2017–2024 layer: where is similarity lowest?
+
+<Fragment slot="solution">
+With a forest point, the bright areas move from the town to the forested slopes, and settlements turn dark. In the 2017–2024 layer, the lowest similarity (red) is typically where new buildings, roads or cleared land appeared around the expanding town; check those places in high-resolution imagery.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-4-satellite-embeddings" questions={[
+  { q: "What is each pixel of the Satellite Embedding dataset?", options: ["A single reflectance value", "A 64-dimensional unit-length vector summarising a year of observations", "A land-cover class", "A cloud mask"], answer: 1, explain: "64 bands (A00–A63) at 10 m, one image per year." },
+  { q: "Two embedding vectors have a dot product of 0.95. What does that mean?", options: ["They are nearly identical in direction: the places are very similar", "They are unrelated", "They are opposite", "One of them is masked"], answer: 0, explain: "For unit vectors, the dot product is the cosine similarity; close to 1 means very similar." },
+  { q: "Which is a good practice for training with embeddings?", options: ["Use as many labels as possible, regardless of quality", "Match each label to the year of the embedding", "Use one band as a vegetation index", "Use labels from any year"], answer: 1, explain: "Labels should describe the same year as the embedding, and quality matters more than quantity." },
+  { q: "Low similarity between a pixel's 2017 and 2024 embeddings always means land-cover change.", answer: false, explain: "It can also reflect environmental differences, such as a wet year against a dry one." },
+]} />
+
+<KeyPoints points={[
+  "The Satellite Embedding dataset gives a 64-band, 10 m, unit-length vector per pixel per year, learned by AlphaEarth Foundations from many sensors.",
+  "The dot product of two embeddings is their cosine similarity: use it to find similar places and to measure change between years.",
+  "Embeddings can replace composites and covariates in classification and regression, often with fewer labels.",
+  "Use good-quality labels that match the embedding year.",
+]} />
+
+<References />
+
+<Credit
+  source="D4 Effective Use of Google's Satellite Embedding Dataset (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson; Google DeepMind figures not reused, ideas cited to the AlphaEarth Foundations paper and DeepMind and Earth Engine pages",
+    "New: a Bhutan script for similarity search and year-to-year similarity, with a Python version",
+    "Trainers' own Bhutan results (Thimphu and Paro similarity, forest change) kept as screenshots",
+  ]}
+/>
