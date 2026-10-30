@@ -1,16 +1,130 @@
 ---
 title: "Reporting and documentation"
+description: Put the results into an activity-data table, record every assumption and version, and package the code and data so that a verifier, or your future self, can reproduce the numbers.
+newContent: true
 sidebar:
   order: 5
 ---
+import Callout from '~/components/Callout.astro';
+import Quiz from '~/components/Quiz.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import VersionNote from '~/components/VersionNote.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
+<LessonHeader
+  questions={["What exactly do I report, and in what form?", "How do I make sure someone else can reproduce my numbers?"]}
+  objectives={[
+    "Assemble an activity-data table for TREES 3.0.",
+    "Document assumptions, versions and code so others can reproduce the work.",
+  ]}
+  teaching={20} exercises={20}
+  prerequisites={["Accuracy assessment and area adjustment"]}
+/>
+
+:::note[New content]
+This lesson was written for the website; it was not part of the May 2026 training materials. The trainers will review it. The exact ART-TREES reporting requirements are covered in [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/); this lesson focuses on the activity data and the evidence behind them.
 :::
 
-## In this lesson you will
+The end product of the course is not a map but a set of **numbers with their evidence**: the area of each activity (for example forest loss) for each period, with confidence intervals, and a record that lets a verifier check how they were made. ART-TREES programmes are verified by an independent body, so transparency and reproducibility matter as much as the numbers themselves <Cite id="trees3" />.
 
-- Assemble an activity-data table for TREES 3.0
-- Document assumptions, versions and code so others can reproduce the work
+<VersionNote standard="TREES 3.0">
+The training used TREES 2.0. Check the TREES 3.0 requirements for the reporting period, the activity-data categories and the uncertainty provisions before finalising tables.
+</VersionNote>
 
-**Time:** about 20 min teaching + 20 min practice.
+## The activity-data table
+
+Report, for each period and each activity, the **area-adjusted estimate** from the reference sample, not the mapped area. A clear table has one row per class or activity:
+
+| Class / activity | Mapped area (ha) | Adjusted area (ha) | SE (ha) | 90% CI (ha) | Uncertainty (± %) | User's accuracy | Producer's accuracy |
+|---|---|---|---|---|---|---|---|
+| Stable forest | … | … | … | … to … | … | … | … |
+| Forest loss (deforestation) | … | … | … | … to … | … | … | … |
+| Stable non-forest | … | … | … | … to … | … | … | … |
+| **Total** | = map total | = map total | | | | | |
+
+The [accuracy and area calculator](/bhutan-hfld-training/labs/accuracy-area-estimator/) produces all of these columns and downloads them as a CSV. Alongside the table, report:
+
+- the **confusion matrix** in sample counts, and the **stratum weights** (mapped areas);
+- the **sample size per stratum** and how it was allocated;
+- the **period** (start and end dates) and the **forest definition** used;
+- the **estimator** (stratified, Olofsson et al. 2014) and the confidence level (90%, z = 1.6449) <Cite id="olofsson2014" />.
+
+<Callout type="mistake" title="Totals must add up">
+The adjusted areas of all classes should add up to the total mapped area. If they don't, a stratum probably has no samples (see the [calculator](/bhutan-hfld-training/labs/accuracy-area-estimator/)): fix the sample, don't adjust the numbers.
+</Callout>
+
+## The assumptions log
+
+Every choice that affects the numbers belongs in a log, written as you go, not at the end. A simple table works:
+
+| Date | Step | Decision | Why | Effect / evidence |
+|---|---|---|---|---|
+| 2026-05-10 | Composite | Jan–Apr and Oct–Dec windows | monsoon months have too few clear images | monthly image counts |
+| 2026-05-12 | Covariates | bands scaled to 0–1 reflectance before EVI/SAVI | constants assume 0–1 | — |
+| 2026-05-14 | Assemblage | forest first, threshold 0.50 | matches the forest definition | primitive accuracy plot |
+| 2026-05-16 | Sampling | minimum 150 per stratum | deforestation stratum needs enough samples | calculator output |
+| 2026-05-20 | Interpretation | mixed plots labelled by majority class | response design § 3 | double-interpretation agreement |
+
+Include, at least: the forest definition and how it maps to classes and thresholds; image windows and cloud thresholds; masks (cloud, shadow, snow); covariates; training data sources and dates; classifier settings and seeds; assemblage order and thresholds; strata, sample sizes and the seed of the sample; the response design; and any corrections made afterwards.
+
+## The reproducibility checklist
+
+A verifier, or a colleague next year, should be able to rerun the work and get the same numbers.
+
+- ☐ **Code** for every step is saved in a shared Earth Engine repository (or Git), with the final version tagged or dated.
+- ☐ **Assets** (boundaries, composites, primitives, map, samples) are kept, shared read-only, and named with source, class and year (for example `ls_Forest_2025`).
+- ☐ **Versions** are recorded: Earth Engine dataset IDs (for example `COPERNICUS/S2_SR_HARMONIZED`, `GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL`), and the TREES version used.
+- ☐ **Random seeds** are fixed and recorded (classifiers, training/validation splits, the stratified sample).
+- ☐ **The reference sample** (plots and samples), the Collect Earth Online export and the interpreter notes are archived unchanged.
+- ☐ **The calculator inputs and outputs** (strata areas, confusion matrix, results CSV) are archived.
+- ☐ **The assumptions log** is complete and dated.
+- ☐ **A short method description** connects all of the above, in the order of the [workflow](/bhutan-hfld-training/start-here/).
+
+<Callout type="why">
+Why this matters: a number that can't be reproduced can't be verified. Seeds, versions and archived samples turn "we got 13,304 ha" into a result anyone can check.
+</Callout>
+
+<Callout type="bhutan">
+Bhutan context: the work spans several agencies and years. Keeping one shared Earth Engine project for the HFLD work, with a folder per year and a single assumptions log, makes each new monitoring period faster and keeps the time series consistent.
+</Callout>
+
+## Common mistakes
+
+- **Reporting mapped areas** instead of adjusted areas with confidence intervals.
+- **Unrecorded seeds**: rerunning gives a slightly different map or sample.
+- **Assets in personal folders** that disappear when someone leaves.
+- **Changing methods between periods** without recording it, so change in the numbers reflects method, not land.
+
+## Practice
+
+<Challenge level="complete" time={20} hints={["Start from the calculator's CSV download.", "List every decision from Days 2–5 that changed a number."]}>
+For the capstone (or the training example), prepare: the **activity-data table** from the calculator's report, an **assumptions log** with at least eight entries covering Days 2–5, and the **reproducibility checklist** with each item ticked or marked missing.
+
+<Fragment slot="solution">
+A complete answer has a table with adjusted areas, SE, 90% CI and uncertainty for each class (totals equal to the mapped total); a dated log covering composites, covariates, training data, classifier, assemblage, sampling, response design and interpretation; and the checklist, with links to the scripts, assets and archived samples.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-5-reporting" questions={[
+  { q: "Which area should the activity-data table report for forest loss?", options: ["The mapped (pixel-count) area", "The area-adjusted estimate with its 90% confidence interval", "The training-data area", "The largest of the two"], answer: 1, explain: "Adjusted estimates correct map errors and come with uncertainty." },
+  { q: "Why record random seeds?", options: ["They make the map more accurate", "They let others reproduce exactly the same classification and sample", "Earth Engine requires them", "They reduce cost"], answer: 1, explain: "Fixed, recorded seeds make the results reproducible." },
+  { q: "The adjusted areas of all classes should add up to the total mapped area.", answer: true, explain: "If they don't, a stratum probably has no samples." },
+]} />
+
+<KeyPoints points={[
+  "Report adjusted areas, SE, 90% CI and uncertainty per class, with the confusion matrix, weights and sample sizes.",
+  "Keep a dated assumptions log of every decision that affects the numbers.",
+  "Archive code, assets, seeds, versions and the reference sample so the work can be reproduced and verified.",
+]} />
+
+<References />
+
+---
+
+*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*
