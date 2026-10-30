@@ -1,9 +1,102 @@
 ---
 title: "Debug Earth Engine errors"
+description: What Earth Engine error messages mean and how to fix them, from syntax mistakes to client/server mix-ups, memory and timeout limits, and failed exports.
+newContent: true
 sidebar:
   order: 1
 ---
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
+Most Earth Engine errors fall into one of five groups. Find your message below. The exact wording can change between API versions, so match on the start of the message.
+
+## How to find the problem
+
+1. **Read the first red line in the Console.** In the Code Editor, errors from your browser appear at once; errors from Google's servers appear when a result is printed, mapped or exported.
+2. **Print each step.** Add `print()` after each step until the output stops looking right. Print `.size()`, `.first()` or `.bandNames()` rather than whole collections.
+3. **Test on a small area.** Swap the whole of Bhutan for one Dzongkhag, or a point near Thimphu buffered by 5 km, and use `.limit(10)` on collections.
+4. **Use the Inspector tab.** Click the map to see pixel values for every layer, which shows quickly whether a mask or scale is wrong.
+
+```js
+var thimphu = ee.Geometry.Point([89.64, 27.47]).buffer(5000);
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+    .filterBounds(thimphu)
+    .filterDate('2025-01-01', '2025-04-30');
+print('Images found', s2.size());
+print('Bands of the first image', s2.first().bandNames());
+```
+
+The script uses [Sentinel-2 surface reflectance](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED).
+
+## 1. Syntax errors (the script does not start)
+
+The Code Editor marks these with a red icon next to the line number before you click **Run**.
+
+| Message (starts with) | Usual cause | Fix |
+|---|---|---|
+| `SyntaxError: Unexpected token` | a missing `)`, `}` or `,`, or an extra one | check the line shown and the line above it; the editor highlights matching brackets |
+| `SyntaxError: Unterminated string` | a quote opened but not closed | close it, and use the same kind of quote at both ends |
+| `ReferenceError: x is not defined` | a variable used before `var x = …`, or a typo in its name (names are case-sensitive) | define it first, or fix the spelling |
+| `TypeError: x.filterDate is not a function` | the method called on the wrong kind of object, for example on an `ee.Image` rather than an `ee.ImageCollection` | `print(x)` to see what it is |
+
+## 2. Client and server mix-ups
+
+Earth Engine objects (`ee.Number`, `ee.Image`, …) are instructions sent to Google's servers. Your browser cannot see their values, so ordinary JavaScript tests on them silently go wrong. See [JavaScript basics](/bhutan-hfld-training/day-1/javascript-basics/).
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `if (collection.size() > 0)` always takes the same branch | the comparison is done in the browser on an object, not on the number | filter instead, or use `ee.Algorithms.If()`; keep `if` for plain JavaScript values |
+| `ee.Number(5) + 1` prints something strange | `+` is JavaScript; it joins text | `ee.Number(5).add(1)` |
+| `A mapped function's arguments cannot be used in client-side operations` | `print()`, `getInfo()`, `Map.addLayer()` or a JavaScript `if` inside a function passed to `.map()` | do only server-side work inside `.map()`; print the result afterwards |
+| the Code Editor freezes | `getInfo()` on a large object waits in the browser | use `print()`, which runs in the background, or reduce the object first |
+
+## 3. Data errors
+
+| Message (starts with) | Usual cause | Fix |
+|---|---|---|
+| `Image.select: Pattern 'B8' did not match any bands` | a band name that the image doesn't have (wrong sensor, already renamed, or a typo) | `print(image.bandNames())` |
+| `Image.bandNames: Parameter 'image' is required`, or `print(collection.size())` shows 0 | the filters removed every image (dates in the wrong order, area outside the tiles, cloud filter too strict) | `print(collection.size())` after each filter |
+| `Image asset '…' not found (does not exist or caller does not have access)` | the path is wrong, or the asset belongs to a project you can't read | check the path; see the [asset catalogue](/bhutan-hfld-training/reference/assets/) for how to make your own |
+| a layer shows nothing on the map | the image is fully masked, or the `min`/`max` stretch is wrong (for example 0–3000 on reflectance scaled 0–1) | click it with the Inspector; check the values and fix `visParams` |
+| `Dictionary.get: Dictionary does not contain key` | the key name differs, often because a reducer names its output after the band (`B8_mean`, not `mean`) | `print()` the dictionary to see its keys |
+
+## 4. Memory and timeout limits
+
+Earth Engine shares its servers among all users, so each request has limits. When you hit one, make the job smaller rather than retrying it.
+
+| Message (starts with) | What to try |
+|---|---|
+| `User memory limit exceeded` | Run it as an **export** instead of printing or mapping it, because exports run in batch with more resources. Set a coarser `scale`, use `tileScale: 4` (or up to 16) in `reduceRegion`, `sampleRegions` and `stratifiedSample`, and select only the bands you need. |
+| `Computation timed out` | Interactive requests are short. Export the result, then load the exported asset for the next steps. |
+| `Too many pixels in the region. Found …, but maxPixels allows only …` | Set `maxPixels: 1e13` in `reduceRegion` or the export, and check that `scale` is what you meant (10 m over all of Bhutan is many pixels). |
+| `Collection query aborted after accumulating over 5000 elements` | You printed a large collection. Print `.size()`, `.limit(10)` or `.aggregate_histogram('property')` instead. |
+| `Too many concurrent aggregations` | Wait and run again, or export instead. |
+| `Tile error: User memory limit exceeded` on the map | The map is computing too much at the current zoom. Zoom in, or export the result and display the asset. |
+
+:::tip[Compute once, reuse]
+In the course, composites, covariates and primitives are exported as assets and read back by the next lesson. This avoids most memory and timeout errors, and it makes each step reproducible.
 :::
+
+## 5. Export failures
+
+Exports appear in the **Tasks** tab; click **Run** to start each one. A failed task shows a red icon; hover over it or click it to read the error.
+
+| Message (starts with) | Fix |
+|---|---|
+| `Export too large: specified … pixels (max: …)` | Add `maxPixels: 1e13` to `Export.image.toAsset` or `toDrive`. |
+| `Exported bands must have compatible data types` | Cast every band to one type, for example `image.toInt16()` for scaled reflectance or `image.toFloat()` for indices. |
+| `Cannot overwrite asset` or `… already exists` | Delete the old asset in the **Assets** tab, or change the `assetId`. |
+| `Asset … does not exist` or a permission error on the `assetId` | The folder doesn't exist or isn't yours. Export to `projects/<your-project>/assets/…`. |
+| the exported image is in the wrong place, or blurred | Set `region`, `scale` and `crs` explicitly, for example `scale: 30, crs: 'EPSG:32645'`. |
+| a table export is slow, or the CSV has hundreds of columns | `select()` only the properties you need before exporting. |
+
+## Python (geemap)
+
+Errors from the server arrive in Python as `ee.EEException` with the same messages as above. Two errors are specific to Python:
+
+- `ee.Initialize: no project found` (or a similar message): call `ee.Initialize(project="<your-project>")` with your own Cloud project ID.
+- `Please authorize access to your Earth Engine account`: run `ee.Authenticate()` once, then `ee.Initialize(project="<your-project>")`. Never put keys or passwords in a notebook you share.
+
+## Further help
+
+- [Earth Engine debugging guide](https://developers.google.com/earth-engine/guides/debugging) (Google);
+- [Earth Engine coding best practices](https://developers.google.com/earth-engine/guides/best_practices) (Google);
+- the [Earth Engine developers forum](https://groups.google.com/g/google-earth-engine-developers): search for the error message first.
