@@ -1,17 +1,159 @@
 ---
-title: "Stratified sampling in Earth Engine"
+title: "Stratified sampling in GEE"
+description: Remap the stratification map to the sampling strata, draw a stratified random sample with the sizes from the calculator, index the samples and make 30 m plots, and export them for Collect Earth Online.
 sidebar:
   order: 3
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I draw the reference sample I designed?", "What does Collect Earth Online need from me?"]}
+  objectives={[
+    "Use the sample sizes from the calculator in stratifiedSample.",
+    "Index the samples and make plots for interpretation.",
+    "Export plots and samples for Collect Earth Online.",
+  ]}
+  teaching={10} exercises={25}
+  prerequisites={["Determining sample size"]}
+/>
 
-## In this lesson you will
+This exercise turns the design into points: a stratified random sample of the stratification map, with the number of samples per stratum that you chose in [Determining sample size](/bhutan-hfld-training/day-5/sample-size/). The samples are then interpreted in [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/).
 
-- Draw samples with `stratifiedSample`
-- Index them and build plots
-- Export for CEO
+## Part 1: Start from the previous script
 
-**Time:** about 15 min teaching + 25 min practice.
+Open your script from [Determining sample size](/bhutan-hfld-training/day-5/sample-size/) and save a copy (for example `Exercise2_D5/D5-stratified-sampling`): make a small edit and undo it so the Code Editor lets you save. You need its `mapSelect`, `AOI`, `scale` and `proj` variables. Stratified sampling is computationally heavy, so remove the strata-report block and run sampling as a separate step.
+
+## Part 2: Remap to the sampling strata
+
+Remap the stratification map's classes to the three sampling strata: forest (class 2) becomes 1, deforestation (10) becomes 3, and everything else becomes 2 (non-forest).
+
+<CodeBlock script="day-5/stratified-sampling-gee.js" lines={[21, 32]} />
+
+## Part 3: Stratified sampling
+
+`stratifiedSample` draws a simple random sample within each class of a raster. For each value in `classValues`, it takes the number of points given at the same position in `classPoints`. Use your own allocation from the calculator; the exercise used 828 forest, 0 non-forest and 80 deforestation samples.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-5/stratified-sampling-gee.js" lines={[34, 47]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+# Assumes `map_select` (stratification map), `aoi`, scale 30 and projection "EPSG:4326" from Part 1.
+remap_select = map_select.remap([2, 10], [1, 3], 2).rename("lc_no")
+stratified_sample = remap_select.stratifiedSample(
+    numPoints=80, classBand="lc_no", region=aoi, scale=30, projection="EPSG:4326",
+    seed=42, classValues=[1, 2, 3], classPoints=[828, 0, 80], geometries=True,
+)
+print(stratified_sample.aggregate_histogram("lc_no").getInfo())
+```
+  </TabItem>
+</Tabs>
+
+<Callout type="mistake" title="Use your own numbers">
+828 and 80 came from the exercise text's allocation (908 samples), which differs from what the spreadsheet gives for its stated inputs (see [Determining sample size](/bhutan-hfld-training/day-5/sample-size/)). Put your own forest and deforestation sample sizes in `classPoints`. It is good practice to ask for a few more than you need and trim later, because some samples may turn out to be uninterpretable (cloud, no imagery).
+</Callout>
+
+## Part 4: Index the samples
+
+Give each sample a number. Collect Earth Online needs two files:
+
+- **Plots**: points, lines or polygons, each with a unique `plotID`.
+- **Samples**: points, each with a `plotID` and a `sampleID`. Several samples may share a `plotID` (a cluster), but within a plot every `sampleID` must be unique.
+
+Here each plot has one sample, so `plotID` and `sampleID` are the same: simple random sampling.
+
+<CodeBlock script="day-5/stratified-sampling-gee.js" lines={[49, 60]} />
+
+## Part 5: Sampling plots
+
+The minimum mapping unit is one pixel of the land-cover map, so the interpreter must judge the land cover of the whole pixel. The map has 30 m pixels, so each sample point becomes a **30 m × 30 m square plot**: a 15 m buffer, turned into its bounding box.
+
+<CodeBlock script="day-5/stratified-sampling-gee.js" lines={[62, 72]} />
+
+## Part 6: Export
+
+Export the samples and the plots as shapefiles to Google Drive (to upload to Collect Earth Online), and as assets (an original copy for quality control). Replace `yourname`, and use your own project in the asset paths.
+
+<CodeBlock script="day-5/stratified-sampling-gee.js" lines={[74, 101]} />
+
+<OpenInGEE script="day-5/stratified-sampling-gee.js" hash="0dbd04fc75df2f21ecf44b3ffcec69ec" />
+
+<Callout type="why">
+Why this matters: these samples are the reference data for accuracy and area estimation. Keep the exported files unchanged and record the seed and sample sizes, so the sample can be reproduced and checked by a verifier.
+</Callout>
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `image.remap(from, to, default)` | Recodes classes; anything not listed gets the default |
+| `image.stratifiedSample({classBand, classValues, classPoints, region, scale, seed, geometries})` | Random points per class, with a chosen number per class |
+| `ee.Dictionary.fromLists(keys, values)` | Maps each sample's system index to a sequential ID |
+| `feature.buffer(15).geometry().bounds()` | A square plot around a point |
+| `Export.table.toDrive({fileFormat: 'SHP'})` | Shapefile for Collect Earth Online |
+
+## Common mistakes
+
+- **Mismatched `classValues` and `classPoints`**: they are read in pairs.
+- **Plots the wrong size** for the map's pixels. Match the plot to the minimum mapping unit.
+- **Re-running with a different seed** after interpretation has begun: you get a different sample.
+- **Exporting only points.** Collect Earth Online needs both plots and samples, with `plotID` and `sampleID`.
+
+<Callout type="bhutan">
+Bhutan context: with 30 m plots on steep slopes, high-resolution imagery can be distorted by relief displacement; interpreters should look at the whole plot and its surroundings, and flag plots they can't interpret rather than guess.
+</Callout>
+
+## Practice
+
+<Challenge level="blanks" time={15} hints={["Use the forest and deforestation numbers from your calculator.", "Non-forest stays at 0 in this design."]}>
+Draw a sample with **your own allocation** from the calculator (for example 990 + 390 + 270 = 1,650 forest and 150 deforestation), export it, and check the histogram in the Console.
+
+```js
+  classValues: [1, 2, 3],
+  classPoints: [___, 0, ___],
+```
+
+<Fragment slot="solution">
+```js
+  classValues: [1, 2, 3],
+  classPoints: [1650, 0, 150],
+```
+The Console histogram of `lc_no` should show 1,650 samples in class 1 and 150 in class 3 (fewer only if a stratum has fewer pixels than requested).
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-5-stratified-sampling-gee" questions={[
+  { q: "In stratifiedSample, how are classValues [1, 2, 3] and classPoints [828, 0, 80] read?", options: ["828 points in class 1, none in class 2, 80 in class 3", "828 points in total", "80 points per class", "Classes 828 and 80"], answer: 0, explain: "The two lists are paired by position." },
+  { q: "Why are the sample plots 30 m squares?", options: ["Collect Earth Online requires 30 m", "The map's pixels are 30 m, so the plot matches the minimum mapping unit", "To reduce the file size", "Squares are faster to export"], answer: 1, explain: "The interpreter judges the land cover of the whole mapped pixel." },
+  { q: "What does Collect Earth Online need?", options: ["Only points", "Plots with a unique plotID and samples with a plotID and sampleID", "A GeoTIFF", "A CSV of class names"], answer: 1, explain: "Plots and samples are linked by plotID; sampleID is unique within a plot." },
+  { q: "Setting a fixed seed makes the sample reproducible.", answer: true, explain: "The same seed, inputs and parameters give the same points." },
+]} />
+
+<KeyPoints points={[
+  "Remap the stratification map to the sampling strata, then use stratifiedSample with your calculator's sample sizes.",
+  "Index samples with plotID and sampleID, and make plots that match the map's pixel size.",
+  "Export plots and samples as shapefiles for Collect Earth Online, and keep a copy as assets.",
+]} />
+
+<Credit
+  source="EXERCISE D5 Part 2: Creating a Stratified Sampling Design in Google Earth Engine"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; code copied from the exercise",
+    "Histograms printed by lc_no (the exercise used lc_name, which the samples don't have, so they came out empty)",
+    "Script names and paths with \"D4\" corrected to Day 5; note that the sample sizes should come from your own calculation",
+    "Added a Python version, practice and a quiz",
+  ]}
+/>
