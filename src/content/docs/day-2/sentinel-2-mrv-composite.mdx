@@ -1,18 +1,262 @@
 ---
 title: "Sentinel-2 MRV composite"
+description: Build Bhutan's annual Sentinel-2 product for MRV, with Jan–Apr and Oct–Dec median composites after Cloud Score+ masking, TDOM shadow cleaning and terrain correction, exported as one 12-band Int16 image.
 sidebar:
   order: 4
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I make a cloud-free, terrain-corrected Sentinel-2 image of Bhutan for one reporting year?", "Why two seasonal composites instead of one annual median?"]}
+  objectives={[
+    "Justify the Jan–Apr and Oct–Dec windows for Bhutan.",
+    "Apply Cloud Score+ and TDOM shadow masking.",
+    "Apply terrain correction.",
+    "Export a 12-band Int16 composite.",
+  ]}
+  teaching={30} exercises={45}
+  prerequisites={["Mosaics and composites", "Spectral indices and functions"]}
+/>
 
-## In this lesson you will
+This manual turns the Sentinel-2 compositing workflow into an annual product for MRV (measurement, reporting and verification). The design follows four rules:
 
-- Justify the Jan–Apr / Oct–Dec windows for Bhutan
-- Apply Cloud Score+ and TDOM shadow masking
-- Apply terrain correction
-- Export a 12-band Int16 composite
+- avoid the monsoon months, when there are too few clear optical images;
+- keep both composite windows inside the reporting year;
+- export only the bands used for training;
+- write one Int16 image per year, with the season in each band name.
 
-**Time:** about 30 min teaching + 45 min practice.
+<Callout type="mistake" title="Assets you need">
+The script reads Bhutan's boundary from `projects/bhutan-hfld-readiness-training/assets/Bhutan` and exports to the same project. If you don't have access, replace the boundary with your own asset (or `ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017').filter(ee.Filter.eq('country_na', 'Bhutan'))`) and change `assetId` to a folder in your own Cloud project.
+</Callout>
+
+## Why this method is used for Bhutan MRV
+
+Optical data in Bhutan are strongly seasonal. The dry and shoulder months give enough clear Sentinel-2 images to build stable composites; the monsoon does not. For MRV, the goal is not to use as many months as possible, but a **repeatable annual product that is consistent from one reporting year to the next**.
+
+The manual counted the available images per month (training example):
+
+| Month | Images | Interpretation |
+|---|---|---|
+| January | 64 | strong support |
+| February | 46 | strong support |
+| March | 54 | strong support |
+| April | 40 | usable support |
+| May | 19 | weak support |
+| June | 1 | do not use for an optical composite |
+| July | 1 | do not use for an optical composite |
+| August | — (not reported) | very weak support |
+| September | 15 | weak support |
+| October | 31 | usable support |
+| November | 73 | very strong support |
+| December | 105 | very strong support |
+
+So the windows are **January–April** and **October–December**. Both stay inside the reporting year, which keeps MRV bookkeeping simple. May to September is left out because it is too cloudy to support reliable training data from year to year. A single March–October composite would mix good months with nearly empty ones and make the model unstable.
+
+**The product:** one image per reporting year, with 12 bands: six Sentinel-2 surface-reflectance bands (B2, B3, B4, B8, B11, B12) for January–April, and the same six for October–December, stored as Int16, with no quality bands.
+
+## Step 1: Study area, year and windows
+
+Define Bhutan, the reporting year, the cloud thresholds and the two seasonal windows once, at the start. The end dates use `advance(1, 'day')` because `filterDate` excludes the end date.
+
+<CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[26, 37]} />
+
+<Callout type="why">
+Why this step matters: every later function depends on the study area, the year and the windows. Setting them once reduces the chance of mixing years or exporting the wrong period.
+</Callout>
+
+## Step 2: Base Sentinel-2 collections
+
+A reusable function builds a Sentinel-2 query filtered by date, study area and scene cloud cover. Separate collections are built for each season so the seasons stay independent.
+
+<CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[38, 47]} />
+
+<Callout type="implication">
+Training implication: this is the first place where seasonality is kept. Don't merge both windows into one annual collection: the model should get two distinct seasonal views, not a blurred annual median.
+</Callout>
+
+<Callout type="mistake" title="Corrected: surface reflectance">
+The training script loaded `COPERNICUS/S2_HARMONIZED`, which is Level-1C top-of-atmosphere reflectance, while the manual specifies surface reflectance and the shadow step (Step 5) uses `COPERNICUS/S2_SR_HARMONIZED` as its reference. Comparing the two products mixes atmospheric effects into the shadow test. The course script uses `COPERNICUS/S2_SR_HARMONIZED` throughout.
+</Callout>
+
+## Step 3: Cloud Score+
+
+Scene cloud cover only removes very cloudy scenes. Pixel-level masking removes thin cloud, haze and cloud edges. [Cloud Score+](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_CLOUD_SCORE_PLUS_V1_S2_HARMONIZED) gives each Sentinel-2 pixel a score from 0 (not clear) to 1 (clear). `linkCollection` attaches the matching score image to each Sentinel-2 image, and pixels with `cs_cdf` below 0.60 are masked.
+
+<CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[48, 60]} />
+
+<Callout type="implication">
+Training implication: cloud left in the inputs teaches the model cloud artefacts instead of land cover. That matters most over steep terrain and mixed forest.
+</Callout>
+
+## Step 4: TDOM shadow cleaning
+
+**TDOM** (temporal dark outlier mask) finds pixels that are much darker in near infrared and SWIR than usual for that place. It compares each image with the mean and standard deviation over the previous three years. A pixel is masked as shadow when both its NIR and SWIR-1 z-scores are below −1.8 and their sum is below 0.20 reflectance. The mask is shrunk by 1.5 pixels to drop isolated pixels, then grown by 2.5 pixels to cover shadow edges. TDOM only updates the mask; no z-score or mask bands are kept.
+
+<CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[61, 101]} />
+
+<Callout type="implication">
+Training implication: deep terrain and cloud shadows can look like water, bare soil or disturbance. TDOM reduces that confusion before the model is trained.
+</Callout>
+
+## Step 5: Terrain correction
+
+A slope facing the sun looks brighter than the same land cover on a shaded slope. The correction computes the **illumination condition** (IC), how directly each pixel faces the sun, from the slope and aspect of the [SRTM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003) DEM and the image's sun angles. For each band, a regression of reflectance on IC (over slopes of at least 5°) gives a correction factor *c*, and the band is adjusted:
+
+<Theory title="The C-correction">
+$IC = \cos Z \cos S + \sin Z \sin S \cos(\phi_{sun} - \phi_{aspect})$, where $Z$ is the solar zenith angle and $S$ the slope. With $\rho = a \cdot IC + b$ fitted per band and $c = b/a$, the corrected reflectance is $\rho_{corr} = \rho \, \dfrac{\cos S \cos Z + c}{IC + c}$. Pixels facing the sun are darkened, shaded pixels brightened, and flat ground barely changes.
+</Theory>
+
+<CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[102, 175]} />
+
+Only the corrected spectral bands are returned, so the final asset stays compact.
+
+## Step 6: Int16 and band names
+
+Take the median of each season, convert to Int16 to halve the storage, and add the season to every band name so the bands can't be mixed up later.
+
+<CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[176, 193]} />
+
+The manual mentions clamping values to a reflectance-like range before the conversion; the script converts without clamping. Surface reflectance fits easily in Int16 (−32,768 to 32,767), so this does no harm.
+
+## Step 7: Merge and export
+
+Merge the two seasons into one image and export it to an asset at 10 m.
+
+<CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[194, 202]} />
+
+Expected band order: `B2_jan_apr, B3_jan_apr, B4_jan_apr, B8_jan_apr, B11_jan_apr, B12_jan_apr, B2_oct_dec, B3_oct_dec, B4_oct_dec, B8_oct_dec, B11_oct_dec, B12_oct_dec`.
+
+Click **Run** in the **Tasks** tab to start the export. A national 10 m export takes a while, often an hour or more.
+
+## The full script
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-2/sentinel-2-mrv-composite.js" />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+The full Python port is in [`scripts/gee/day-2/sentinel_2_mrv_composite.py`](https://github.com/wangdiues/bhutan-hfld-training/blob/main/scripts/gee/day-2/sentinel_2_mrv_composite.py). Its core:
+
+```python
+def get_s2_collection(start, end):
+    return (
+        ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+        .filterDate(start, end)
+        .filterBounds(bhutan)
+        .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", cloud_cover_max))
+    )
+
+
+composites = []
+for season, (start, end) in seasons.items():
+    month0 = 1 if season == "jan_apr" else 10
+    coll = apply_cloud_score(get_s2_collection(start, end))
+    coll = apply_tdom(coll, ee.Date.fromYMD(target_year - 3, month0, 1), end)
+    coll = coll.map(topo_corr_s2)
+    composite = coll.median().select(spectral_bands).toInt16()
+    composites.append(composite.rename([f"{b}_{season}" for b in spectral_bands]))
+export_image = composites[0].addBands(composites[1])
+```
+  </TabItem>
+</Tabs>
+
+<OpenInGEE script="day-2/sentinel-2-mrv-composite.js" hash="53d893180be40059cfde3df41385950a" />
+
+## Notes for using the product
+
+- Use the 12-band image as a **two-season feature stack**: one early-year and one late-year view of the same reporting year. This keeps seasonality instead of averaging it away.
+- Keep the **same windows** and the **same band order** every year, so training data and code stay comparable.
+- Don't add QA bands to the final asset unless an experiment needs them.
+- If one season is poorly covered in a year, **flag it** instead of quietly widening the window.
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `ee.Date.fromYMD(y, m, d).advance(1, 'day')` | Builds dates; the day after the window's last day is the exclusive end |
+| `collection.linkCollection(other, bands)` | Adds bands from the matching image of another collection |
+| `img.updateMask(condition)` | Masks pixels where the condition is false |
+| `collection.reduce(ee.Reducer.stdDev())` | Per-pixel standard deviation over time (for TDOM) |
+| `focal_min()`, `focal_max()` | Shrink and grow a mask |
+| `ee.Algorithms.Terrain(dem)` | Slope, aspect and hillshade from a DEM |
+| `ee.Reducer.linearFit()` | Fits y = scale·x + offset over a region |
+| `image.toInt16()` | Converts to 16-bit integers |
+| `Export.image.toAsset({...})` | Writes an image to an Earth Engine asset |
+
+## Common mistakes
+
+- **Building a March–October composite.** It mixes usable and unusable months.
+- **Exporting IC, TDOM mask, z-score or Cloud Score bands.** Keep the training asset compact.
+- **Letting the windows cross calendar years** when the product is used for MRV reporting.
+- **Skipping a visual check before exporting.** Bhutan's terrain makes artefacts likely: look at each preview layer.
+- **Mixing Level-1C and Level-2A** in one workflow.
+
+<Callout type="bhutan">
+Bhutan context: the preview layers ("s2 image", "after cloud removal", "after shadow removal", "after topographic correction") show one image near Thimphu after each step. Zoom in on north-facing slopes to see what TDOM and terrain correction change.
+</Callout>
+
+## Practice
+
+<Challenge level="complete" time={30} hints={["Only targetYear needs to change for a different year.", "Look at the Console: the counts of raw images per season."]}>
+Run the full script for **2025**. Before starting the export, check each preview layer and the image counts in the Console. Then export the composite to your own asset folder.
+
+<Fragment slot="solution">
+Change `assetId` to `'projects/<your-project>/assets/bhutan_s2_2025_janapr_octdec_int16'` (or a folder you created), run the script, then click **Run** next to the task in the **Tasks** tab. The asset should have 12 Int16 bands in the order listed above.
+</Fragment>
+</Challenge>
+
+<Challenge level="blanks" time={15} hints={["The windows are built from targetYear, so one change moves both.", "CLEAR_THRESHOLD is the Cloud Score+ cut-off; higher means stricter."]}>
+Make the composite for **2024**, and make the cloud mask **stricter** (keep only pixels with a Cloud Score+ of at least 0.65). Which variables do you change?
+
+```js
+var targetYear = ___;
+var CLEAR_THRESHOLD = ___;
+```
+
+<Fragment slot="solution">
+```js
+var targetYear = 2024;
+var CLEAR_THRESHOLD = 0.65;
+```
+Everything else follows from these two values. A stricter threshold removes more haze but leaves fewer clear observations per pixel, so check for gaps.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-2-sentinel-2-mrv-composite" questions={[
+  { q: "Why does the Bhutan MRV composite use January–April and October–December?", options: ["They are the warmest months", "They have enough clear Sentinel-2 images and stay inside the reporting year", "Sentinel-2 does not operate in the monsoon", "They match the fiscal year"], answer: 1, explain: "The monthly image counts show strong support in these windows and almost none in June–August; keeping both inside the year suits annual MRV reporting." },
+  { q: "What does Cloud Score+'s cs_cdf band with a threshold of 0.60 do?", options: ["Masks pixels with a clear score below 0.60", "Masks scenes with more than 60% cloud", "Masks pixels with NDVI below 0.60", "Scales reflectance by 0.60"], answer: 0, explain: "cs_cdf runs from 0 (not clear) to 1 (clear); pixels below the threshold are masked." },
+  { q: "What does TDOM detect?", options: ["Bright clouds", "Pixels much darker than usual in NIR and SWIR, which are likely shadows", "Snow", "Changes in land cover"], answer: 1, explain: "TDOM flags temporal dark outliers using z-scores against a multi-year reference." },
+  { q: "Terrain correction makes the same forest on sunlit and shaded slopes look more alike.", answer: true, explain: "It adjusts each band using the illumination condition from slope, aspect and sun position." },
+  { q: "How many bands does the exported image have?", options: ["6", "12", "13", "24"], answer: 1, explain: "Six spectral bands for each of the two seasons." },
+]} />
+
+<KeyPoints points={[
+  "Two seasonal composites (Jan–Apr, Oct–Dec) within the reporting year give a stable, repeatable MRV product for Bhutan.",
+  "Cloud Score+ removes cloud and haze; TDOM removes shadows; the C-correction evens out terrain illumination.",
+  "Export one 12-band Int16 image per year with season-named bands and no QA bands.",
+  "Use surface reflectance throughout, and inspect each step before exporting.",
+]} />
+
+<Credit
+  source="D2 Bhutan MRV Sentinel-2 Optical Composite Workflow (manual)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; the manual's full script kept as the course script (the step sections repeat it)",
+    "Main collection changed from COPERNICUS/S2_HARMONIZED (Level-1C) to COPERNICUS/S2_SR_HARMONIZED, as the manual specifies and the TDOM reference requires",
+    "The drawn preview point defaults to Thimphu; asset access and export path explained",
+    "Added the C-correction formula, a Python (geemap) port, practice tasks and a quiz",
+  ]}
+/>
