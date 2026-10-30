@@ -79,6 +79,7 @@ probability = alpha_earth.select(bands).classify(classifier.setOutputMode("PROBA
 - `numberOfTrees: 200`: trees added one by one.
 - `shrinkage: 0.05`: the learning rate; each tree's contribution is scaled down, so learning is slow and steady.
 - `samplingRate: 0.7`: each tree sees 70% of the samples (stochastic boosting).
+- `loss: "LeastSquares"` only matters for regression; Earth Engine ignores it when the target is a class, as here.
 
 Variable importance is useful as a check, but the embedding axes are learned, so their importance has no physical meaning.
 
@@ -114,7 +115,27 @@ Define a search area (a rectangle around western Bhutan, drawn in the training) 
 
 For each reference point, turn its 64 values into a constant image and take the dot product with every pixel: that is the cosine similarity. Averaging the similarity maps of several points gives a more robust definition of "like these":
 
-<CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[370, 421]} />
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[370, 421]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+# Assumes `mosaic` (the 2024 embedding image), `samples` (reference points) and `small_aoi`.
+band_names = mosaic.bandNames()
+sample_embeddings = mosaic.sampleRegions(collection=samples, scale=10, geometries=True)
+
+
+def similarity_to(f):
+    vec = ee.Image.constant(f.toArray(band_names)).arrayFlatten([band_names]).toFloat()
+    return vec.multiply(mosaic).reduce(ee.Reducer.sum()).rename("similarity")
+
+
+mean_similarity = ee.ImageCollection(sample_embeddings.map(similarity_to)).mean().clip(small_aoi)
+similarity_mask = mean_similarity.gt(0.80)
+```
+  </TabItem>
+</Tabs>
 
 ### Threshold, polygons and export
 
@@ -138,6 +159,7 @@ The same dot product, between one pixel's embeddings in two years, measures how 
   </TabItem>
   <TabItem label="Python (geemap)">
 ```python
+# Assumes `aoi`, the search area geometry.
 emb = ee.ImageCollection("GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL")
 
 
@@ -190,8 +212,8 @@ Replace the `geometry` MultiPoint with four points in central Thimphu, for examp
 </Fragment>
 </Challenge>
 
-<Challenge level="blanks" time={15} hints={["Only yearA and yearB change.", "Pick the two most recent years available in the catalog."]}>
-Map change between **2022 and 2024** in Part C.
+<Challenge level="blanks" time={15} hints={["Only yearA and yearB change.", "The training used embeddings up to 2025."]}>
+Map change between **2024 and 2025** in Part C.
 
 ```js
 var yearA = ___;
@@ -200,8 +222,8 @@ var yearB = ___;
 
 <Fragment slot="solution">
 ```js
-var yearA = 2022;
-var yearB = 2024;
+var yearA = 2024;
+var yearB = 2025;
 ```
 Red pixels are places whose embeddings changed most between the two years; check them on imagery for new construction, clearing or landslides.
 </Fragment>
@@ -229,6 +251,7 @@ Red pixels are places whose embeddings changed most between the two years; check
   changes={[
     "Title typo corrected (\"Simarity\")",
     "Converted to a web lesson; the exercise's two scripts run as Parts A and B; new Part C maps change between years",
+    "Exercise text said a Random Forest model with a 0/1 class attribute; the code (followed here) uses Gradient Tree Boost and the multiclass class_name labels",
     "Binary layer name restored (commented out when the code was extracted); the similarity mask exports to your own project instead of projects/servir-mekong/temp",
     "Added explanations, Python versions, practice and a quiz",
   ]}
