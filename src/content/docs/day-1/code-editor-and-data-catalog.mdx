@@ -323,6 +323,8 @@ Map.addLayer(dzongkhags, {color: 'orange'}, 'Dzongkhags (GAUL 2024 level 1)');
 
 <Image src={dzongkhags} alt="Bhutan's dzongkhag boundaries loaded as a FeatureCollection and coloured by district, with a legend." />
 
+The screenshot comes from the trainers' longer script, which colours each Dzongkhag and adds a legend. The code above draws plain orange outlines.
+
 To filter one area, first check which property holds its name: print a feature, or use the Inspector. Data: FAO GAUL 2024, from the [awesome-gee-community-catalog](https://gee-community-catalog.org/).
 
 ## Step 5: Draw a geometry
@@ -333,6 +335,12 @@ To filter one area, first check which property holds its name: print a feature, 
 4. Use it in code like any other geometry: `collection.filterBounds(aoi)`.
 
 Use the gear icon next to the layer in the geometry list to change its name, colour, or type (geometry, feature or feature collection).
+
+## Further learning
+
+- *Cloud-Based Remote Sensing with Google Earth Engine: Fundamentals and Applications* (Cardille et al., Springer, 2024), free and open access, with tutorials at [eefabook.org](https://www.eefabook.org/).
+- [Open Geo Blog](https://mygeoblog.com/), with Earth Engine tutorials.
+- Google's [Earth Engine guides and tutorials](https://developers.google.com/earth-engine/guides).
 
 ## The full script
 

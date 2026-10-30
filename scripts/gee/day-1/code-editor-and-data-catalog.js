@@ -10,6 +10,8 @@
  *     population 114,551 -> 114551 (a comma inside a number is a JavaScript error).
  *   - `aoi` is defined in code (around Thimphu) instead of a geometry drawn on the map.
  *   - The GAUL FeatureCollection is filtered to Bhutan and displayed (the slide stops at loading it).
+ *   - Slide 19's `cloudfreeImg` is renamed `s2CloudfreeImg`, and its repeat of `rgbParams` (identical to
+ *     slide 16) is dropped, so the Landsat and Sentinel-2 parts can run in one script.
  */
 
 // ---- Comments and print (slides 9-10) ----
