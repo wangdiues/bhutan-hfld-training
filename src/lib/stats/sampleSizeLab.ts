@@ -45,7 +45,8 @@ export interface LabResult {
 	nRounded: number;
 	equal: Allocation;
 	proportional: Allocation;
-	minimum: Allocation;
+	/** null when the minimums alone need more samples than n (it would give negative counts). */
+	minimum: Allocation | null;
 	/** Problems the user should fix or know about; the numbers are still shown where valid. */
 	warnings: string[];
 }
@@ -87,9 +88,10 @@ export function runSampleSizeLab(input: LabInput): LabOutcome {
 		warnings.push('Every expected proportion is 0 or 1, so the strata have no variance and the formula gives 0 samples. Enter realistic expected proportions.');
 	const roles = strata.map((s) => s.role);
 	const minUsed = minimum * roles.filter((x) => x !== 'zero').length;
-	if (minUsed > nRounded)
+	const minimumFits = minUsed <= nRounded;
+	if (!minimumFits)
 		warnings.push(
-			`The minimum of ${minimum} per stratum needs ${minUsed} samples, more than the ${nRounded} the formula asks for, so the shared strata get fewer than the minimum. Lower the minimum or the margin of error.`,
+			`The minimum of ${minimum} per stratum needs ${minUsed} samples, more than the ${nRounded} the formula gives, so the "minimum" allocation cannot be made (it would need negative samples). Lower the minimum, or tighten the margin of error to raise n.`,
 		);
 	if (!roles.includes('share'))
 		warnings.push('No stratum is set to "share the rest", so the minimum allocation does not use the full sample size.');
@@ -110,7 +112,7 @@ export function runSampleSizeLab(input: LabInput): LabOutcome {
 			nRounded,
 			equal: allocation(areas, allocateEqual(r.n, areas)),
 			proportional: allocation(areas, allocateProportional(r.n, r.weights)),
-			minimum: allocation(areas, allocateMinimum(r.n, areas, minimum, roles)),
+			minimum: minimumFits ? allocation(areas, allocateMinimum(r.n, areas, minimum, roles)) : null,
 			warnings,
 		},
 	};
@@ -146,4 +148,24 @@ export function bhutanDefaults(): LabInput {
 		z: 1.6449,
 		minimum: 130,
 	};
+}
+
+/** True if a saved value has the shape of LabInput (saved state may be old or corrupted). */
+export function isLabInput(x: unknown): x is LabInput {
+	if (!x || typeof x !== 'object') return false;
+	const v = x as Record<string, unknown>;
+	const roles = ['share', 'minimum', 'zero'];
+	return (
+		Array.isArray(v.strata) &&
+		v.strata.length > 0 &&
+		v.strata.every(
+			(s) =>
+				s && typeof s === 'object' && typeof s.name === 'string' && typeof s.areaHa === 'number' &&
+				typeof s.expectedProportion === 'number' && roles.includes(s.role),
+		) &&
+		typeof v.targetIndex === 'number' &&
+		typeof v.marginOfErrorPercent === 'number' &&
+		typeof v.z === 'number' &&
+		typeof v.minimum === 'number'
+	);
 }

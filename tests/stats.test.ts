@@ -9,7 +9,7 @@ import {
 	sampleSize,
 	samplingDensity,
 } from '../src/lib/stats/sampleSize';
-import { bhutanDefaults, runSampleSizeLab, type LabInput } from '../src/lib/stats/sampleSizeLab';
+import { bhutanDefaults, isLabInput, runSampleSizeLab, type LabInput } from '../src/lib/stats/sampleSizeLab';
 
 const fixture = (name: string) =>
 	JSON.parse(readFileSync(join(import.meta.dirname, 'fixtures', name), 'utf-8'));
@@ -137,7 +137,7 @@ describe('Lab 1 page — the preloaded Bhutan inputs reproduce the workbook', ()
 		closeAll(r.proportional.samples, expected.proportional);
 		closeAll(r.equal.density as number[], expected.densityEqual);
 		closeAll(r.proportional.density as number[], expected.densityProportional);
-		for (const m of inputs.minimumPerStratum) closeAll(run({ minimum: m }).minimum.samples, expected.minimum[String(m)]);
+		for (const m of inputs.minimumPerStratum) closeAll(run({ minimum: m }).minimum!.samples, expected.minimum[String(m)]);
 		close(run({ z: inputs.z95 }).targetSE, expected.targetSE95);
 	});
 	it('reports bad inputs instead of NaN or Infinity', () => {
@@ -146,8 +146,19 @@ describe('Lab 1 page — the preloaded Bhutan inputs reproduce the workbook', ()
 		expect(runSampleSizeLab(zeroAreas)).toMatchObject({ ok: false });
 		expect(runSampleSizeLab({ ...bhutanDefaults(), marginOfErrorPercent: 0 })).toMatchObject({ ok: false });
 		const r = run();
-		expect(r.minimum.density[3]).toBeNull();
+		expect(r.minimum!.density[3]).toBeNull();
 		const flat = [r.n, ...r.weights, ...r.equal.samples, ...r.proportional.samples, ...r.minimum.samples];
 		expect(flat.every(Number.isFinite)).toBe(true);
+	});
+	it('refuses a minimum allocation that would need negative samples', () => {
+		const r = run({ minimum: 2000 });
+		expect(r.minimum).toBeNull();
+		expect(r.warnings.some((w) => w.includes('cannot be made'))).toBe(true);
+		expect([...r.equal.samples, ...r.proportional.samples].every((x) => x >= 0)).toBe(true);
+	});
+	it('rejects corrupted saved state', () => {
+		expect(isLabInput(bhutanDefaults())).toBe(true);
+		expect(isLabInput({ strata: [{ areaHa: 1 }] })).toBe(false);
+		expect(isLabInput(null)).toBe(false);
 	});
 });

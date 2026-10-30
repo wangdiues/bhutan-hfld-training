@@ -88,7 +88,7 @@ const d = bhutanDefaults();
 </hfld-sample-size>
 
 <script>
-	import { bhutanDefaults, runSampleSizeLab, type LabInput, type MinimumRole } from '~/lib/stats/sampleSizeLab';
+	import { bhutanDefaults, isLabInput, runSampleSizeLab, type LabInput, type MinimumRole } from '~/lib/stats/sampleSizeLab';
 	import { loadJSON, saveJSON } from '~/lib/storage';
 
 	const KEY = 'hfld-lab:sample-size';
@@ -109,8 +109,8 @@ const d = bhutanDefaults();
 		connectedCallback() {
 			this.form = this.querySelector('form')!;
 			this.rows = this.querySelector('[data-rows]')!;
-			const saved = loadJSON<LabInput>(KEY);
-			this.load(saved && Array.isArray(saved.strata) ? saved : bhutanDefaults());
+			const saved = loadJSON<unknown>(KEY);
+			this.load(isLabInput(saved) ? saved : bhutanDefaults());
 			this.form.addEventListener('input', () => this.update());
 			this.form.addEventListener('change', () => this.update());
 			this.querySelector('[data-add]')!.addEventListener('click', () => {
@@ -217,12 +217,13 @@ const d = bhutanDefaults();
 				`<tr><th scope="row" colspan="4">Sample size n = (ΣWS / SE)²</th><td>${fmt(r.n, 2)}</td></tr></tfoot>`;
 
 			const whole = (x: number) => Math.abs(x - Math.round(x)) < 1e-9;
-			const cell = (x: number) => fmt(x, whole(x) ? 0 : 1);
+			const cell = (x: number) =>
+				Number.isNaN(x) ? '<span title="Not possible: the minimums need more samples than n">—</span>' : fmt(x, whole(x) ? 0 : 1);
 			const dens = (x: number | null) => (x === null ? '<span title="No samples in this stratum">—</span>' : fmt(x, 1));
 			const methods = [
 				['Equal', r.equal],
 				['Proportional', r.proportional],
-				[`Minimum of ${fmt(input.minimum)}`, r.minimum],
+				[`Minimum of ${fmt(input.minimum)}`, r.minimum ?? { samples: names.map(() => NaN), density: names.map(() => null), total: NaN }],
 			] as const;
 			this.querySelector('[data-allocation]')!.innerHTML =
 				`<thead><tr><th scope="col" rowspan="2">Stratum</th>${methods.map(([m]) => `<th scope="colgroup" colspan="2">${m}</th>`).join('')}</tr>` +
@@ -235,14 +236,14 @@ const d = bhutanDefaults();
 					.join('') +
 				`</tbody><tfoot><tr><th scope="row">Total</th>${methods.map(([, a]) => `<td>${cell(a.total)}</td><td></td>`).join('')}</tr></tfoot>`;
 
-			this.renderChart(names, methods.map(([m, a]) => [m, a.samples] as const));
+			this.renderChart(names, methods.filter(([, a]) => a.samples.every((x) => !Number.isNaN(x))).map(([m, a]) => [m, a.samples] as const));
 
 			const rows = [
 				['stratum', 'area_ha', 'expected_p', 'weight', 'std_dev', 'equal', 'proportional', `minimum_${input.minimum}`, 'ha_per_sample_equal', 'ha_per_sample_proportional', 'ha_per_sample_minimum'],
 				...names.map((n, i) => [
 					n, input.strata[i].areaHa, input.strata[i].expectedProportion, r.weights[i], r.stdDevs[i],
-					r.equal.samples[i], r.proportional.samples[i], r.minimum.samples[i],
-					r.equal.density[i] ?? '', r.proportional.density[i] ?? '', r.minimum.density[i] ?? '',
+					r.equal.samples[i], r.proportional.samples[i], r.minimum?.samples[i] ?? '',
+					r.equal.density[i] ?? '', r.proportional.density[i] ?? '', r.minimum?.density[i] ?? '',
 				]),
 				[],
 				['total_samples_n', r.n], ['rounded_n', r.nRounded], ['target_se', r.targetSE],
