@@ -1,0 +1,350 @@
+---
+/**
+ * Lab 2 (task M5-03): accuracy assessment and area estimation from a stratified sample.
+ * Statistics: src/lib/stats/accuracyArea.ts; validation, CSV parsing and result rows:
+ * src/lib/stats/accuracyLab.ts (both tested against the Day 5 workbook). This file is the
+ * matrix editor, the CSV paste box, the results and the report download.
+ */
+import '~/styles/labs.css';
+---
+
+<hfld-accuracy class="hfld-lab not-content">
+	<form class="hfld-lab__form" novalidate>
+		<fieldset>
+			<legend>Classes and confusion matrix</legend>
+			<p class="hfld-lab__hint">
+				Rows are the <strong>map class</strong> (the stratum each sample was drawn from); columns are the{' '}
+				<strong>reference class</strong> from interpretation. Each cell is a count of samples. The last column is the
+				mapped area of each class in hectares.
+			</p>
+			<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Confusion matrix">
+				<table class="hfld-lab__table hfld-lab__matrix" data-matrix></table>
+			</div>
+			<div class="hfld-lab__buttons">
+				<button type="button" data-add>Add a class</button>
+				<button type="button" data-example>Load the Day 5 workbook example</button>
+			</div>
+		</fieldset>
+
+		<fieldset>
+			<legend>Paste a CSV</legend>
+			<p class="hfld-lab__hint">
+				Either a matrix (a corner cell, one column per reference class, optionally <code>area_ha</code>, then one row per
+				map class in the same order) or one row per sample with columns named <code>map</code> and{' '}
+				<code>reference</code>, for example a Collect Earth Online export with those two columns renamed.
+			</p>
+			<label class="hfld-lab__stack">
+				CSV text
+				<textarea name="csv" rows="5" spellcheck="false"
+					placeholder={'map \\ reference,Forest,Non-Forest,area_ha\nForest,95,5,2675342\nNon-Forest,4,96,1188820'}></textarea>
+			</label>
+			<div class="hfld-lab__buttons">
+				<button type="button" data-paste>Use this CSV</button>
+			</div>
+			<p class="hfld-lab__note" data-paste-status role="status"></p>
+		</fieldset>
+
+		<fieldset>
+			<legend>Options</legend>
+			<div class="hfld-lab__grid">
+				<label>
+					Confidence level
+					<select name="z">
+						<option value="1.6449" selected>90% (z = 1.6449, the ART-TREES default)</option>
+						<option value="1.96">95% (z = 1.96)</option>
+					</select>
+				</label>
+				<label>
+					Variance rule
+					<select name="rule">
+						<option value="olofsson">Olofsson et al. 2014 (recommended)</option>
+						<option value="workbook">As in the Day 5 workbook</option>
+					</select>
+				</label>
+				<label>
+					Uncertainty threshold, % (optional)
+					<input type="number" name="threshold" min="0" step="any" placeholder="e.g. your programme's limit" />
+				</label>
+			</div>
+		</fieldset>
+	</form>
+
+	<div class="hfld-lab__error" role="alert" hidden></div>
+
+	<section class="hfld-lab__results" aria-labelledby="acc-results" aria-live="polite">
+		<h2 id="acc-results">Results</h2>
+		<ul class="hfld-lab__warnings" data-warnings hidden></ul>
+		<dl class="hfld-lab__stats" data-overall></dl>
+
+		<h3>Accuracy by class</h3>
+		<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Accuracy by class">
+			<table class="hfld-lab__table" data-accuracy></table>
+		</div>
+
+		<h3>Adjusted area and uncertainty</h3>
+		<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Adjusted area and uncertainty">
+			<table class="hfld-lab__table" data-area-table></table>
+		</div>
+		<p class="hfld-lab__note">
+			"—" means the value cannot be computed because it would divide by zero (for example, user's accuracy for a class
+			with no samples). Hover or focus it for the reason.
+		</p>
+		<div class="hfld-lab__buttons">
+			<button type="button" data-csv>Download the report (CSV)</button>
+		</div>
+	</section>
+</hfld-accuracy>
+
+<script>
+	import { parseConfusionCsv, runAccuracyLab, workbookExample, type AccuracyLabInput } from '~/lib/stats/accuracyLab';
+	import type { Maybe } from '~/lib/stats/accuracyArea';
+	import { loadJSON, saveJSON } from '~/lib/storage';
+
+	const KEY = 'hfld-lab:accuracy-area';
+	const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+	const fmt = (x: number, d = 0) => x.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+	const dash = (why: string) => `<span tabindex="0" title="${esc(why)}" aria-label="not computable: ${esc(why)}">—</span>`;
+	const pct = (x: Maybe, why: string, d = 1) => (x === null ? dash(why) : `${fmt(x * 100, d)}%`);
+
+	function isInput(x: unknown): x is AccuracyLabInput {
+		if (!x || typeof x !== 'object') return false;
+		const v = x as Record<string, unknown>;
+		const k = Array.isArray(v.classes) ? v.classes.length : 0;
+		return (
+			k >= 2 &&
+			(v.classes as unknown[]).every((c) => typeof c === 'string') &&
+			Array.isArray(v.mappedAreaHa) && v.mappedAreaHa.length === k && v.mappedAreaHa.every((a) => typeof a === 'number') &&
+			Array.isArray(v.matrix) && v.matrix.length === k &&
+			v.matrix.every((r) => Array.isArray(r) && r.length === k && r.every((c) => typeof c === 'number')) &&
+			typeof v.z === 'number' && (v.varianceRule === 'olofsson' || v.varianceRule === 'workbook')
+		);
+	}
+
+	class HfldAccuracy extends HTMLElement {
+		private form!: HTMLFormElement;
+		private state!: AccuracyLabInput;
+		private report = '';
+
+		connectedCallback() {
+			this.form = this.querySelector('form')!;
+			const saved = loadJSON<unknown>(KEY);
+			this.state = isInput(saved) ? saved : workbookExample();
+			this.drawMatrix();
+			this.setOptions();
+			this.form.addEventListener('input', (e) => {
+				if ((e.target as HTMLElement).closest('textarea')) return;
+				this.readMatrix();
+				this.readOptions();
+				this.update();
+			});
+			this.form.addEventListener('change', () => {
+				this.readOptions();
+				this.update();
+			});
+			this.querySelector('[data-add]')!.addEventListener('click', () => {
+				const k = this.state.classes.length;
+				this.state.classes.push(`Class ${k + 1}`);
+				this.state.mappedAreaHa.push(0);
+				this.state.matrix.forEach((r) => r.push(0));
+				this.state.matrix.push(Array(k + 1).fill(0));
+				this.drawMatrix();
+				this.querySelector<HTMLInputElement>(`[data-name="${k}"]`)!.focus();
+				this.update();
+			});
+			this.querySelector('[data-example]')!.addEventListener('click', () => {
+				this.state = workbookExample();
+				this.drawMatrix();
+				this.setOptions();
+				this.update();
+			});
+			this.querySelector('[data-paste]')!.addEventListener('click', () => this.paste());
+			this.querySelector('[data-csv]')!.addEventListener('click', () => this.download());
+			this.update();
+		}
+
+		private setOptions() {
+			(this.form.elements.namedItem('z') as HTMLSelectElement).value = this.state.z === 1.96 ? '1.96' : '1.6449';
+			(this.form.elements.namedItem('rule') as HTMLSelectElement).value = this.state.varianceRule;
+			(this.form.elements.namedItem('threshold') as HTMLInputElement).value =
+				this.state.thresholdPercent === null || this.state.thresholdPercent === undefined ? '' : String(this.state.thresholdPercent);
+		}
+
+		private readOptions() {
+			this.state.z = Number((this.form.elements.namedItem('z') as HTMLSelectElement).value);
+			this.state.varianceRule = (this.form.elements.namedItem('rule') as HTMLSelectElement).value as 'olofsson' | 'workbook';
+			const t = (this.form.elements.namedItem('threshold') as HTMLInputElement).valueAsNumber;
+			this.state.thresholdPercent = Number.isFinite(t) && t > 0 ? t : null;
+		}
+
+		private drawMatrix() {
+			const { classes, matrix, mappedAreaHa } = this.state;
+			const k = classes.length;
+			const head =
+				`<thead><tr><th scope="col">Map class ↓ / reference →</th>` +
+				classes.map((c, j) => `<th scope="col" data-col="${j}">${esc(c)}</th>`).join('') +
+				`<th scope="col">Mapped area (ha)</th><th scope="col"><span class="sr-only">Remove</span></th></tr></thead>`;
+			const body = classes
+				.map(
+					(c, i) =>
+						`<tr><th scope="row"><input type="text" data-name="${i}" value="${esc(c)}" aria-label="Name of class ${i + 1}"></th>` +
+						matrix[i]
+							.map(
+								(x, j) =>
+									`<td><input type="number" min="0" step="1" data-cell="${i},${j}" value="${x}" aria-label="Samples mapped as ${esc(c)}, reference ${esc(classes[j])}"></td>`,
+							)
+							.join('') +
+						`<td><input type="number" min="0" step="any" data-area="${i}" value="${Math.round(mappedAreaHa[i] * 1000) / 1000}" aria-label="Mapped area of ${esc(c)} in hectares"></td>` +
+						`<td>${k > 2 ? `<button type="button" data-remove="${i}" aria-label="Remove ${esc(c)}">Remove</button>` : ''}</td></tr>`,
+				)
+				.join('');
+			const table = this.querySelector<HTMLTableElement>('[data-matrix]')!;
+			table.innerHTML = head + `<tbody>${body}</tbody>`;
+			table.querySelectorAll<HTMLButtonElement>('[data-remove]').forEach((b) =>
+				b.addEventListener('click', () => {
+					const i = Number(b.dataset.remove);
+					this.state.classes.splice(i, 1);
+					this.state.mappedAreaHa.splice(i, 1);
+					this.state.matrix.splice(i, 1);
+					this.state.matrix.forEach((r) => r.splice(i, 1));
+					this.drawMatrix();
+					this.querySelector<HTMLElement>('[data-add]')!.focus();
+					this.update();
+				}),
+			);
+		}
+
+		/** Read the inputs into state. Area values are kept at full precision unless edited. */
+		private readMatrix() {
+			const s = this.state;
+			this.querySelectorAll<HTMLInputElement>('[data-name]').forEach((el) => {
+				const i = Number(el.dataset.name);
+				s.classes[i] = el.value;
+				const th = this.querySelector(`[data-col="${i}"]`);
+				if (th) th.textContent = el.value;
+			});
+			const label = (i: number) => s.classes[i] || `class ${i + 1}`;
+			this.querySelectorAll<HTMLInputElement>('[data-cell]').forEach((el) => {
+				const [i, j] = el.dataset.cell!.split(',').map(Number);
+				s.matrix[i][j] = el.value === '' ? NaN : el.valueAsNumber;
+				el.setAttribute('aria-label', `Samples mapped as ${label(i)}, reference ${label(j)}`);
+			});
+			this.querySelectorAll<HTMLElement>('[data-area]').forEach((el) =>
+				el.setAttribute('aria-label', `Mapped area of ${label(Number(el.dataset.area))} in hectares`),
+			);
+			this.querySelectorAll<HTMLElement>('[data-remove]').forEach((el) =>
+				el.setAttribute('aria-label', `Remove ${label(Number(el.dataset.remove))}`),
+			);
+			this.querySelectorAll<HTMLInputElement>('[data-area]').forEach((el) => {
+				const i = Number(el.dataset.area);
+				const shown = Math.round(s.mappedAreaHa[i] * 1000) / 1000;
+				if (el.valueAsNumber !== shown || el.value === '') s.mappedAreaHa[i] = el.value === '' ? NaN : el.valueAsNumber;
+			});
+		}
+
+		private paste() {
+			const text = (this.form.elements.namedItem('csv') as HTMLTextAreaElement).value;
+			const status = this.querySelector<HTMLElement>('[data-paste-status]')!;
+			const out = parseConfusionCsv(text);
+			if (!out.ok) {
+				status.textContent = `Could not use the CSV: ${out.error}`;
+				return;
+			}
+			const p = out.value;
+			const keepAreas = p.classes.map((c) => {
+				const i = this.state.classes.indexOf(c);
+				return i === -1 ? 0 : this.state.mappedAreaHa[i];
+			});
+			this.state.classes = p.classes;
+			this.state.matrix = p.matrix;
+			this.state.mappedAreaHa = p.mappedAreaHa ?? keepAreas;
+			this.drawMatrix();
+			this.update();
+			const n = p.matrix.flat().reduce((s, x) => s + x, 0);
+			status.textContent =
+				`Loaded ${p.classes.length} classes and ${fmt(n)} samples from a ${p.format === 'samples' ? 'one-row-per-sample' : 'matrix'} CSV.` +
+				(p.mappedAreaHa ? '' : ' Enter the mapped area of each class in the matrix.');
+		}
+
+		private update() {
+			saveJSON(KEY, this.state);
+			const out = runAccuracyLab(this.state);
+			const error = this.querySelector<HTMLElement>('.hfld-lab__error')!;
+			const results = this.querySelector<HTMLElement>('.hfld-lab__results')!;
+			if (!out.ok) {
+				error.textContent = `Cannot compute yet: ${out.error}`;
+				error.hidden = false;
+				results.hidden = true;
+				this.report = '';
+				return;
+			}
+			error.hidden = true;
+			results.hidden = false;
+			const v = out.value;
+			const conf = this.state.z === 1.96 ? '95%' : '90%';
+			const warn = this.querySelector<HTMLUListElement>('[data-warnings]')!;
+			warn.hidden = v.warnings.length === 0;
+			warn.innerHTML = v.warnings.map((w) => `<li>${esc(w)}</li>`).join('');
+
+			const emptyWhy = 'a stratum has no samples';
+			this.querySelector('[data-overall]')!.innerHTML =
+				`<div><dt>Samples</dt><dd>${fmt(v.raw.n)}</dd></div>` +
+				`<div><dt>Overall accuracy, area-weighted (recommended)</dt><dd>${pct(v.overallArea, emptyWhy)}</dd></div>` +
+				`<div><dt>Overall accuracy, sample counts (as in the workbook)</dt><dd>${pct(v.overallSample, 'no samples')}</dd></div>` +
+				`<div><dt>Kappa (sample counts)</dt><dd>${v.kappa === null ? dash('expected agreement is 1') : fmt(v.kappa, 3)}</dd></div>`;
+
+			this.querySelector('[data-accuracy]')!.innerHTML =
+				`<thead><tr><th scope="col">Class</th><th scope="col">Samples (map)</th><th scope="col">User's accuracy</th><th scope="col">Producer's accuracy, area-weighted</th><th scope="col">Producer's accuracy, sample counts</th></tr></thead><tbody>` +
+				v.rows
+					.map(
+						(r) =>
+							`<tr><th scope="row">${esc(r.name)}</th><td>${fmt(r.samples)}</td><td>${pct(r.usersAccuracy, 'no samples in this stratum')}</td><td>${pct(r.producersAccuracyArea, 'no reference samples of this class')}</td><td>${pct(r.producersAccuracySample, 'no reference samples of this class')}</td></tr>`,
+					)
+					.join('') +
+				'</tbody>';
+
+			const threshold = this.state.thresholdPercent;
+			const verdict = (p: boolean | null) =>
+				p === null ? (threshold === null ? '' : dash('the adjusted area is 0')) : p ? 'Pass' : '<strong>Fail</strong>';
+			this.querySelector("[data-area-table]")!.innerHTML =
+				`<thead><tr><th scope="col">Class</th><th scope="col">Mapped area (ha)</th><th scope="col">Adjusted area (ha)</th><th scope="col">SE (ha)</th><th scope="col">${conf} CI (ha)</th><th scope="col">Uncertainty (± % of area)</th>${threshold === null ? '' : `<th scope="col">Within ${fmt(threshold, 1)}%?</th>`}</tr></thead><tbody>` +
+				v.rows
+					.map(
+						(r) =>
+							`<tr><th scope="row">${esc(r.name)}</th><td>${fmt(r.mappedAreaHa)}</td><td>${fmt(r.adjustedAreaHa)}</td><td>${fmt(r.seAreaHa)}</td><td>${fmt(r.ciLowHa)} to ${fmt(r.ciHighHa)} (±${fmt(r.ciHalfWidthHa)})</td><td>${r.uncertaintyPercent === null ? dash('the adjusted area is 0') : `${fmt(r.uncertaintyPercent, 2)}%`}</td>${threshold === null ? '' : `<td>${verdict(r.pass)}</td>`}</tr>`,
+					)
+					.join('') +
+				`</tbody><tfoot><tr><th scope="row">Total</th><td>${fmt(v.raw.totalAreaHa)}</td><td>${v.adjustedTotalHa === null ? dash(emptyWhy + ', so the adjusted areas do not cover the map') : fmt(v.adjustedTotalHa)}</td><td colspan="${threshold === null ? 3 : 4}"></td></tr></tfoot>`;
+
+			const q = (s: string | number) => (/[",\n]/.test(String(s)) ? `"${String(s).replace(/"/g, '""')}"` : String(s));
+			const n = (x: Maybe) => (x === null ? '' : String(x));
+			const lines = [
+				['class', 'mapped_area_ha', 'samples', 'users_accuracy', 'producers_accuracy_area_weighted', 'producers_accuracy_sample', 'adjusted_area_ha', 'se_ha', 'ci_low_ha', 'ci_high_ha', 'uncertainty_percent', 'within_threshold'],
+				...v.rows.map((r) => [r.name, r.mappedAreaHa, r.samples, n(r.usersAccuracy), n(r.producersAccuracyArea), n(r.producersAccuracySample), r.adjustedAreaHa, r.seAreaHa, r.ciLowHa, r.ciHighHa, n(r.uncertaintyPercent), r.pass === null ? '' : r.pass ? 'yes' : 'no']),
+				[],
+				['overall_accuracy_area_weighted', n(v.overallArea)],
+				['overall_accuracy_sample', n(v.overallSample)],
+				['kappa', n(v.kappa)],
+				['confidence', conf],
+				['z', this.state.z],
+				['variance_rule', this.state.varianceRule],
+				['threshold_percent', threshold ?? ''],
+				[],
+				['confusion_matrix (rows = map, columns = reference)', ...this.state.classes],
+				...this.state.classes.map((c, i) => [c, ...this.state.matrix[i]]),
+				...v.warnings.map((w) => ['warning', w]),
+			];
+			this.report = lines.map((l) => l.map(q).join(',')).join('\n') + '\n';
+		}
+
+		private download() {
+			if (!this.report) return;
+			const url = URL.createObjectURL(new Blob([this.report], { type: 'text/csv' }));
+			const a = Object.assign(document.createElement('a'), { href: url, download: 'accuracy-area-report.csv' });
+			document.body.append(a);
+			a.click();
+			a.remove();
+			URL.revokeObjectURL(url);
+		}
+	}
+	customElements.define('hfld-accuracy', HfldAccuracy);
+</script>

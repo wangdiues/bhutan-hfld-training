@@ -9,6 +9,7 @@ import {
 	sampleSize,
 	samplingDensity,
 } from '../src/lib/stats/sampleSize';
+import { parseConfusionCsv, runAccuracyLab, workbookExample } from '../src/lib/stats/accuracyLab';
 import { bhutanDefaults, isLabInput, runSampleSizeLab, type LabInput } from '../src/lib/stats/sampleSizeLab';
 
 const fixture = (name: string) =>
@@ -160,5 +161,51 @@ describe('Lab 1 page — the preloaded Bhutan inputs reproduce the workbook', ()
 		expect(isLabInput(bhutanDefaults())).toBe(true);
 		expect(isLabInput({ strata: [{ areaHa: 1 }] })).toBe(false);
 		expect(isLabInput(null)).toBe(false);
+	});
+});
+
+describe('Lab 2 page — accuracy lab module', () => {
+	const { expected } = fixture('accuracy-area.workbook.json');
+	it('reproduces the workbook with the workbook example', () => {
+		const out = runAccuracyLab(workbookExample());
+		if (!out.ok) throw new Error(out.error);
+		const v = out.value;
+		closeAll(v.rows.map((r) => r.usersAccuracy), expected.usersAccuracy);
+		closeAll(v.rows.map((r) => r.producersAccuracySample), expected.producersAccuracy);
+		closeAll(v.rows.map((r) => r.adjustedAreaHa), expected.adjustedAreaHa);
+		closeAll(v.rows.map((r) => r.seAreaHa), expected.seAreaHa);
+		closeAll(v.rows.map((r) => r.uncertaintyPercent), expected.uncertaintyPercent90);
+		close(v.overallSample, expected.overallAccuracy);
+		close(v.kappa, expected.kappa);
+		expect(v.adjustedTotalHa).toBeNull();
+		expect(v.warnings[0]).toMatch(/Non-Forest has no samples/);
+	});
+	it('applies a pass/fail threshold and never returns NaN or Infinity', () => {
+		const out = runAccuracyLab({ ...workbookExample(), thresholdPercent: 30 });
+		if (!out.ok) throw new Error(out.error);
+		expect(out.value.rows.map((r) => r.pass)).toEqual([true, true, false]);
+		const nums = out.value.rows.flatMap((r) => [r.adjustedAreaHa, r.seAreaHa, r.ciLowHa, r.ciHighHa]);
+		expect(nums.every(Number.isFinite)).toBe(true);
+	});
+	it('rejects bad input with a message', () => {
+		expect(runAccuracyLab({ ...workbookExample(), matrix: [[0, 0, 0], [0, 0, 0], [0, 0, 0]] })).toMatchObject({ ok: false });
+		expect(runAccuracyLab({ ...workbookExample(), mappedAreaHa: [0, 0, 0] })).toMatchObject({ ok: false });
+		expect(runAccuracyLab({ ...workbookExample(), matrix: [[1.5, 0, 0], [0, 1, 0], [0, 0, 1]] })).toMatchObject({ ok: false });
+		expect(runAccuracyLab({ ...workbookExample(), classes: ['A', 'A', 'B'] })).toMatchObject({ ok: false });
+	});
+	it('parses a matrix CSV with an area column', () => {
+		const out = parseConfusionCsv('map \ ref,Forest,Non-Forest,area_ha\nForest,90,10,"1,000"\nNon-Forest,5,95,500\n');
+		expect(out).toEqual({ ok: true, value: { classes: ['Forest', 'Non-Forest'], matrix: [[90, 10], [5, 95]], mappedAreaHa: [1000, 500], format: 'matrix' } });
+	});
+	it('tallies one-row-per-sample CSV (e.g. a Collect Earth Online export)', () => {
+		const out = parseConfusionCsv('plotid,map,reference\n1,Forest,Forest\n2,Forest,Non-Forest\n3,Non-Forest,Non-Forest\n4,Forest,Forest\n');
+		expect(out).toEqual({ ok: true, value: { classes: ['Forest', 'Non-Forest'], matrix: [[2, 1], [0, 1]], format: 'samples' } });
+	});
+	it('explains CSV it cannot read', () => {
+		const bad = parseConfusionCsv('a,b\n1,2\n');
+		expect(bad.ok).toBe(false);
+		const order = parseConfusionCsv(',A,B\nB,1,2\nA,3,4\n');
+		expect(order).toMatchObject({ ok: false });
+		if (!order.ok) expect(order.error).toMatch(/same order/);
 	});
 });

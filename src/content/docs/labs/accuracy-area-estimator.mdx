@@ -1,11 +1,56 @@
 ---
 title: "Lab: Accuracy and area estimator"
+description: Turn a confusion matrix from a stratified sample into accuracy measures, area-adjusted estimates, standard errors and confidence intervals.
 sidebar:
   order: 2
 ---
+import AccuracyLab from '~/components/labs/AccuracyLab.astro';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import Credit from '~/components/Credit.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+This lab does what the Day 5 workbook *Exercise D5-Confusion Matrix, Accuracy Assessment, Area Adjustment.xlsx* does, following Olofsson et al. <Cite id="olofsson2014" />. Enter the sample counts and the mapped area of each class, or paste a CSV. It opens with the workbook's own example, so you can check that the numbers match. Your inputs are saved in this browser only.
 
-Enter or paste a confusion matrix to get user's, producer's and overall accuracy, area-adjusted estimates, standard errors and 90% confidence intervals.
+<AccuracyLab />
+
+## How it works
+
+<Theory title="Area-adjusted estimates">
+With stratum weights $W_i = A_i / A$ and $n_{ij}$ samples mapped as $i$ with reference class $j$, the estimated area proportion of each cell is $\hat p_{ij} = W_i \, n_{ij} / n_{i\cdot}$. The adjusted area of class $j$ is $\hat A_j = A \sum_i \hat p_{ij}$, with standard error
+$$ SE(\hat p_{\cdot j}) = \sqrt{\sum_i W_i^2 \, \frac{\hat p_{j|i}(1 - \hat p_{j|i})}{n_{i\cdot} - 1}}, \qquad \hat p_{j|i} = n_{ij} / n_{i\cdot} $$
+<Cite id="olofsson2014" at="Eqs. 9–10" />. The confidence interval is $\hat A_j \pm z \, SE(\hat A_j)$, with $z = 1.6449$ for 90%.
+</Theory>
+
+- **User's accuracy** is the share of samples mapped as a class that really are that class. Low user's accuracy means commission errors.
+- **Producer's accuracy** is the share of a reference class that the map got right. Low producer's accuracy means omission errors. Under stratified sampling, the **area-weighted** version is the unbiased one <Cite id="olofsson2014" />. The workbook's version, from raw sample counts, is shown too, for comparison.
+- **Uncertainty** is the half-width of the confidence interval as a percentage of the adjusted area. This is the figure to compare with the requirement in the [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/) lesson. Type that requirement into the optional threshold box to get a pass or fail for each class.
+
+<Callout type="bhutan" title="What the workbook example shows">
+In the workbook, the Non-Forest stratum has no samples. Its user's accuracy cannot be computed, and the adjusted areas cover only the sampled half of the map: they add up to about 2.69 million ha instead of 5.37 million ha. The lab flags this and will not report a total. Every stratum needs samples.
+</Callout>
+
+<Callout type="mistake" title="Common mistakes">
+- **Swapping rows and columns.** Rows are the map class (the stratum the sample came from); columns are what the interpreter saw.
+- **Reporting the mapped area.** Pixel counting carries the map's errors. Report the adjusted area and its confidence interval.
+- **Using the workbook variance rule for reporting.** It leaves out cells with a single sample. Olofsson et al. keep them, so the lab uses their rule unless you choose otherwise.
+- **Pasting CEO data with other column names.** Rename the map-class and interpreted-class columns to `map` and `reference` first.
+</Callout>
+
+The lab's maths is in `src/lib/stats/accuracyArea.ts` and `src/lib/stats/accuracyLab.ts`. Automated tests check that the workbook example reproduces every output of the workbook to within one part in a million, and that bad input gives a message, never NaN or Infinity.
+
+<References />
+
+<Credit
+  source="Exercise D5-Confusion Matrix, Accuracy Assessment, Area Adjustment.xlsx"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Rebuilt as an interactive web calculator with the same formulas",
+    "Adds area-weighted producer's and overall accuracy (Olofsson et al. 2014) beside the workbook's sample-count versions",
+    "Offers the Olofsson variance rule (keeps cells with one sample) as the default; the workbook rule stays available",
+    "Warns when a stratum has no samples and does not report an adjusted total",
+    "Adds CSV paste (matrix or one row per sample), confidence intervals, a pass/fail threshold and a report download",
+  ]}
+/>
