@@ -1,15 +1,53 @@
 ---
 title: "Day 5 recap quiz"
+description: Check what you remember from Day 5 (sampling design, sample size, stratified sampling, accuracy and area, reporting), plus three questions from earlier days.
 sidebar:
   order: 6
 ---
+import Quiz from '~/components/Quiz.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import Callout from '~/components/Callout.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["What do I remember from Day 5, without looking back?"]}
+  objectives={["Recall the main ideas of Day 5 and three from earlier days (spaced retrieval)."]}
+  teaching={0} exercises={20}
+  prerequisites={["All Day 5 lessons"]}
+/>
 
-## In this lesson you will
+Answer from memory first, then check. If you miss a question, follow the link to the lesson.
 
-- Retrieval of M4-27..31, plus 3 earlier items
+## What Day 5 covered
 
-**Time:** about 0 min teaching + 20 min practice.
+- [Designing a stratified sampling frame](/bhutan-hfld-training/day-5/sampling-design/): why maps need a sample; strata; designs.
+- [Determining sample size](/bhutan-hfld-training/day-5/sample-size/): strata areas, total sample size, allocation.
+- [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/): drawing, indexing and exporting the sample.
+- [Accuracy assessment and area adjustment](/bhutan-hfld-training/day-5/accuracy-and-area/): confusion matrix, adjusted areas, uncertainty.
+- [Reporting and documentation](/bhutan-hfld-training/day-5/reporting/): activity-data table, assumptions log, reproducibility.
+
+## Recap quiz
+
+<Quiz id="day-5-recap" title="Day 5 recap" questions={[
+  { q: "Why can't areas be reported straight from a land-cover map?", options: ["Maps are too large", "Maps have classification errors and no uncertainty", "Pixels are always 30 m", "Maps are confidential"], answer: 1, explain: "A probability sample corrects bias and gives confidence intervals. See Designing a stratified sampling frame." },
+  { q: "Why does deforestation get its own stratum?", options: ["It is rare, so a stratum lets you give it enough samples", "It is the largest class", "To avoid weighting", "Earth Engine requires it"], answer: 0, explain: "Stratification lets you over-sample rare classes; area weights keep the estimates unbiased." },
+  { q: "Halving the margin of error multiplies the total sample size by about…", options: ["2", "4", "0.5", "1"], answer: 1, explain: "n is proportional to 1/SE². See Determining sample size." },
+  { q: "Why use a minimum per stratum when allocating samples?", options: ["Proportional allocation would give the tiny deforestation stratum very few samples", "To reduce the total", "To sample non-forest more", "It is required by CEO"], answer: 0, explain: "A minimum keeps rare strata well sampled." },
+  { q: "In stratifiedSample, classValues [1, 2, 3] with classPoints [828, 0, 80] means…", options: ["80 points in total", "828 points in class 1, none in class 2, 80 in class 3", "828 classes", "80 points per class"], answer: 1, explain: "The lists are paired by position. See Stratified sampling in GEE." },
+  { q: "User's accuracy reflects which kind of error?", options: ["Omission", "Commission", "Sampling", "Registration"], answer: 1, explain: "Of the samples mapped as a class, how many are that class. See Accuracy assessment and area adjustment." },
+  { q: "An adjusted area is 13,304 ha with SE 1,495 ha. What is the 90% half-width?", options: ["±1,495 ha", "±2,930 ha", "±2,459 ha", "±1,820 ha"], answer: 2, explain: "1.6449 × 1,495 = 2,459 ha, 18.5% of the estimate." },
+  { q: "Which area goes into the activity-data table?", options: ["The mapped area", "The area-adjusted estimate with its 90% CI", "The training-data area", "The average of the two"], answer: 1, explain: "See Reporting and documentation." },
+  { q: "Day 4: what does the assemblage do with a pixel that passes two rules?", options: ["Takes the higher probability", "Takes the first rule passed", "Leaves it unclassified", "Averages the classes"], answer: 1, explain: "Rule order sets priority. See Assemblage." },
+  { q: "Day 2: the Bhutan MRV composites use January–April and October–December because those windows have enough clear images and stay inside the reporting year.", answer: true, explain: "See Sentinel-2 MRV composite." },
+  { q: "Day 1: what must a function used with imageCollection.map() return?", options: ["A number", "An ee.Image", "Nothing", "A string"], answer: 1, explain: "See Custom functions and mapping." },
+]} />
+
+<Callout type="why">
+Why this matters: you now have the whole method, from composites to a reported area with its uncertainty. The [capstone](/bhutan-hfld-training/capstone/) puts it together for one Dzongkhag.
+</Callout>
+
+<KeyPoints points={[
+  "A stratified probability sample turns a map into unbiased areas with confidence intervals.",
+  "Sample size follows from the strata and the target precision; a minimum per stratum protects rare classes.",
+  "Report adjusted areas, SE, 90% CI and uncertainty, with the evidence to reproduce them.",
+]} />
