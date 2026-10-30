@@ -1,9 +1,17 @@
 ---
 title: "Script library"
+description: Every Earth Engine script used in the course, grouped by day and tagged by workflow step, with downloads, lesson links and the trainers' original Code Editor scripts.
 sidebar:
   order: 1
 ---
+import ScriptLibrary from '~/components/ScriptLibrary.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
+All the course's scripts in one place. **Code Editor** scripts are JavaScript to paste into the [Earth Engine Code Editor](https://code.earthengine.google.com/); **Python (geemap)** versions run in a notebook with the Earth Engine Python API; **practice solutions** answer a lesson's exercises. "Original" opens the trainers' Code Editor script from the May 2026 training, where there is one.
+
+This table is generated from the files in [`scripts/gee/`](https://github.com/wangdiues/bhutan-hfld-training/tree/main/scripts/gee) each time the site is built, so it is always up to date. Each script starts with a header naming its source, credit and licence (MIT); changes from the training's code are listed in the [changelog](https://github.com/wangdiues/bhutan-hfld-training/blob/main/CHANGELOG.md).
+
+:::caution[Assets you may need]
+Many scripts read assets shared with training participants (for example `projects/bhutan-hfld-readiness-training/assets/...`). If an asset can't be found, you don't have read access: ask your trainer, or replace it with your own export from the earlier lesson. See the [asset catalogue](/bhutan-hfld-training/reference/assets/).
 :::
+
+<ScriptLibrary />

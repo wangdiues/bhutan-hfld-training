@@ -1,0 +1,151 @@
+---
+/**
+ * Script library (task M4-34): a table of every script in scripts/gee/, generated at build
+ * time from the files and their header comments, grouped by day and tagged by workflow step.
+ */
+const files = import.meta.glob('/scripts/gee/**/*.{js,py}', { query: '?raw', import: 'default', eager: true }) as Record<
+	string,
+	string
+>;
+
+// Workflow step for each lesson slug (the script name without -solution, .js or .py).
+const STEPS: Record<string, string> = {
+	'hello-bhutan': 'Basics',
+	'introduction-to-earth-engine': 'Basics',
+	'code-editor-and-data-catalog': 'Basics',
+	'javascript-basics': 'Basics',
+	'image-collections': 'Basics',
+	'custom-functions': 'Basics',
+	'spectral-indices': 'Indices',
+	'mosaics-and-composites': 'Composites',
+	'sentinel-2-mrv-composite': 'Composites',
+	'landsat-mrv-composite': 'Composites',
+	'feature-basics': 'Import and export',
+	'import-and-export': 'Import and export',
+	covariates: 'Covariates',
+	'forest-primitives': 'Primitives',
+	'change-strata': 'Change',
+	'training-data': 'Training data',
+	assemblage: 'Assemblage',
+	'satellite-embeddings': 'Embeddings',
+	'embeddings-classification-similarity': 'Embeddings',
+	'sample-size': 'Sampling',
+	'stratified-sampling-gee': 'Sampling',
+};
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const headerOf = (code: string, python: boolean) =>
+	python ? (code.match(/"""([\s\S]*?)"""/)?.[1] ?? '') : (code.match(/\/\*\*([\s\S]*?)\*\//)?.[1] ?? '');
+const rows = Object.entries(files)
+	.map(([file, code]) => {
+		const rel = file.replace('/scripts/gee/', '');
+		const [dir, name] = rel.split('/');
+		const python = name.endsWith('.py');
+		const slug = name.replace(/\.(js|py)$/, '').replace(/_/g, '-').replace(/-solution$/, '');
+		const solution = /-solution\.js$/.test(name);
+		const title =
+			headerOf(code, python)
+				.split('\n')
+				.map((l) => l.replace(/^\s*\*?\s?/, '').trim())
+				.find((l) => l.length > 0) ?? slug;
+		const hash = code.match(/code\.earthengine\.google\.com\/([0-9a-f]{32})/)?.[1];
+		const lessonPath = dir === 'start-here' ? 'start-here/' : `${dir}/${slug}/`;
+		return {
+			rel,
+			dir,
+			name,
+			title: title.replace(/\.$/, ''),
+			step: STEPS[slug] ?? 'Other',
+			kind: python ? 'Python (geemap)' : solution ? 'Practice solution' : 'Code Editor',
+			lesson: `${base}${lessonPath}`,
+			hash,
+		};
+	})
+	.sort((a, b) => a.dir.localeCompare(b.dir) || a.rel.localeCompare(b.rel));
+const groups = [...new Set(rows.map((r) => r.dir))];
+const label = (d: string) => (d === 'start-here' ? 'Start here' : d.replace('day-', 'Day '));
+---
+
+<div class="not-content hfld-scripts">
+	{
+		groups.map((g) => (
+			<section aria-labelledby={`scripts-${g}`}>
+				<h2 id={`scripts-${g}`}>{label(g)}</h2>
+				<div class="hfld-scripts__scroll" tabindex="0" role="region" aria-label={`${label(g)} scripts`}>
+					<table>
+						<thead>
+							<tr>
+								<th scope="col">Script</th>
+								<th scope="col">Step</th>
+								<th scope="col">Type</th>
+								<th scope="col">Links</th>
+							</tr>
+						</thead>
+						<tbody>
+							{rows
+								.filter((r) => r.dir === g)
+								.map((r) => (
+									<tr>
+										<th scope="row">
+											{r.title}
+											<br />
+											<code>{r.name}</code>
+										</th>
+										<td>{r.step}</td>
+										<td>{r.kind}</td>
+										<td>
+											<a href={`${base}scripts/${r.rel}`} download={r.name}>
+												Download<span class="sr-only"> {r.name}</span>
+											</a>
+											{' · '}
+											<a href={r.lesson}>
+												Lesson<span class="sr-only"> for {r.name}</span>
+											</a>
+											{r.hash && (
+												<>
+													{' · '}
+													<a href={`https://code.earthengine.google.com/${r.hash}`}>
+														Original<span class="sr-only"> Code Editor script for {r.name}</span>
+													</a>
+												</>
+											)}
+										</td>
+									</tr>
+								))}
+						</tbody>
+					</table>
+				</div>
+			</section>
+		))
+	}
+</div>
+
+<style>
+	.hfld-scripts h2 {
+		margin-top: 2rem;
+	}
+	.hfld-scripts__scroll {
+		overflow-x: auto;
+	}
+	.hfld-scripts__scroll:focus-visible {
+		outline: 3px solid var(--sl-color-accent);
+	}
+	table {
+		border-collapse: collapse;
+		width: 100%;
+		font-size: var(--sl-text-sm);
+	}
+	th,
+	td {
+		border: 1px solid var(--sl-color-gray-5);
+		padding: 0.4rem 0.6rem;
+		text-align: left;
+		vertical-align: top;
+	}
+	thead th {
+		background: var(--sl-color-gray-6);
+	}
+	th[scope='row'] {
+		font-weight: 600;
+	}
+</style>
