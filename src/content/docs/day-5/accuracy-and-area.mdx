@@ -49,7 +49,7 @@ Maps contain classification errors, give no sign of over- or under-estimation, a
 3. if required, uses that information to **adjust** the area estimates.
 
 <Callout type="mistake" title="Thresholds: check the current standard">
-The training slide stated two rules of thumb: "ART-TREES typically requires forest cover maps to have accuracy > 90%" and "Verra Avoided Unplanned Deforestation requires forest cover maps to have uncertainty < 20%, and uses uncertainty to adjust deforestation estimates". This course has not yet verified either against the current standards (TREES 3.0, June 2026, and the current Verra methodology), so treat them as unconfirmed. The [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/) lesson will give the exact TREES 3.0 provisions, which address uncertainty mainly through deductions.
+The training slide stated two rules of thumb: "ART-TREES typically requires forest cover maps to have accuracy > 90%" and "Verra Avoided Unplanned Deforestation requires forest cover maps to have uncertainty < 20%, and uses uncertainty to adjust deforestation estimates". This course has not yet verified either against the current standards (TREES 3.0, June 2026, and the current Verra methodology), so treat them as unconfirmed. The [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/) lesson will give the exact TREES 3.0 provisions, which address uncertainty mainly through deductions <Cite id="trees3" at="Sections 8 and 10" />.
 </Callout>
 
 ## The confusion matrix
@@ -85,17 +85,17 @@ This shows the idea, but it only removes **commission** errors (mapped forest th
 
 **Percentage uncertainty** is the half-width of the 90% confidence interval as a proportion of the estimate.
 
-Worked example (from the slide, corrected):
+Worked example (from the slide):
 
 - The map shows 17,000 ha of deforestation.
 - 18 of 23 samples mapped as deforestation really are deforestation.
 - Adjusted deforestation area (from that stratum alone): 17,000 × 18/23 = **13,304 ha**.
-- The standard error is **1,435 ha**.
-- 90% confidence interval half-width: 1.6449 × 1,435 = **±2,360 ha**.
-- Percentage uncertainty: 2,360 / 13,304 = **17.7%**.
+- The standard error, from the formula above with this one stratum: 17,000 × √((18/23)(5/23)/22) = **1,495 ha**.
+- 90% confidence interval half-width: 1.6449 × 1,495 = **±2,459 ha**.
+- Percentage uncertainty: 2,459 / 13,304 = **18.5%**.
 
-<Callout type="mistake" title="Corrected: the uncertainty example">
-The slide gave ±2,459 ha and 18.5%. With the slide's own standard error of 1,435 ha and z = 1.6449 (90%), the half-width is 2,360 ha, or 17.7% of 13,304 ha.
+<Callout type="mistake" title="Corrected: the standard error in the example">
+The slide's ±2,459 ha and 18.5% are right, but it gives the standard error as 1,435 ha; the formula gives 1,495 ha (1.6449 × 1,495 = 2,459). The slide's uncertainty formula also used a t-value; for samples this size, z = 1.6449 gives practically the same result.
 </Callout>
 
 ## Try it: the accuracy and area calculator
@@ -119,16 +119,18 @@ Bhutan context: in the training example, the Non-Forest stratum had no samples, 
 ## Practice
 
 <Challenge level="blanks" time={15} hints={["Adjusted area = mapped area × user's accuracy for that stratum.", "Half-width = 1.6449 × SE.", "Uncertainty = half-width ÷ adjusted area."]}>
-Recompute the worked example: mapped deforestation 17,000 ha, 18 of 23 samples confirmed, SE 1,435 ha.
+Recompute the worked example: mapped deforestation 17,000 ha, 18 of 23 samples confirmed.
 
 - Adjusted area = 17,000 × ___ / ___ = ___ ha
-- 90% half-width = ___ × 1,435 = ___ ha
+- Standard error = 17,000 × √((18/23)(5/23)/___) = ___ ha
+- 90% half-width = ___ × SE = ___ ha
 - Percentage uncertainty = ___ / ___ = ___ %
 
 <Fragment slot="solution">
 - Adjusted area = 17,000 × 18 / 23 = **13,304 ha**
-- 90% half-width = 1.6449 × 1,435 = **2,360 ha**
-- Percentage uncertainty = 2,360 / 13,304 = **17.7%**
+- Standard error = 17,000 × √((18/23)(5/23)/22) = **1,495 ha**
+- 90% half-width = 1.6449 × 1,495 = **2,459 ha**
+- Percentage uncertainty = 2,459 / 13,304 = **18.5%**
 </Fragment>
 </Challenge>
 
@@ -136,7 +138,7 @@ Recompute the worked example: mapped deforestation 17,000 ha, 18 of 23 samples c
 
 <Quiz id="day-5-accuracy-and-area" questions={[
   { q: "User's accuracy reflects which kind of error?", options: ["Omission", "Commission", "Sampling", "Registration"], answer: 1, explain: "User's accuracy is the share of mapped samples that are correct; its complement is commission error." },
-  { q: "What is the 90% confidence interval half-width for an adjusted area of 13,304 ha with SE 1,435 ha?", options: ["±1,435 ha", "±2,360 ha", "±2,459 ha", "±2,813 ha"], answer: 1, explain: "1.6449 × 1,435 = 2,360 ha (17.7%)." },
+  { q: "What is the 90% confidence interval half-width for an adjusted area of 13,304 ha with SE 1,495 ha?", options: ["±1,495 ha", "±2,930 ha", "±2,459 ha", "±1,820 ha"], answer: 2, explain: "1.6449 × 1,495 = 2,459 ha, i.e. 18.5% of 13,304 ha." },
   { q: "Why can't you report accuracy straight from the raw counts of a stratified sample?", options: ["The counts are too small", "Strata were sampled at different rates, so producer's and overall accuracy must be weighted by stratum area", "Kappa must be used instead", "The matrix must be square"], answer: 1, explain: "Weighting by W_h removes the bias from unequal sampling rates." },
   { q: "Multiplying a class's mapped area by its user's accuracy gives a complete area adjustment.", answer: false, explain: "It removes commission errors only; omission errors found in other strata must be added back, as the stratified estimator does." },
 ]} />
@@ -156,7 +158,7 @@ Recompute the worked example: mapped deforestation 17,000 ha, 18 of 23 samples c
   date="May 2026"
   changes={[
     "Slides rewritten as a web lesson; Lab 2 (the confusion-matrix spreadsheet as a calculator) embedded",
-    "Uncertainty example corrected: ±2,360 ha (17.7%), not ±2,459 ha (18.5%)",
+    "Standard error in the uncertainty example corrected to 1,495 ha (the slide said 1,435; its ±2,459 ha and 18.5% are right)",
     "The \">90% accuracy\" and \"<20% uncertainty\" rules of thumb flagged as unverified against TREES 3.0 and the current Verra methodology",
     "Kappa scale's top category given as \"almost perfect\" (Landis and Koch); note that Olofsson et al. advise against kappa",
     "Simple user's-accuracy adjustment explained as removing commission only",

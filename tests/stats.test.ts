@@ -117,6 +117,9 @@ describe('Olofsson variance rule vs the workbook rule', () => {
 		// 17,000 ha mapped as deforestation; 18 of 23 samples confirmed → 13,304 ha.
 		const r = accuracyArea({ mappedAreaHa: [83000, 17000], matrix: [[100, 0], [5, 18]], z: 1.6449 });
 		close(r.cellProportions[1][1] * r.totalAreaHa, 17000 * (18 / 23));
+		// SE of the deforestation area: 17,000 × √((18/23)(5/23)/22) ≈ 1,495 ha → ±2,459 ha (18.5%) at 90%.
+		close(r.seAreaHa[1], 17000 * Math.sqrt(((18 / 23) * (5 / 23)) / 22));
+		expect(Math.round(r.ciHalfWidthHa[1])).toBe(2459);
 	});
 });
 

@@ -34,7 +34,7 @@ Generated 2026-10-26 (task M0-04). 32 files: 1 agenda, 14 slide decks, 15 exerci
 | 24 | `Day 4/D4-Use of Google_s Satellite Embedding dataset.pptx` | Slides | M4-23, M4-39, M5-08 | DeepMind figures not reusable; link to the sources instead |
 | 25 | `Day 4/EXERCISE D4_ Land Cover Classification and Cosine Simarity Using AFE.docx` | Exercise | M4-24 | "Simarity" → "Similarity" |
 | 26 | `Day 5/D5-Designing a Stratified Random Sampling Frame.pptx` | Slides | M4-27 | Refers to "EXERCISE D4 Part 1/2"; these are Day 5 exercises |
-| 27 | `Day 5/D5-Accuracy Assessment and Area Adjustment.pptx` | Slides | M4-30 | Uncertainty example is wrong (±2,459 → ±2,360 ha, 18.5% → 17.7%); check the ">90%" claim against TREES 3.0 |
+| 27 | `Day 5/D5-Accuracy Assessment and Area Adjustment.pptx` | Slides | M4-30 | Uncertainty example: the SE should be 1,495 ha (slide: 1,435); ±2,459 ha and 18.5% are right; check the ">90%" claim against TREES 3.0 |
 | 28 | `Day 5/EXERCISE D5_ PART 1-DETERMINING SAMPLE SIZE.docx` | Exercise | M4-28 | |
 | 29 | `Day 5/EXERCISE D5_ PART 2-CREATING A STRATIFIED SAMPLING DESIGN IN GOOGLE EARTH ENGINE.docx` | Exercise | M4-29 | |
 | 30 | `Day 5/EXERCISE D5_ Group Activity.docx` | Activity | M6-03 | The capstone |

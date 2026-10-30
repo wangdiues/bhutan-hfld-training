@@ -42,7 +42,7 @@
    "image": "05.webp",
    "source_slide": 6,
    "title": "HFLD Readiness Training",
-   "text": "- Confusion Matrix\n- Vertical Axis: What was the sample classified as?\n- Horizontal Axis: What land cover is the sample in reality?\n- Results:\n- User’s Accuracy: Errors of Commission\n  - How wrong is the classification?\n- Producer’s Accuracy: Errors of Omission\n  - How much did the classification miss?\n- Overall Accuracy\n- Kappa Coefficient\n\n| Kappa value | Strength of agreement |\n|---|---|\n| &lt; 0 | Poor agreement |\n| 0–0.20 | Slight agreement |\n| 0.21–0.40 | Fair agreement |\n| 0.41–0.60 | Moderate agreement |\n| 0.61–0.80 | Substaintial agreement |\n| 0.81–1.0 | Perfect agreement |",
+   "text": "**Note:** in Landis and Koch's scale, 0.81–1.0 is \"almost perfect\" agreement; Olofsson et al. (2014) advise against relying on kappa.\n\n- Confusion Matrix\n- Vertical Axis: What was the sample classified as?\n- Horizontal Axis: What land cover is the sample in reality?\n- Results:\n- User’s Accuracy: Errors of Commission\n  - How wrong is the classification?\n- Producer’s Accuracy: Errors of Omission\n  - How much did the classification miss?\n- Overall Accuracy\n- Kappa Coefficient\n\n| Kappa value | Strength of agreement |\n|---|---|\n| &lt; 0 | Poor agreement |\n| 0–0.20 | Slight agreement |\n| 0.21–0.40 | Fair agreement |\n| 0.41–0.60 | Moderate agreement |\n| 0.61–0.80 | Substantial agreement |\n| 0.81–1.0 | Perfect agreement |",
    "notes": "",
    "hidden_pictures": 1
   },
@@ -58,7 +58,7 @@
    "image": "07.webp",
    "source_slide": 8,
    "title": "HFLD Readiness Training",
-   "text": "- Percentage Uncertainty\n- Half-width of 90% Confidence Interval of estimate\n- As a proportion of the estimate\n- Example\n- Initial estimate of 17,000 hectares of deforestation\n- 18/23 classified samples are actually deforestation\n- Our adjusted deforestation area is 13,304 hectares\n- We calculate the standard error is 1,435 hectares\n- We are 90% sure the real deforestation area is ±2,459 of 13,304 hectares\n- We are therefore 18.5% uncertain about our estimate",
+   "text": "**Correction:** the standard error in this example is 1,495 ha, not 1,435 ha (1.6449 × 1,495 = 2,459).\n\n- Percentage Uncertainty\n- Half-width of 90% Confidence Interval of estimate\n- As a proportion of the estimate\n- Example\n- Initial estimate of 17,000 hectares of deforestation\n- 18/23 classified samples are actually deforestation\n- Our adjusted deforestation area is 13,304 hectares\n- We calculate the standard error is 1,435 hectares\n- We are 90% sure the real deforestation area is ±2,459 of 13,304 hectares\n- We are therefore 18.5% uncertain about our estimate",
    "notes": "",
    "hidden_pictures": 4
   }
