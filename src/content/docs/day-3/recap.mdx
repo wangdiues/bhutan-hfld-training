@@ -1,15 +1,52 @@
 ---
 title: "Day 3 recap quiz"
+description: Check what you remember from Day 3 (Random Forest, covariates, primitives and change strata), plus two questions from earlier days.
 sidebar:
   order: 5
 ---
+import Quiz from '~/components/Quiz.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import Callout from '~/components/Callout.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["What do I remember from Day 3, without looking back?"]}
+  objectives={["Recall the main ideas of Day 3 and two from earlier days (spaced retrieval)."]}
+  teaching={0} exercises={15}
+  prerequisites={["All Day 3 lessons"]}
+/>
 
-## In this lesson you will
+Answer from memory first, then check. If you miss a question, follow the link to the lesson.
 
-- Retrieval of M4-15..18, plus 2 earlier items
+## What Day 3 covered
 
-**Time:** about 0 min teaching + 15 min practice.
+- [Random Forest theory](/bhutan-hfld-training/day-3/random-forest/): decision trees, entropy, information gain, bagging and random feature selection.
+- [Calculating covariates](/bhutan-hfld-training/day-3/covariates/): seasonal indices, Tasseled Cap, terrain and water layers.
+- [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/): one Random Forest per class in probability mode.
+- [Change detection and loss strata](/bhutan-hfld-training/day-3/change-strata/): stable forest, loss and non-forest strata from two dates.
+
+## Recap quiz
+
+<Quiz id="day-3-recap" title="Day 3 recap" questions={[
+  { q: "A set of training pixels is half forest and half grassland. What is its entropy?", options: ["0", "0.5", "1", "2"], answer: 2, explain: "−(0.5 log₂ 0.5 + 0.5 log₂ 0.5) = 1. See Random Forest theory." },
+  { q: "What is bagging in a Random Forest?", options: ["Training each tree on a bootstrap sample of the training data", "Removing irrelevant covariates", "Averaging pixel values", "Splitting the map into tiles"], answer: 0, explain: "Each tree sees a random sample drawn with replacement; the left-out samples give the out-of-bag error." },
+  { q: "Why add eastness and northness to the covariates?", options: ["Aspect is circular; sine and cosine give smooth values", "They replace elevation", "They are spectral indices", "Earth Engine requires them"], answer: 0, explain: "359° and 1° are neighbours; sine and cosine make that clear to the classifier. See Calculating covariates." },
+  { q: "Why divide the Int16 composite by 10,000 before computing EVI?", options: ["EVI's +1 term assumes reflectance between 0 and 1", "To save memory", "NDVI needs it", "It converts Landsat to Sentinel-2"], answer: 0, explain: "The composites store reflectance × 10,000; ratios are unaffected, formulas with constants are not." },
+  { q: "What is a forest primitive?", options: ["A binary forest map", "A per-pixel probability that the pixel is forest", "A set of forest training points", "A covariate"], answer: 1, explain: "One-versus-rest Random Forest in probability mode. See Forest primitives." },
+  { q: "Why is the training set balanced but the validation set not?", options: ["So the model doesn't lean to the larger class, while validation reflects the real mix", "To speed up training", "Validation must have equal numbers", "Earth Engine requires it"], answer: 0, explain: "Balancing helps training; an unbalanced validation set keeps its accuracy honest." },
+  { q: "A pixel is forest at the start of a period and not forest at the end. Which stratum?", options: ["Stable forest", "Loss", "Stable non-forest", "Gain"], answer: 1, explain: "See Change detection and loss strata." },
+  { q: "Why does forest loss get its own stratum?", options: ["It is rare, so a stratum lets the sample cover it well", "It is the largest class", "To avoid area weights", "Hansen data requires it"], answer: 0, explain: "Stratification lets you over-sample a rare class; area weights keep estimates unbiased." },
+  { q: "Day 2: which step removes dark outliers likely to be shadows?", options: ["Cloud Score+", "TDOM", "BRDF correction", "Int16 conversion"], answer: 1, explain: "TDOM flags pixels much darker than usual in NIR and SWIR. See Sentinel-2 MRV composite." },
+  { q: "Day 1: filterDate('2025-01-01', '2025-05-01') includes images from 1 May 2025.", answer: false, explain: "The end date is excluded. See Image collections, filtering and reducers." },
+]} />
+
+<Callout type="why">
+Why this matters: Day 4 assembles the primitives into a land-cover map, and Day 5 samples the strata. Both depend on today's outputs.
+</Callout>
+
+<KeyPoints points={[
+  "Trees split on the largest information gain; a forest adds bagging, random feature subsets and a vote.",
+  "Covariates must be scaled correctly and checked before training.",
+  "Primitives are per-class probabilities from one-versus-rest models.",
+  "Two forest maps give change strata; loss is rare, so it needs its own stratum.",
+]} />
