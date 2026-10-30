@@ -34,11 +34,12 @@ This lesson was written for the website; the May 2026 training demonstrated Coll
 
 ## The response design
 
-Before anyone interprets a plot, write down the **response design**: the rules that decide what the reference label of a sample is <Cite id="olofsson2014" />. It has three parts:
+Before anyone interprets a plot, write down the **response design**: the rules that decide what the reference label of a sample is <Cite id="olofsson2014" />. It has four parts:
 
 1. **The assessment unit.** What is labelled: here a 30 m × 30 m plot matching one map pixel (or the sample point at its centre).
 2. **The sources of reference data.** Which imagery and dates are used: for example high-resolution imagery in CEO, Sentinel-2 and Landsat time series for the reporting years, and field knowledge.
 3. **The labelling protocol.** The class definitions and the rules for hard cases.
+4. **The definition of agreement.** How a reference label is compared with the map: here, how the start and end land-cover answers become a reference **stratum class** (forest, non-forest or deforestation) to set against the map's stratum.
 
 For Bhutan's HFLD work, the protocol should include:
 
@@ -79,7 +80,7 @@ Why this matters: the reference labels are treated as truth. If two interpreters
 </Steps>
 
 <Callout type="mistake" title="Keep the sample unchanged">
-Don't move, add or delete plots after the sample is drawn: that breaks the probability design. If a plot can't be interpreted, record that; the analysis handles it.
+Don't move, add or delete plots after the sample is drawn: that breaks the probability design. If a plot can't be interpreted, record that and report how many there were. Leaving them out of the analysis can bias the estimates if they differ from the rest, which is why [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) suggests drawing a few spare samples per stratum.
 </Callout>
 
 ## Interpret the plots
@@ -93,12 +94,14 @@ Don't move, add or delete plots after the sample is drawn: that breaks the proba
 
 ## Export the results
 
-When the plots are interpreted, export the **plot** (or sample) data as CSV from the project's data menu. Each row holds the plot and sample IDs, the coordinates, the answers and the interpreter.
+When the plots are interpreted, export the **plot** (or sample) data as CSV from the project's data menu. Each row holds the plot and sample IDs, the coordinates, the answers and the interpreter, and usually the attribute fields you uploaded (CEO may add a prefix to their names), so the map stratum `lc_no` may already be in the export.
 
-To analyse them, you need, for each sample, its **map class** (the stratum from Earth Engine) and its **reference class** (from CEO):
+To analyse them, you need, for each sample, its **map class** (the stratum from Earth Engine) and its **reference class** (from CEO), named the same way:
 
-1. Join the CEO export with the exported samples on `plotID` (in a spreadsheet, or in Earth Engine after uploading the CSV as an asset).
-2. Make a table with two columns, `map` and `reference`, using the same class names.
+1. If the export doesn't include `lc_no`, join it with the exported samples on `plotID` (in a spreadsheet, or in Earth Engine after uploading the CSV as an asset).
+2. Turn the map stratum codes into names: 1 = Forest, 2 = Non-forest, 3 = Deforestation.
+3. Turn each sample's start and end answers into a reference stratum class: forest at both dates = Forest; forest at the start and not at the end = Deforestation; not forest at the end (and not deforestation) = Non-forest.
+4. Make a table with two columns, `map` and `reference`, using these names.
 3. Paste it into the [accuracy and area calculator](/bhutan-hfld-training/labs/accuracy-area-estimator/), with the mapped area of each stratum.
 
 The trainers' Code Editor script for the CEO demonstration is [code.earthengine.google.com/0cbd5b45585eaf7252becc41c417ae6e](https://code.earthengine.google.com/0cbd5b45585eaf7252becc41c417ae6e).
