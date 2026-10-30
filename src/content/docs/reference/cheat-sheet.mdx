@@ -1,10 +1,83 @@
 ---
 title: "Bands, indices and further reading"
+description: Sentinel-2 and Landsat 8/9 bands side by side, the spectral indices the course computes with their formulas, and where to read more on each step.
+newContent: true
 sidebar:
   label: Cheat sheet & reading
   order: 4
 ---
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
+## Bands
+
+The course's composites keep six bands from each sensor. Band numbers differ between the two, so check this table before writing an index.
+
+| Name | Sentinel-2 band | Centre (nm) | Pixel | Landsat 8/9 band | Range (nm) | Pixel |
+|---|---|---|---|---|---|---|
+| Blue | B2 | 490 | 10 m | B2 | 452–512 | 30 m |
+| Green | B3 | 560 | 10 m | B3 | 533–590 | 30 m |
+| Red | B4 | 665 | 10 m | B4 | 636–673 | 30 m |
+| Red edge 1–3 | B5, B6, B7 | 705, 740, 783 | 20 m | — | — | — |
+| Near infrared (NIR) | B8 (B8A narrow, 865) | 842 | 10 m (B8A 20 m) | B5 | 851–879 | 30 m |
+| Shortwave infrared 1 (SWIR1) | B11 | 1610 | 20 m | B6 | 1566–1651 | 30 m |
+| Shortwave infrared 2 (SWIR2) | B12 | 2190 | 20 m | B7 | 2107–2294 | 30 m |
+
+The course composites use Sentinel-2 bands B2, B3, B4, B8, B11 and B12, and Landsat bands B2–B7, each with a `_jan_apr` and an `_oct_dec` suffix: 12 bands in all.
+
+### Scaling to reflectance (0–1)
+
+| Dataset | Stored as | To get reflectance |
+|---|---|---|
+| [Sentinel-2 SR](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED) (`COPERNICUS/S2_SR_HARMONIZED`) | integers, reflectance × 10,000 | `image.divide(10000)` |
+| [Landsat 8/9 Collection 2 Level-2](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2) (`SR_B*` bands) | scaled integers | `image.multiply(0.0000275).add(-0.2)` |
+| Course composites (`…_int16`) | integers, reflectance × 10,000 | `image.divide(10000)` |
+
+Normalized-difference indices (NDVI, NDWI, …) give the same answer with or without scaling. EVI, SAVI, IBI and Tasseled Cap need 0–1 reflectance.
+
+## Spectral indices
+
+Formulas use the names from the band table. [Spectral indices](/bhutan-hfld-training/day-2/spectral-indices/) and [Calculating covariates](/bhutan-hfld-training/day-3/covariates/) show the code.
+
+| Index | Formula | Sentinel-2 | Landsat 8/9 | High values mean |
+|---|---|---|---|---|
+| NDVI <Cite id="tucker1979" /> | (NIR − Red) / (NIR + Red) | (B8 − B4) / (B8 + B4) | (B5 − B4) / (B5 + B4) | dense green vegetation |
+| EVI | 2.5 × (NIR − Red) / (NIR + 6 Red − 7.5 Blue + 1) | B8, B4, B2 | B5, B4, B2 | green vegetation, less saturated than NDVI over dense forest |
+| SAVI (L = 0.5) | 1.5 × (NIR − Red) / (NIR + Red + 0.5) | B8, B4 | B5, B4 | vegetation, with less soil effect where cover is sparse |
+| NDMI | (NIR − SWIR1) / (NIR + SWIR1) | (B8 − B11) / (B8 + B11) | (B5 − B6) / (B5 + B6) | moist canopy |
+| NBR | (NIR − SWIR2) / (NIR + SWIR2) | (B8 − B12) / (B8 + B12) | (B5 − B7) / (B5 + B7) | healthy vegetation; a drop between dates marks fire or clearing |
+| NDWI | (Green − NIR) / (Green + NIR) | (B3 − B8) / (B3 + B8) | (B3 − B5) / (B3 + B5) | open water |
+| MNDWI | (Green − SWIR1) / (Green + SWIR1) | (B3 − B11) / (B3 + B11) | (B3 − B6) / (B3 + B6) | open water, separated better from built land |
+| NDBI | (SWIR1 − NIR) / (SWIR1 + NIR) | (B11 − B8) / (B11 + B8) | (B6 − B5) / (B6 + B5) | built-up and bare land |
+| IBI | (NDBI − (SAVI + MNDWI) / 2) / (NDBI + (SAVI + MNDWI) / 2) | from the three indices | from the three indices | built-up land |
+
+In Earth Engine, write a normalized difference as `image.normalizedDifference(['B8', 'B4'])`, which computes (first − second) / (first + second).
+
+:::caution[Common mistakes]
+- Using Sentinel-2 band numbers on Landsat: Landsat's NIR is B5, not B8.
+- Computing EVI or SAVI on reflectance × 10,000. The constants in the formulas assume 0–1.
+- Expecting a fixed threshold, such as "NDVI > 0.4 is forest", to work everywhere. Check it against samples for each season and region of Bhutan.
 :::
+
+## Further reading
+
+### For the whole course
+
+- *Cloud-Based Remote Sensing with Google Earth Engine: Fundamentals and Applications* (Cardille, Crowley, Saah and Clinton, eds., Springer, 2024). Open access, with code for every chapter: [eefabook.org](https://www.eefabook.org/).
+- [Earth Engine community tutorials](https://developers.google.com/earth-engine/tutorials/community/explore) (Google).
+- [OpenMRV](https://openmrv.org/): open-source tools and tutorials for forest monitoring and MRV.
+- [FAO e-learning Academy](https://elearning.fao.org/): free courses on REDD+, forest monitoring and estimating uncertainty in forest emissions.
+
+### By step
+
+| Step | Lessons | Read |
+|---|---|---|
+| Earth Engine basics | Day 1 | EEFA book; Gorelick et al. 2017 <Cite id="gorelick2017" /> |
+| Composites and indices | Day 2 | EEFA book; [Spectral indices](/bhutan-hfld-training/day-2/spectral-indices/) |
+| Classification and primitives | Days 3–4 | Breiman 2001 <Cite id="breiman2001" />; Saah et al. 2020 on RLCMS <Cite id="saah2020" />; EEFA book |
+| Embeddings | Day 4 | Brown et al. 2025 <Cite id="brown2025" /> |
+| Reference data | Days 4–5 | [Collect Earth Online](https://collect.earth/) and [SEPAL](https://sepal.io/), which links CEO projects to Earth Engine |
+| Sampling, accuracy and area | Day 5 | Olofsson et al. 2014 <Cite id="olofsson2014" />; Cochran 1977 <Cite id="cochran1977" />; [AREA2](https://area2.readthedocs.io/en/latest/overview.html), an Earth Engine toolbox for design-based area estimation |
+| Uncertainty | Day 5 | [REDD+ Uncertainty Training](https://seamusrobertmurphy.quarto.pub/redd-uncertainty-training/) (Quarto book; written for ART-TREES 2.0, so check each rule against TREES 3.0 <Cite id="trees3" />) |
+
+<References />
