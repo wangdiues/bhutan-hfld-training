@@ -1,18 +1,164 @@
 ---
-title: "Accuracy assessment and area estimation"
+title: "Accuracy assessment and area adjustment"
+description: Build a confusion matrix from interpreted reference samples, compute user's, producer's and overall accuracy, area-adjusted estimates, standard errors, 90% confidence intervals and percentage uncertainty.
 sidebar:
   order: 4
 ---
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import AccuracyLab from '~/components/labs/AccuracyLab.astro';
+import { Image } from 'astro:assets';
+import ceoMap from '~/assets/day-5/accuracy-and-area/s04-223ec9b1ac.webp';
+import ceoImagery from '~/assets/day-5/accuracy-and-area/s04-77781520b8.webp';
+import matrixImg from '~/assets/day-5/accuracy-and-area/s06-19cb3093c5.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How accurate is my map?", "How much forest and deforestation is there really, and how sure am I?"]}
+  objectives={[
+    "Build a confusion matrix.",
+    "Compute user's, producer's and overall accuracy.",
+    "Compute area-adjusted estimates, the standard error and the 90% confidence interval.",
+    "State the percentage uncertainty.",
+  ]}
+  teaching={25} exercises={35}
+  prerequisites={["Stratified sampling in GEE", "Collect Earth Online"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/accuracy-and-area/) give a visual summary.
 
-- Build a confusion matrix
-- Compute user's, producer's and overall accuracy
-- Compute area-adjusted estimates, SE and the 90% CI
-- State the percentage uncertainty
+After the stratified sample has been interpreted in [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/), each sample has two labels: the **map class** (its stratum) and the **reference class** (what the interpreter saw). This lesson turns those pairs into accuracy measures and area estimates <Cite id="olofsson2014" />.
 
-**Time:** about 25 min teaching + 35 min practice.
+<Image src={ceoMap} alt="Collect Earth Online plot over the sampling frame map, with sample points inside a circular plot and the class legend." />
+
+<Image src={ceoImagery} alt="The same Collect Earth Online plot over high-resolution imagery for interpretation." />
+
+## Why validate?
+
+Maps contain classification errors, give no sign of over- or under-estimation, and have no uncertainty. Validation with a probability sample:
+
+1. assesses the map's accuracy;
+2. derives the uncertainty of the estimates;
+3. if required, uses that information to **adjust** the area estimates.
+
+<Callout type="mistake" title="Thresholds: check the current standard">
+The training slide stated two rules of thumb: "ART-TREES typically requires forest cover maps to have accuracy > 90%" and "Verra Avoided Unplanned Deforestation requires forest cover maps to have uncertainty < 20%, and uses uncertainty to adjust deforestation estimates". This course has not yet verified either against the current standards (TREES 3.0, June 2026, and the current Verra methodology), so treat them as unconfirmed. The [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/) lesson will give the exact TREES 3.0 provisions, which address uncertainty mainly through deductions.
+</Callout>
+
+## The confusion matrix
+
+A <Term id="confusion-matrix" /> counts the samples by map class (rows: what the sample was **classified as**) and reference class (columns: what the land cover **really is**).
+
+<Image src={matrixImg} alt="Example confusion matrix of mapped classes (forest, non-forest, deforestation) against reference observations, with row and column totals." />
+
+| Measure | Question | Error it reflects |
+|---|---|---|
+| <Term id="users-accuracy" /> | Of the samples mapped as a class, how many really are that class? | commission (how wrong is the classification?) |
+| <Term id="producers-accuracy" /> | Of the samples that really are a class, how many did the map get right? | omission (how much did the map miss?) |
+| Overall accuracy | What share of all samples is correct? | |
+| Kappa | How much better than chance is the agreement? | |
+
+A common reading of kappa (Landis and Koch): below 0 poor; 0–0.20 slight; 0.21–0.40 fair; 0.41–0.60 moderate; 0.61–0.80 substantial; 0.81–1.00 almost perfect. Olofsson et al. advise **against** relying on kappa for accuracy reporting <Cite id="olofsson2014" />; report user's, producer's and overall accuracy instead.
+
+<Theory title="Stratified estimators">
+With stratified sampling, each stratum $h$ has weight $W_h = A_h/A$. The estimated area proportion of reference class $j$ is $\hat p_{\cdot j} = \sum_h W_h \, n_{hj}/n_{h\cdot}$, the adjusted area is $\hat A_j = A\,\hat p_{\cdot j}$, and its standard error is $SE(\hat A_j) = A\sqrt{\sum_h W_h^2 \frac{\hat p_{j|h}(1-\hat p_{j|h})}{n_{h\cdot}-1}}$. The 90% confidence interval is $\hat A_j \pm 1.6449\,SE(\hat A_j)$ <Cite id="olofsson2014" />. Producer's and overall accuracy must also be weighted by $W_h$; the plain counts in the matrix are biased under stratified sampling.
+</Theory>
+
+## Area adjustment
+
+The slide's simple example uses one class's user's accuracy:
+
+- The map shows 2,700,000 ha of forest: 70% forest cover.
+- Of 100 samples mapped as forest, 98 are forest: user's accuracy 98%.
+- Adjusted forest cover: 98% × 70% = 68.6%, so about 2,646,000 ha.
+
+This shows the idea, but it only removes **commission** errors (mapped forest that isn't). Forest that the map missed, sampled in other strata, must be added back. The full stratified estimator above does both, using every cell of the matrix. The calculator below applies it.
+
+## Uncertainty
+
+**Percentage uncertainty** is the half-width of the 90% confidence interval as a proportion of the estimate.
+
+Worked example (from the slide, corrected):
+
+- The map shows 17,000 ha of deforestation.
+- 18 of 23 samples mapped as deforestation really are deforestation.
+- Adjusted deforestation area (from that stratum alone): 17,000 × 18/23 = **13,304 ha**.
+- The standard error is **1,435 ha**.
+- 90% confidence interval half-width: 1.6449 × 1,435 = **±2,360 ha**.
+- Percentage uncertainty: 2,360 / 13,304 = **17.7%**.
+
+<Callout type="mistake" title="Corrected: the uncertainty example">
+The slide gave ±2,459 ha and 18.5%. With the slide's own standard error of 1,435 ha and z = 1.6449 (90%), the half-width is 2,360 ha, or 17.7% of 13,304 ha.
+</Callout>
+
+## Try it: the accuracy and area calculator
+
+The calculator reproduces the training's confusion-matrix spreadsheet. It opens with the spreadsheet's example; paste your own Collect Earth Online results (one row per sample with `map` and `reference` columns) to analyse them.
+
+<AccuracyLab />
+
+<Callout type="bhutan">
+Bhutan context: in the training example, the Non-Forest stratum had no samples, so its area could not be adjusted. Every stratum with mapped area needs samples; for HFLD, the deforestation stratum's uncertainty usually decides how precise the result is.
+</Callout>
+
+## Common mistakes
+
+- **Using unweighted accuracy from the raw matrix.** Under stratified sampling, producer's and overall accuracy must be weighted by stratum area.
+- **Reporting the mapped area** instead of the adjusted area with its confidence interval.
+- **Mixing up rows and columns**: rows are map classes, columns are reference classes.
+- **A stratum with no samples**: its share of the area cannot be estimated.
+- **Using z = 1.96 by default.** The 90% interval (z = 1.6449) is the one used here.
+
+## Practice
+
+<Challenge level="blanks" time={15} hints={["Adjusted area = mapped area × user's accuracy for that stratum.", "Half-width = 1.6449 × SE.", "Uncertainty = half-width ÷ adjusted area."]}>
+Recompute the worked example: mapped deforestation 17,000 ha, 18 of 23 samples confirmed, SE 1,435 ha.
+
+- Adjusted area = 17,000 × ___ / ___ = ___ ha
+- 90% half-width = ___ × 1,435 = ___ ha
+- Percentage uncertainty = ___ / ___ = ___ %
+
+<Fragment slot="solution">
+- Adjusted area = 17,000 × 18 / 23 = **13,304 ha**
+- 90% half-width = 1.6449 × 1,435 = **2,360 ha**
+- Percentage uncertainty = 2,360 / 13,304 = **17.7%**
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-5-accuracy-and-area" questions={[
+  { q: "User's accuracy reflects which kind of error?", options: ["Omission", "Commission", "Sampling", "Registration"], answer: 1, explain: "User's accuracy is the share of mapped samples that are correct; its complement is commission error." },
+  { q: "What is the 90% confidence interval half-width for an adjusted area of 13,304 ha with SE 1,435 ha?", options: ["±1,435 ha", "±2,360 ha", "±2,459 ha", "±2,813 ha"], answer: 1, explain: "1.6449 × 1,435 = 2,360 ha (17.7%)." },
+  { q: "Why can't you report accuracy straight from the raw counts of a stratified sample?", options: ["The counts are too small", "Strata were sampled at different rates, so producer's and overall accuracy must be weighted by stratum area", "Kappa must be used instead", "The matrix must be square"], answer: 1, explain: "Weighting by W_h removes the bias from unequal sampling rates." },
+  { q: "Multiplying a class's mapped area by its user's accuracy gives a complete area adjustment.", answer: false, explain: "It removes commission errors only; omission errors found in other strata must be added back, as the stratified estimator does." },
+]} />
+
+<KeyPoints points={[
+  "The confusion matrix compares map classes (rows) with reference classes (columns).",
+  "User's accuracy reflects commission errors, producer's accuracy omission errors; weight them by stratum area.",
+  "Adjusted areas, their standard errors and 90% confidence intervals come from the stratified estimator.",
+  "Percentage uncertainty is the CI half-width as a share of the estimate.",
+]} />
+
+<References />
+
+<Credit
+  source="D5 Data Analysis: Accuracy Assessment and Area Adjustment (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson; Lab 2 (the confusion-matrix spreadsheet as a calculator) embedded",
+    "Uncertainty example corrected: ±2,360 ha (17.7%), not ±2,459 ha (18.5%)",
+    "The \">90% accuracy\" and \"<20% uncertainty\" rules of thumb flagged as unverified against TREES 3.0 and the current Verra methodology",
+    "Kappa scale's top category given as \"almost perfect\" (Landis and Koch); note that Olofsson et al. advise against kappa",
+    "Simple user's-accuracy adjustment explained as removing commission only",
+  ]}
+/>
