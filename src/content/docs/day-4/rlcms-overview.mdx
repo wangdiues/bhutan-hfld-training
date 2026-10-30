@@ -1,16 +1,129 @@
 ---
 title: "RLCMS overview and terms"
+description: The four stages of the Regional Land Cover Monitoring System (composites, training data, primitives, assemblage), why it is modular, and the terms used on Days 3 and 4.
 sidebar:
   order: 1
 ---
+import { Steps } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import Term from '~/components/Term.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do composites, training data and primitives fit together into one land-cover map?", "What do covariate, primitive and assemblage mean?"]}
+  objectives={[
+    "Describe the four RLCMS stages.",
+    "Define covariate, primitive and assemblage.",
+  ]}
+  teaching={20} exercises={5}
+  prerequisites={["Day 3: Forest primitives"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/rlcms-overview/) give a visual summary.
 
-- Describe the four RLCMS stages
-- Define covariate, primitive and assemblage
+## What is RLCMS?
 
-**Time:** about 20 min teaching + 0 min practice.
+The <Term id="rlcms" /> (Regional Land Cover Monitoring System) uses satellite data to produce customised, high-quality land-cover maps for a region. It works anywhere in the world because it uses publicly available global data (Landsat, MODIS, Sentinel-2) and an adaptable design: the **assembly logic** that turns probabilities into a map can be changed to match each country's land-cover classes and monitoring goals <Cite id="saah2020" />.
+
+RLCMS was developed by SERVIR-Mekong (in South-East Asia) with the support of the U.S. Forest Service, NASA's Applied Sciences Program, Google, the University of Maryland and the governments of countries in the region. The course uses the same approach for Bhutan.
+
+## The four stages
+
+<Steps>
+
+1. **Composite preparation.** Pre-process images (shadow and cloud masking, BRDF and topographic correction) and build composites. Any available imagery can be used: Landsat 5, 7, 8 and 9, Sentinel-1, Sentinel-2, or Planet NICFI. *Course:* [Sentinel-2](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) and [Landsat](/bhutan-hfld-training/day-2/landsat-mrv-composite/) MRV composites.
+
+2. **Training data preparation.** Define the land-cover typology (the list of classes) for the country, and collect reference data for each class. The reference data are split into training data and validation data, and the training data are sampled to get covariate values at each point. *Course:* [Calculating covariates](/bhutan-hfld-training/day-3/covariates/) and [Collecting training data](/bhutan-hfld-training/day-4/training-data/).
+
+3. **Primitive layer generation.** A classifier, trained on the sampled data, produces a primitive for each class: the probability that a pixel is that class. Each primitive's accuracy is assessed. *Course:* [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/).
+
+4. **Assemblage.** A decision tree with user-set thresholds combines the primitives into the final land-cover map. The thresholds come from visual assessment and from plots of each primitive's accuracy against its probability. *Course:* [Assemblage](/bhutan-hfld-training/day-4/assemblage/).
+
+</Steps>
+
+<Callout type="why">
+Why this matters: splitting the work into stages means each part can be checked and improved on its own. A better composite, more training data or a changed class definition does not mean starting again.
+</Callout>
+
+## A modular system
+
+Three features make RLCMS practical for a national agency:
+
+- **Modular architecture.** Composites, covariates, primitives and the assembly are separate modules. Each can be replaced, for example a new sensor for the composites, without changing the others.
+- **Customisable to the agency's classification system.** The assembly algorithm can be reconfigured to produce the classes a country reports, from the same primitives. The regional system, for example, uses biophysical primitives (evergreen, deciduous, tree canopy cover, rice, urban and built-up, cropland, mangrove, plantation forest and others) and assembles them into a shared 18-class typology; a country can assemble them into its own classes instead.
+- **Easily updated.** New data and better algorithms can be added each year, and validation data from one year improve the next.
+
+## Terms to know
+
+**Machine learning (ML).** A kind of artificial intelligence in which algorithms learn patterns and relationships from large datasets, then use them to make predictions or decisions, improving as they get more data. RLCMS uses Random Forest and convolutional neural networks.
+
+**Classifier.** An ML algorithm that sorts data into categories (classes). It learns from training data and predicts the class of new data.
+
+**<Term id="random-forest" /> classifier.** An ML algorithm that uses many decision trees, each built from a random subset of the training data, and takes the majority vote of the trees as the final class. It predicts most classes well, but can struggle with classes whose data look alike. See [Random Forest theory](/bhutan-hfld-training/day-3/random-forest/).
+
+**Training data.** Reference points with known classes, collected in the field or from high-resolution imagery. Reference points are split into **training** and **validation** data. At each training point, the covariate values are read from the image (sampling); the classifier learns from these "known" points and predicts the class of every other ("unknown") pixel.
+
+**<Term id="covariate">Covariates</Term>.** The variables a classifier uses, calculated from the composite bands (indices, Tasseled Cap, terrain and others). In Random Forest, the best split at each node is searched among a random subset of covariates. Fewer covariates means less computation, so RLCMS runs the classifier twice: first with all covariates, to find the most important ones (**feature selection**), then with only those, for an efficient and accurate model.
+
+**<Term id="primitive">Primitives</Term>.** The output of the model: a probability map for each land-cover class, one map per class. Each pixel's value says how likely it is to be that class, based on how similar its covariate values are to what the model learned from the training data for that class. The accuracy of each primitive can be evaluated separately.
+
+**<Term id="assemblage">Assemblage</Term> map.** The land-cover map made by combining the primitives with rules that reflect the user's class definitions and priorities, while keeping the uncertainty information. In the simplest version, each pixel takes the class whose primitive has the highest probability; in practice a decision tree with thresholds and a class order is used.
+
+<Callout type="bhutan">
+Bhutan context: for HFLD, the classes Bhutan reports (forest, cropland, grassland, settlement, wetland and other land) are produced by assembling Bhutan's own primitives, with rules that put Bhutan's forest definition into practice.
+</Callout>
+
+## Common mistakes
+
+- **Treating a primitive as a map.** A primitive is a probability; the class comes only after assemblage.
+- **Using validation points for training.** Keep them separate, or the accuracy is overstated.
+- **Adding every possible covariate.** Feature selection keeps the model efficient and often more accurate.
+
+## Practice
+
+<Challenge level="complete" time={5} hints={["Think of what each stage takes in and what it produces."]}>
+For each RLCMS stage, write one line saying what it takes in and what it produces. For example: *Composite preparation: raw images in, cloud-free, corrected composite out.*
+
+<Fragment slot="solution">
+- **Composite preparation:** raw satellite images → corrected, cloud-free seasonal composites.
+- **Training data preparation:** composites and reference points → covariate values at training points (and a separate validation set).
+- **Primitive generation:** sampled training data and covariates → one probability layer per class.
+- **Assemblage:** primitives and decision rules → the final land-cover map.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-4-rlcms-overview" questions={[
+  { q: "What is the correct order of the RLCMS stages?", options: ["Primitives → composites → assemblage → training data", "Composites → training data → primitives → assemblage", "Training data → assemblage → composites → primitives", "Assemblage → primitives → training data → composites"], answer: 1, explain: "Composites feed the training data sampling, which trains the classifiers that make primitives, which are assembled into the map." },
+  { q: "What is a primitive?", options: ["A raw satellite band", "A probability map for one land-cover class", "The final land-cover map", "A training point"], answer: 1, explain: "One primitive per class, giving each pixel's probability of being that class." },
+  { q: "What are covariates?", options: ["Validation points", "Variables calculated from the composite bands that the classifier uses", "The classes in the typology", "Thresholds in the decision tree"], answer: 1, explain: "Covariates are the classifier's input variables: indices, terrain and so on." },
+  { q: "What does the assemblage do?", options: ["Masks clouds", "Combines primitives into a land-cover map using rules and thresholds", "Splits training and validation data", "Computes covariates"], answer: 1, explain: "The assemblage turns probabilities into classes, following the user's class definitions and priorities." },
+  { q: "RLCMS runs the classifier twice: first to find the most important covariates, then with only those.", answer: true, explain: "This feature selection reduces computation and often improves accuracy." },
+]} />
+
+<KeyPoints points={[
+  "RLCMS has four stages: composites, training data, primitives, assemblage.",
+  "Covariates are the classifier's inputs; primitives are per-class probability maps; the assemblage turns them into a land-cover map.",
+  "The modular design lets each stage, and the class system, be changed or updated on its own.",
+]} />
+
+<References />
+
+<Credit
+  source="D4 RLCMS: General Overview and Terms to Know (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson; terms linked to the glossary",
+    "Typos corrected (\"preperation\", \"modulalr system architicure\")",
+    "Figures from published RLCMS papers described in text instead of reused",
+    "\"SERVIR-SEA\" given as SERVIR-Mekong, the hub that developed RLCMS",
+  ]}
+/>
