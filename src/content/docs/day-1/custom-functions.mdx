@@ -37,7 +37,7 @@ An image collection is a set of images of the same kind. For example, every Land
 
 <CodeBlock script="day-1/custom-functions.js" lines={[20, 23]} />
 
-**What is mapped?** The collection has hundreds of thousands of images, but `Map.addLayer()` shows only the most recent image at each place.
+**What is mapped?** The collection holds every Landsat 8 scene since 2013, far too many to list, but `Map.addLayer()` shows only the most recent image at each place. In the course script this layer starts switched off to save time: tick it in the **Layers** menu to see it.
 
 <Callout type="mistake" title="Printing the whole collection">
 `print(L8_collection)` fails with "Collection query aborted after accumulating over 5000 elements". Earth Engine refuses to list that many images in the Console. Filter the collection first, and print its `size()` instead of the collection itself.
@@ -87,7 +87,7 @@ Here is a function that adds two numbers:
 
 ### Local and global variables
 
-Try printing `Sum` after the function runs: the Console says **Sum is not defined in this scope**. A variable created with `var` inside a function is **local**: it exists only inside the function. To get the result out, the function uses `return`, and you store the call in a **global** variable, `Sum_test`. The Console shows 157 twice: once from the `print` inside the function, and once from `Sum_test`.
+Try printing `Sum` after the function runs: the Console says **Sum is not defined in this scope**. Next, remove the `return Sum;` line and try `var Sum_test = calculate_Sum(75, 82); print(Sum_test);`. There is no error message, but the value is lost: without `return`, a function gives back nothing (`undefined`). A variable created with `var` inside a function is **local**: it exists only inside the function. To get the result out, the function uses `return`, and you store the call in a **global** variable, `Sum_test`. The Console shows 157 twice: once from the `print` inside the function, and once from `Sum_test`.
 
 ## Part 6: A cloud-masking function
 
@@ -193,7 +193,7 @@ Your script runs in two places. Plain JavaScript (variables, `function`, `if`, l
 
 ## Common mistakes
 
-- **No `return`.** A mapped function without `return` gives an error or an empty collection.
+- **No `return`.** A mapped function without `return` fails with the error "User-defined methods must return a value".
 - **Returning the wrong type.** A function for `map()` over an image collection must return an image. Returning a number or a string fails.
 - **Using `print()` or `Map.addLayer()` inside a mapped function.** They run on the client, which `map()` can't do. Remove them.
 - **Using the wrong dataset with `simpleCloudScore`.** It expects Landsat TOA reflectance; with surface reflectance the scores are wrong.
