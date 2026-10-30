@@ -1,0 +1,170 @@
+{
+ "deck": "image-collections",
+ "title": "Working with Time-series of Images and Image Stacks, Filtering Image Collections",
+ "day": 1,
+ "lesson": "day-1/image-collections",
+ "source": "Day 1/D1 WORKING WITH IMAGE COLLECTIONS.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
+ "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "slides": [
+  {
+   "image": "01.webp",
+   "source_slide": 2,
+   "title": "",
+   "text": "- WORKING WITH IMAGE COLLECTIONS\n- Geometry tool (rectangle, line, point and polygon), Create a date-limited ImageCollection and apply reducers (e.g., median pixel value)",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "02.webp",
+   "source_slide": 3,
+   "title": "Set Up Your Workspace",
+   "text": "- DEFAULT REPOSITORY\n- Create a new folder script in the code editor Code Editor API\n- Create a new folder and script in your default repository\n\nIt is important to store your script in a logical location and save it at each stage. Scripts do not save automatically!",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "03.webp",
+   "source_slide": 4,
+   "title": "Working with Image Collections",
+   "text": "AN ORGANIZED SET OF IMAGES\n\n- Create an Image collection object:\n- Landsat\n- Planet\n- Sentinel\n- MODIS\n- Other",
+   "notes": "",
+   "hidden_pictures": 2
+  },
+  {
+   "image": "04.webp",
+   "source_slide": 5,
+   "title": "Optical Imagery",
+   "text": "- Landsat (USGS)\n  - 1980s-present, 30m resolution, global\n  - Currently provides 15m data with 16-day revisit\n- Sentinel-2 (ESA)\n  - 2015-present, 10m res, 10-day revisit globally\n- Many others\n  - Various resolutions, revisit times, bands, etc.",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "05.webp",
+   "source_slide": 6,
+   "title": "Working with Image Collections",
+   "text": "| Satellite | Date Range | Instruments | Resolution |\n|---|---|---|---|\n| Landsat 1 | 1972 - 1978 | MSS | 60 |\n| Landsat 2 | 1975 - 1982 | MSS | 60 |\n| Landsat 3 | 1978 - 1983 | MSS | 60 |\n| Landsat 4 | 1982-1993 | MSS/TM | 60 / 30 |\n| Landsat 5 | 1984-2012 | MSS/TM | 30 |\n| Landsat 7 | 1999 - 2022 | ETM+ | 30 / 15 (pan) |\n| Landsat 8 | 2013 - present | OLI/TIRS | 30 / 15 (pan) |\n| Landsat 9 | 2021 - present | OLI-2/TIRS-2 | 30 / 15 (pan) |\n\n© NASA's Goddard Space Flight Center",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "06.webp",
+   "source_slide": 7,
+   "title": "Landsat 8 Bands",
+   "text": "SWIR 2\n\nPanchromatic\n\nCirrus\n\nThermal 1\n\nThermal 2\n\nQA",
+   "notes": "",
+   "hidden_pictures": 12
+  },
+  {
+   "image": "07.webp",
+   "source_slide": 8,
+   "title": "Landsat 8 Bands",
+   "text": "False Color Composite",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "08.webp",
+   "source_slide": 9,
+   "title": "Sentinel-2",
+   "text": "- False Color\n- (often used for plant health)\n- NIR - RED - GREEN",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "09.webp",
+   "source_slide": 10,
+   "title": "Sentinel-2",
+   "text": "RGB code\n\nFalse Color code\n\n- Example:\n- Sentinel-2\n- agriculture band combination\n- SWIR-1, NIR, blue",
+   "notes": "",
+   "hidden_pictures": 4
+  },
+  {
+   "image": "10.webp",
+   "source_slide": 11,
+   "title": "Working with Image Collections",
+   "text": "- One way or another all image data to be visualized needs to conform to PNG or JPEG format.\n- 8-bit (values 0 to 255)\n- grayscale, paletted, or RGB(A)\n- ee.Image.visualize\n- bands\n  - a list of either a single band or three bands\n- min\n  - the data value to associate with 0 in 8-bit image\n- max\n  - the data value to associate with 255 in 8-bit image\n- palette\n  - a list of color values to scale linearly between\n- opacity\n  - value from 0 (transparent) to 1 (opaque)\n\nImage styling",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "11.webp",
+   "source_slide": 12,
+   "title": "Working with Image Collections",
+   "text": "Color palette\n\n```js\npalette:\n```\n\n```js\n#ffe74c\n```\n\n```js\n#ff5964\n```\n\nmin: 200\n\nSelected data range scaled linearly to 8-bit range\n\nmax: 2500",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "12.webp",
+   "source_slide": 13,
+   "title": "Temporally Filter Images",
+   "text": "Filter the dates to the time period you want\n\nChange these bands, based on what you  want to look at - this is to help you visualize.\n\nYou can change the coordinates and zoom level",
+   "notes": "",
+   "hidden_pictures": 3
+  },
+  {
+   "image": "13.webp",
+   "source_slide": 14,
+   "title": "Computing Infrastucture",
+   "text": "- Geometry\n- Points, lines, and polygons\n- Feature\n- A Geometry + attributes\n\n- Image\n- An arbitrary number of bands + band designations + metadata\n- Collection\n- A bag of a certain object type, i.e. a FeatureCollection\n\n- + B1 properties\n- + B2 properties\n- + B3 properties\n- + B4 properties\n- + B5 properties\n- + B6 properties\n\n+ metadata\n\n| Geometry | Biome | NDVI |\n|---|---|---|\n|   | “grassland” | 0.32 |\n|   | “savanna” | 0.15 |\n\n| Geometry | Biome | NDVI |\n|---|---|---|\n|   | “grassland” | 0.32 |",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "14.webp",
+   "source_slide": 15,
+   "title": "Computing Infrastucture",
+   "text": "",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "15.webp",
+   "source_slide": 16,
+   "title": "Computing Infrastucture",
+   "text": "",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "16.webp",
+   "source_slide": 17,
+   "title": "Earth Engine Reducers",
+   "text": "- Reducer\n- Object used for aggregations and calculating statistics\n\nImageCollection Reducer:\n\nREDUCERS COMBINE A BUNCH OF VALUES\n\nReduces the collection of images to an individual image\n\nImage Reducer:\n\nExample; mean, median, min, max",
+   "notes": "",
+   "hidden_pictures": 3
+  },
+  {
+   "image": "17.webp",
+   "source_slide": 18,
+   "title": "Earth Engine Reducers",
+   "text": "Where do the values come from / where do the results go?\n\nHow are the values combined?\n\n- Image.reduce\n- Image.reduceConnectedComponents\n- Image.reduceNeighborhood\n- Image.reduceRegion\n- Image.reduceRegions\n- Image.reduceResolution\n- Image.reduceToVectors\n- ImageCollection.reduce\n- FeatureCollection.reduceColumns\n- FeatureCollection.reduceToImage\n- List.reduce\n- Array.reduce\n- Array.accum\n\n- sum\n- mean\n- max\n- countDistinct\n- first\n- median\n- mode\n- percentile\n- anyNonZero\n- autoHistogram\n- kendallsCorrelation\n- linearRegression\n- variance\n- pearsonsCorrelation\n- ...",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "18.webp",
+   "source_slide": 19,
+   "title": "Earth Engine Reducers",
+   "text": "ee.ImageCollection\n\nREDUCERS COMBINE A BUNCH OF VALUES\n\nReduces the collection of images to an individual image\n\n```js\nvar median = imageCollection\n.reduce(ee.Reducer.median(), 2);\n```\n\nhttps://code.earthengine.google.com/21c76e4eb38c13c52de23ef89f52106f\n\n```js\nee.Image\n```",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "19.webp",
+   "source_slide": 20,
+   "title": "Earth Engine Reducers",
+   "text": "Image Region reductions\n\n- var mean = image.reduceRegion(\\{\n- reducer: ee.Reducer.mean(),\n- geometry: santaCruz.geometry(),\n- scale: 30,\n- maxPixels: 1e9,\n- \\});\n\nhttps://code.earthengine.google.com/cb215b5eb73dd292017702673523ee7f",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "20.webp",
+   "source_slide": 21,
+   "title": "Ee Scaling and Debugging",
+   "text": "Three kinds of Errors\n\n- Syntax\n- Errors\n- Client\n- Errors\n- Server\n- Errors\n\nMore information on debugging: https://developers.google.com/earth-engine/guides/debugging",
+   "notes": "",
+   "hidden_pictures": 0
+  }
+ ]
+}

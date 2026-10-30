@@ -1,0 +1,194 @@
+{
+ "deck": "code-editor-and-data-catalog",
+ "title": "Exploring Data Archive in GEE",
+ "day": 1,
+ "lesson": "day-1/code-editor-and-data-catalog",
+ "source": "Day 1/D1 EXPLORING DATA ARCHIVE IN GEE.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
+ "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "slides": [
+  {
+   "image": "01.webp",
+   "source_slide": 2,
+   "title": "",
+   "text": "- INTRODUCTION TO THE CODE EDITOR  API\n- web-based IDE for the Earth Engine JavaScript API",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "02.webp",
+   "source_slide": 3,
+   "title": "Navigating the User Interface",
+   "text": "SEARCH BAR\n\nLEFT PANEL\n\nCODE EDITOR\n\nRIGHT PANEL\n\nMAP VIEWER",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "03.webp",
+   "source_slide": 4,
+   "title": "Navigating the User Interface",
+   "text": "SEARCH BAR\n\nThis tool helps GEE users quickly access datasets and zoom to locations",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "04.webp",
+   "source_slide": 5,
+   "title": "Navigating the User Interface",
+   "text": "LEFT PANEL\n\n- SCRIPT: In this tab, any script you save will be listed under “Owner”.\n- DOCS: In this tab, you will see a categorical listing of available functions to use as you write your script.\n- ASSETS: Any files that you have uploaded to or exported to GEE will be listed in this tab.",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "05.webp",
+   "source_slide": 6,
+   "title": "Navigating the User Interface",
+   "text": "CODE EDITOR\n\nAll GEE scripts are written in javascript and can be activated by clicking the “Run” button or pressing ctrl-enter (cmd-enter on Mac). A word of caution:  it is not automatically save!\n\n  - code editor",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "06.webp",
+   "source_slide": 7,
+   "title": "Navigating the User Interface",
+   "text": "RIGHT PANEL\n\n- INSPECTOR: The mouse cursor changes to a crosshairs and             clicking on the map allows us to sample our data from a particular latitude and longitude.\n- CONSOLE: This is the default tab when GEE loads and contains helpful information related to data being accessed in the script             editor as well as statistical printouts and error messages.\n- TASKS: In this tab, we can track the progress of any data that are in the queue for export/download.",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "07.webp",
+   "source_slide": 8,
+   "title": "Navigating the User Interface",
+   "text": "MAP VIEWER\n\n- GEOMETRY TOOL: (upper left corner of the map) The hand icon is the cursor for panning around the map. Users can then import geometries to your script by drawing them on the screen. You can draw geometries for:\n- points\n- lines\n- polygons\n- rectangles\n- LAYER PANEL: (upper right corner of the map) This drop down is used to adjust the display of layers you added to the map.\n\n  - Map viewer",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "08.webp",
+   "source_slide": 9,
+   "title": "Intro to JavaScript in GEE",
+   "text": "COMMENT\n\n- DOUBLE SLASH (//): for indicating a line of code is a comment, to explain the code or leave a note for yourself.\n- The Code Editor also provides a shortcut— Ctrl + / on Windows, Cmd + / on Mac —to comment or uncomment multiple lines at a time.\n- // This is comment!",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "09.webp",
+   "source_slide": 10,
+   "title": "Intro to JavaScript in GEE",
+   "text": "PRINT FUNCTION\n\n- Print is a function to print text or further information, where the output will be displayed on the upper right-hand panel under the Console after clicking the Run button\n- print(‘Hello World’)\n\nIf you want to filter a specific area, you need to check the attribute you want to filter by\n\nLet’s go to: https://code.earthengine.google.com/ Let’s try to display the words “Hello World”",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "10.webp",
+   "source_slide": 11,
+   "title": "Intro to JavaScript in GEE",
+   "text": "VARIABLE (var)\n\nLISTS\n\n- A variable is a storage location in programming that holds data that can be changed or manipulated.\n- var city = ‘Johor’\n- NOTE: The code below assigns the text “Manila” to the variable named city. Single quotes (‘) or Double quotes (“) on either side of the text can be used to create a text string in the code.\n\n- JavaScript provides a data structure called a list that can hold multiple values. We can create a new list using the square brackets [  ] and adding multiple values separated by a comma (,). This example is a list of strings of city names assigned to the variable cities.\n- var cities = [‘Johor', ‘Kedah', ‘Kelantan', ‘Melaka'];print(cities);\n\nLet’s go to: https://code.earthengine.google.com/ Let’s try to display “var” and list “[ ]”",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "11.webp",
+   "source_slide": 12,
+   "title": "Intro to JavaScript in GEE",
+   "text": "OBJECTS\n\nFUNCTION\n\n- Objects in JavaScript allow you to store key-value pairs, where each value can be referred to by its key. You can create a dictionary using curly braces \\{ \\}. The code below creates an object called cityData with some information about Johor.\n- var cityData = \\{\n- 'city': 'Thimphu',\n- 'coordinates': [83.63, 27.47],\n- 'population': 114,551\n- \\};\n- print(cityData);\n\n- Functions take user inputs, use them to carry out some computation, and send an output back. Functions allow you to group a set of operations together and repeat the same operations with different parameters without having to rewrite them every time.\n- var greet = function(name) \\{    return 'Hello ' + name;\\};print(greet('World'));print(greet('Readers'));",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "12.webp",
+   "source_slide": 13,
+   "title": "",
+   "text": "- WORKING WITH IMAGES\n- Images are composed of one or more bands and each band has its own name, data type, scale, mask and projection",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "13.webp",
+   "source_slide": 14,
+   "title": "Asset Types",
+   "text": "- RASTER\n- Image\n  - A single raster image\n  - May have multiple bands, properties*\n- ImageCollection\n  - Indexed during creation\n  - Supports filtering and aggregation of many images by time, area, etc.\n\n- TABLE\n- FeatureCollection\n  - Geometry column inferred\n    - Empty MultiPoint if missing\n  - Other columns → Feature properties\n  - Property/column keys:table.getInfo().columns\n\n* All collections & elements can have key→value properties",
+   "notes": "",
+   "hidden_pictures": 5
+  },
+  {
+   "image": "14.webp",
+   "source_slide": 15,
+   "title": "Asset Types",
+   "text": "Image (ee.Image) for Landsat\n\n```js\n// Fundamental raster data type for choosing an individual image in Earth Engine.\nvar LC8_image= ee.Image('LANDSAT/LC08/C02/T1_TOA/LC08_138041_20260101')\n//Display Image\nMap.addLayer(LC8_image,{bands:['B6', 'B5', 'B4'],min: 0.05, max: 0.8,gamma: 1.6}, 'Landsat8scene');\n```\n\n🛰️LANDSAT",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "15.webp",
+   "source_slide": 16,
+   "title": "Asset Types",
+   "text": "Image (ee.Image) for Sentinel-2\n\n```js\n// Fundamental raster data type for choosing an individual image in Earth Engine.\n//Import single image\n//-----------------------------\nvar s2_image= ee.Image('COPERNICUS/S2_SR_HARMONIZED/20250103T044201_20250103T044548_T45RYL')\n// Define visualization parameters for False Color\n//-----------------------------------------\nvar rgbParams = {\n// bands: ['B4', 'B3', 'B2'],\n// min: 0,\n// max: 3000\n};\n//Display Image\n//-------------------------------------------\nMap.addLayer(s2_image,rgbParams, 's2scene');\n```\n\n🛰️SENTINEL-2",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "16.webp",
+   "source_slide": 17,
+   "title": "Asset Types",
+   "text": "ImageCollection (ee.ImageCollection)\n\n```js\n// A stack of satellite images you can filter and process for cloud-free composites or time-series analysis\nvar l8col = ee.ImageCollection(\"LANDSAT/LC08/C02/T1_TOA\");\n// filter by location/geometry\n// l8col = l8col.filterBounds(aoi)\n// show the number of image in the collection\nprint('number of images:',l8col.size())\n// filter by image property\nprint(l8col.first())\n// filter by the least cloud cover\nvar cloudfreeImg = l8col.sort(\"CLOUD_COVER\", true).first() // true, false\nprint('cloud free image',cloudfreeImg)\nvar vis = {\n// bands: ['B4', 'B3', 'B2'], // 🔥 Landsat RGB\n// min: 0,\n// max: 0.3\n};\nMap.centerObject(aoi, 10);\nMap.addLayer(cloudfreeImg, vis, 'Least Cloud Image');\n```\n\n🛰️LANDSAT",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "17.webp",
+   "source_slide": 18,
+   "title": "Asset Types",
+   "text": "| Satellite | Sensor | Type | GEE ImageCollection ID |\n|---|---|---|---|\n| Landsat 4 | TM | Surface Reflectance (SR) | \"LANDSAT/LT04/C02/T1_L2\" |\n|   |   | Top of Atmosphere (TOA) | \"LANDSAT/LT04/C02/T1_TOA\" |\n| Landsat 5 | TM | Surface Reflectance (SR) | \"LANDSAT/LT05/C02/T1_L2\" |\n|   |   | Top of Atmosphere (TOA) | \"LANDSAT/LT05/C02/T1_TOA\" |\n| Landsat 7 | ETM+ | Surface Reflectance (SR) | \"LANDSAT/LE07/C02/T1_L2\" |\n|   |   | Top of Atmosphere (TOA) | \"LANDSAT/LE07/C02/T1_TOA\" |\n| Landsat 8 | OLI/TIRS | Surface Reflectance (SR) | \"LANDSAT/LC08/C02/T1_L2\" |\n|   |   | Top of Atmosphere (TOA) | \"LANDSAT/LC08/C02/T1_TOA\" |\n| Landsat 9 | OLI-2/TIRS-2 | Surface Reflectance (SR) | \"LANDSAT/LC09/C02/T1_L2\" |\n|   |   | Top of Atmosphere (TOA) | \"LANDSAT/LC09/C02/T1_TOA\" |",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "18.webp",
+   "source_slide": 19,
+   "title": "Asset Types",
+   "text": "ImageCollection (ee.ImageCollection)\n\n```js\n// A stack of satellite images you can filter and process for cloud-free composites or time-series analysis\n// Load sentinel 2 data product\nvar collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterBounds(aoi)\n// show the number of image in the collection\nprint('number of images:',collection.size())\n// filter by image property\nprint(collection.first())\nvar startingDate = '2024-01-01';\nvar endDate = '2024-12-31'\n// filter by dates\nvar s2_2024 = collection.filterDate(startingDate,endDate)\nprint('2024 images:', s2_2024)\n// filter by the least cloud cover\nvar cloudfreeImg = s2_2024.sort(\"CLOUDY_PIXEL_PERCENTAGE\", true).first() // true, false\nprint('cloud free image',cloudfreeImg)\n// Define visualization parameters for RGB\nvar rgbParams = {\n// bands: ['B4', 'B3', 'B2'],\n// min: 0,\n// max: 3000\n};\n//Display image\nMap.addLayer(cloudfreeImg,rgbParams,'cloud free image')\n```\n\n- 📍 Location (filterBounds)\n- 📅 Date (filterDate)\n- 🌥️ Cloud cover or other metadata\n\n🛰️SENTINEL-2",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "19.webp",
+   "source_slide": 20,
+   "title": "Asset Types",
+   "text": "| Collection Name | Description | GEE ID |\n|---|---|---|\n| Sentinel-2 MSI: Level-1C | TOA reflectance, uncorrected for atmospheric effects | \"COPERNICUS/S2\" |\n| Sentinel-2 MSI: Level-2A | Surface reflectance (SR), atmospherically corrected | \"COPERNICUS/S2_SR\" |\n| Sentinel-2 MSI: Harmonized (Level-2A) | Harmonized surface reflectance across Sentinel versions | \"COPERNICUS/S2_SR_HARMONIZED\" |\n| Cloud Score+ for Sentinel-2 Harmonized | Cloud probability score (cs_cdf) for cloud masking | \"GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED\" |",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "20.webp",
+   "source_slide": 21,
+   "title": "Asset Types",
+   "text": "FeatureCollection (ee.FeatureCollection)\n\n```js\n// A set of Features (Click here)\n// https://code.earthengine.google.com/ec007bf68789b99122646670fe6e471d\n// ============================================================\n// 1. LOAD GAUL LEVEL 1\n// ============================================================\nvar GAUL_2024_L1 = ee.FeatureCollection(\n// \"projects/sat-io/open-datasets/FAO/GAUL/GAUL_2024_L1\"\n);\n```",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "21.webp",
+   "source_slide": 22,
+   "title": "",
+   "text": "- GEE APPLICATIONS\n- Publicly available datasets\n- Examples of using GEE",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "22.webp",
+   "source_slide": 23,
+   "title": "Applications of GEE",
+   "text": "Go to developers.google.com/earth-engine/datasets",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "23.webp",
+   "source_slide": 24,
+   "title": "GEE Tutorial Homepage",
+   "text": "efabook\n\nOpen Geo Blog",
+   "notes": "",
+   "hidden_pictures": 3
+  }
+ ]
+}

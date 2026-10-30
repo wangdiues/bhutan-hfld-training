@@ -1,0 +1,226 @@
+{
+ "deck": "random-forest",
+ "title": "Deep Dive Into Random Forest Classification: Theory and Advanced Applications",
+ "day": 3,
+ "lesson": "day-3/random-forest",
+ "source": "Day 3/D3 INTRO TO RANDOM FOREST.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
+ "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "slides": [
+  {
+   "image": "01.webp",
+   "source_slide": 2,
+   "title": "",
+   "text": "- HOW RANDOM FOREST WORKS\n- What common problems can ML solve for the geospatial analyst? What techniques are used?",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "02.webp",
+   "source_slide": 3,
+   "title": "Overview of Random Forest",
+   "text": "- RF (or random forests) is an ensemble classifier that consists of many decision trees and outputs the class that is the mode of the class's output by individual trees.\n- The term came from random decision forests that was first proposed by Tin Kam Ho of Bell Labs in 1995.\n- The method combines Breiman's \"bagging\" idea and the random selection of features.",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "03.webp",
+   "source_slide": 4,
+   "title": "Overview of Random Forest",
+   "text": "Ingredients of Random Forests\n\n- Decision Trees\n- “Bagging”\n- Random feature selection\n- Ensemble modeling\n\nDecision Tree",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "04.webp",
+   "source_slide": 5,
+   "title": "Overview of Random Forest",
+   "text": "Decision Tree\n\nDecision tree - tree shaped diagram used to determine a course of action. Each branch of the tree represent a possible decision, occurrence or reaction.",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "05.webp",
+   "source_slide": 6,
+   "title": "Overview of Random Forest",
+   "text": "Decision Tree\n\nDecision tree - tree shaped diagram used to determine a course of action. Each branch of the tree represent a possible decision, occurrence or reaction.",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "06.webp",
+   "source_slide": 7,
+   "title": "Overview of Random Forest",
+   "text": "Decision Tree\n\nDecision tree - tree shaped diagram used to determine a course of action. Each branch of the tree represent a possible decision, occurrence or reaction.",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "07.webp",
+   "source_slide": 8,
+   "title": "Overview of Random Forest",
+   "text": "Decision Tree\n\nDecision tree - tree shaped diagram used to determine a course of action. Each branch of the tree represent a possible decision, occurrence or reaction.",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "08.webp",
+   "source_slide": 9,
+   "title": "Overview of Random Forest",
+   "text": "Why call it a tree?",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "09.webp",
+   "source_slide": 10,
+   "title": "Overview of Random Forest",
+   "text": "Why call it a tree?",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "10.webp",
+   "source_slide": 11,
+   "title": "Overview of Random Forest",
+   "text": "Why call it a tree?",
+   "notes": "",
+   "hidden_pictures": 2
+  },
+  {
+   "image": "11.webp",
+   "source_slide": 12,
+   "title": "Overview of Random Forest",
+   "text": "What is Random Forest?\n\nThe decision of the majority of the trees is chosen by the random forest as a final decision.",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "12.webp",
+   "source_slide": 13,
+   "title": "Overview of Random Forest",
+   "text": "Important terms\n\n- Entropy\n- Information gain\n- Leaf node\n- Decision node\n- Root node",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "13.webp",
+   "source_slide": 14,
+   "title": "Overview of Random Forest",
+   "text": "Entropy\n\nHigher entropy\n\nInitial set\n\nDecision split\n\nLower entropy",
+   "notes": "",
+   "hidden_pictures": 3
+  },
+  {
+   "image": "14.webp",
+   "source_slide": 15,
+   "title": "Overview of Random Forest",
+   "text": "Information Gain\n\nMeasure of decrease in entropy after the split\n\nInitial set\n\nHigher entropy\n\nDecision split\n\nLower entropy\n\nInformation gain = E1 – E2",
+   "notes": "",
+   "hidden_pictures": 3
+  },
+  {
+   "image": "15.webp",
+   "source_slide": 16,
+   "title": "How Decision Tree Works",
+   "text": "Problem: Classify a bowl of fruits based on different features",
+   "notes": "",
+   "hidden_pictures": 2
+  },
+  {
+   "image": "16.webp",
+   "source_slide": 17,
+   "title": "How Decision Tree Works",
+   "text": "Condition that gives maximum gain will be used as first split",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "17.webp",
+   "source_slide": 18,
+   "title": "How Decision Tree Works",
+   "text": "Condition that gives maximum gain will be used as first split",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "18.webp",
+   "source_slide": 19,
+   "title": "How Decision Tree Works",
+   "text": "Condition that gives maximum gain will be used as first split\n\nTree 1",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "19.webp",
+   "source_slide": 20,
+   "title": "How Decision Tree Works",
+   "text": "Condition that gives maximum gain will be used as first split\n\nTree 2",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "20.webp",
+   "source_slide": 21,
+   "title": "How Decision Tree Works",
+   "text": "Majority voted orange",
+   "notes": "",
+   "hidden_pictures": 5
+  },
+  {
+   "image": "21.webp",
+   "source_slide": 22,
+   "title": "How Decision Tree Works",
+   "text": "Majority voted orange",
+   "notes": "",
+   "hidden_pictures": 5
+  },
+  {
+   "image": "22.webp",
+   "source_slide": 23,
+   "title": "How Decision Tree Works",
+   "text": "What about regression?\n\n- The algorithm works exactly the same!\n- Except! Instead of using information gain, we use mean squared error.",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "23.webp",
+   "source_slide": 25,
+   "title": "Remote Sensing Applications",
+   "text": "",
+   "notes": "",
+   "hidden_pictures": 4
+  },
+  {
+   "image": "24.webp",
+   "source_slide": 26,
+   "title": "How Decision Tree Works",
+   "text": "- Issues\n- When the number of variables is large, but the fraction of relevant variables is small, random forests are likely to perform poorly when m is small\n- Why?\n- Because:  At each split the chance can be small that the relevant variables will be selected\n- For example, with 3 relevant and 100 not so relevant variables the probability of any of the relevant variables being selected at any split is ~0.25",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "25.webp",
+   "source_slide": 27,
+   "title": "Advantages",
+   "text": "- The advantages of random forest are:\n- It is one of the most accurate learning algorithms available. For many data sets, it produces a highly accurate classifier.\n- It runs efficiently on large databases.\n- It can handle thousands of input variables without variable deletion.\n- It gives estimates of what variables are important in the classification.\n- It generates an internal unbiased estimate of the generalization error as the forest building progresses.\n- It has an effective method for estimating missing data and maintains accuracy when a large proportion of the data are missing.",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "26.webp",
+   "source_slide": 28,
+   "title": "Disadvantages",
+   "text": "- Random forests have been observed to overfit for some datasets with noisy classification/regression tasks.\n- For data including categorical variables with different number of levels, random forests are biased in favor of those attributes with more levels. Therefore, the variable importance scores from random forest are not reliable for this type of data.\n- Beware of “out-of-distribution” samples",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "27.webp",
+   "source_slide": 29,
+   "title": "Resources",
+   "text": "- Want to know more?\n- There is an excellent review that breaks down the Random Forest algorithm and documents the many applications in remote sensing.\n- Random forest in remote sensing: A review of applications and future directions:\n  - https://doi.org/10.1016/j.isprsjprs.2016.01.011\n\nBut wait there's more!",
+   "notes": "",
+   "hidden_pictures": 0
+  }
+ ]
+}

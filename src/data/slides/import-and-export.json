@@ -1,0 +1,218 @@
+{
+ "deck": "import-and-export",
+ "title": "Importing and Exporting Datasets with Google Earth Engine",
+ "day": 2,
+ "lesson": "day-2/import-and-export",
+ "source": "Day 2/D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
+ "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "slides": [
+  {
+   "image": "01.webp",
+   "source_slide": 2,
+   "title": "Content Outlines",
+   "text": "OVERVIEW OF FEATURES AND FEATURE COLLECTIONS\n\nFeature data (point, line and polygon)\n\nBASIC ANALYSIS FUNCTIONS\n\nBuffer, clip, merge and union\n\nIMPORTING DATASETS\n\nfeature data, csv and raster data\n\nEXPORTING DATASETS\n\nfeature  data, csv and raster data",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "02.webp",
+   "source_slide": 3,
+   "title": "Overview",
+   "text": "Feature Collections are similar to Image Collections - but they contain Features, not images. They are equivalent to Vector Layers in GIS.\n\nKhajavi et al., 2021\n\nFeature?\n\nAttribute?",
+   "notes": "",
+   "hidden_pictures": 2
+  },
+  {
+   "image": "03.webp",
+   "source_slide": 4,
+   "title": "Basic Analysis Function",
+   "text": "- BUFFER\n- A buffer is a zone of a specified width around a feature (point, line, or polygon) in a GIS",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "04.webp",
+   "source_slide": 5,
+   "title": "Basic Analysis Function",
+   "text": "- CLIP\n- Extracting specific areas from a larger dataset (e.g., extracting land cover data within a study area boundary).",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "05.webp",
+   "source_slide": 6,
+   "title": "Basic Analysis Function",
+   "text": "- MERGE\n- Combining multiple shapefiles or feature classes into one dataset for unified analysis",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "06.webp",
+   "source_slide": 7,
+   "title": "Basic Analysis Function",
+   "text": "- UNION\n- Creating a combined dataset from overlapping regions or features",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "07.webp",
+   "source_slide": 8,
+   "title": "Before we begin…",
+   "text": "Do you have experience with GIS software relevant to preparing feature and raster datasets?",
+   "notes": "",
+   "hidden_pictures": 3
+  },
+  {
+   "image": "08.webp",
+   "source_slide": 9,
+   "title": "Importing Features to GEE as Assets: .shp",
+   "text": "- Shapefiles (.shp)\n- Minimum required for shapefile uploading:\n- .shp\n- .dbf\n- .shx\n- .prj\n- … or a .zip of these",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "09.webp",
+   "source_slide": 10,
+   "title": "Importing Features to GEE as Assets: .shp",
+   "text": "Shapefiles (.shp)\n\nThe extensions (.shp,.dbf,.shx,.prj)\n\nThen users go to the task panel.",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "10.webp",
+   "source_slide": 11,
+   "title": "Importing Features to GEE as Assets: .csv",
+   "text": "Comma-separated values (.csv)\n\n- Needs to be formatted with geometry information (lon = X, lat = Y)\n- CRS defaults to WGS84 (EPSG:4326)\n- Use ‘Advanced options’ to set these",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "11.webp",
+   "source_slide": 12,
+   "title": "Importing Features to GEE Asset",
+   "text": "Detailed information about tasks that are currently importing or have recently imported/exported data\n\n- Your feature and raster data stored as assets\n- (cloud assets or legacy assets)",
+   "notes": "",
+   "hidden_pictures": 2
+  },
+  {
+   "image": "12.webp",
+   "source_slide": 13,
+   "title": "Review Result",
+   "text": "What is this operation called?",
+   "notes": "",
+   "hidden_pictures": 2
+  },
+  {
+   "image": "13.webp",
+   "source_slide": 14,
+   "title": "Importing Features to GEE Asset",
+   "text": "```js\n// VISUALIZE THE FEATURES\nvar countries  = ee.FeatureCollection(\"projects/sat-io/open-datasets/FAO/GAUL/GAUL_2024_L0\");\nprint(countries.limit(10));\nvar Bhutan = countries.filter(ee.Filter.eq('gaul0_name', 'Bhutan'));\nvar studyArea = Bhutan;\nMap.addLayer(studyArea.draw('red'), {}, \"Bhutan\");\nMap.centerObject(studyArea, 8);\n```",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "14.webp",
+   "source_slide": 15,
+   "title": "Practical Assignment (AOI)",
+   "text": "",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "15.webp",
+   "source_slide": 16,
+   "title": "Exporting Data",
+   "text": "- Data in Raster (GeoTIFF)\n- Data in Vector (Features)\n- Data in CSV\n- Data in KML\n- Data in GeoJSON\n- Data in Video",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "16.webp",
+   "source_slide": 17,
+   "title": "Exporting Data",
+   "text": "Batch export APIs\n\n| Export | toAsset() | toCloudStorage() | toDrive() | toFeatureView() | toBigQuery() |\n|---|---|---|---|---|---|\n| image | ✅ | ✅ GeoTIFF, TFRecord | ✅ GeoTIFF, TFRecord |   |   |\n| map |   | ✅ PNG, JPG |   |   |   |\n| table | ✅ | ✅ CSV, GeoJSON, KML KMZ, SHP, TFRecord | ✅ CSV, GeoJSON, KML KMZ, SHP, TFRecord | ✅ | ✅ |\n| video |   | ✅ MP4 | ✅ MP4 |   |   |",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "17.webp",
+   "source_slide": 18,
+   "title": "Exporting Data",
+   "text": "Raster to Google Drive\n\nUse Export.image.toDrive() to download your imagery data sets.\n\nExport.image.toDrive(\\{ \nimage: image, \ndescription: 'image’, \nregion: region, \nscale: 30, \ncrs: 'EPSG:4326’, \nmaxPixels: 1e13, \nfolder: 'GEE’ \n\\});\n\nimage: typically refers to a single raster dataset\ndescription: name type of export\nregion: your area\nscale: resolution of data \ncrs: coordinate reference system for the output image\nmaxPixels: the numbers of pixels in the exported image\nfolder: set automatically the folder in Google Drive",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "18.webp",
+   "source_slide": 19,
+   "title": "Exporting Data",
+   "text": "Raster to Asset\n\nUse Export.image.toAsset () to download your imagery data sets.\n\n```js\nExport.image.toAsset({\nimage: medianImage,            description: \"Bhutan\",                    assetId: \"Bhutan\",                    region: studyArea.bounds(), \nscale:10,                    maxPixels:1e13\n});\n```\n\nimage: typically refers to a single raster dataset\ndescription: name type of export\nregion: your area\nscale: resolution of data \nassetId: you asset ID in Google earth engine account \nmaxPixels: the numbers of pixels in the exported image\nfolder: set automatically the folder in Google Drive",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "19.webp",
+   "source_slide": 20,
+   "title": "Exporting Data",
+   "text": "SHP to Google Drive\n\nUse Export.table.toDrive() to download your imagery data sets.\n\nExport.table.toDrive(\\{ \ncollection: features, \ndescription:'features’, \nfolder: 'GEE_’, \nfileFormat: 'SHP’ \n\\});\n\ncollection: typically refers to type of data \ndescription: name type of export\nfolder: set automatically the folder in Google Drive\nfileFormat:  Type of format",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "20.webp",
+   "source_slide": 21,
+   "title": "Exporting Data",
+   "text": "SHP to Asset\n\nUse Export.table.toAsset() to download your imagery data sets.\n\n```js\n// Export an ee.FeatureCollection Export.table.toAsset({   collection: features,\n description: 'exportToTableAssetExample',   assetId: 'exampleAssetId', });\n```\n\ncollection: typically refers to type of data \ndescription: name type of export\nassetId: you asset ID in Google earth engine account",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "21.webp",
+   "source_slide": 22,
+   "title": "Exporting Data",
+   "text": "Data in CSV, KML and GeoJSON\n\nExport.table.toDrive(\\{ \ncollection: features, \ndescription:'features’, \nfolder: 'GEE’, \nfileFormat: ‘CSV’ \n\\});",
+   "notes": "",
+   "hidden_pictures": 3
+  },
+  {
+   "image": "22.webp",
+   "source_slide": 23,
+   "title": "Exporting Data",
+   "text": "Data in Video\n\n1. Data feature is polygon\n  2. Landsat products \n   -   WRS_PATH\n   -   WRS_ROW",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "23.webp",
+   "source_slide": 24,
+   "title": "Exporting Data",
+   "text": "Export.video.toDrive",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "24.webp",
+   "source_slide": 25,
+   "title": "Exporting Data",
+   "text": "Image collection animation functions\n\n| ui.Thumbnail | GIF animation as a UI component |\n|---|---|\n| ee.ImageCollection.getVideoThumbURL | GIF animation downloadable from URL |\n| Export.video.toDrive | MP4 animation exported to Google Drive |\n| Export.video.toCloudStorage | MP4 animation exported to Cloud Storage bucket |\n| ee.ImageCollection.getFilmstripThumbURL | PNG or JPEG collection strip downloadable from URL |\n| ui.Thumbnail | PNG or JPEG image as UI component (need to display each frame individually) |\n| ee.Image.getThumbURL | PNG or JPEG image as UI component (need to display each frame individually) |\n| ui.Map.CloudStorageLayer | Map tile layers with alternating visibility |",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "25.webp",
+   "source_slide": 26,
+   "title": "Practical Assignment (export)",
+   "text": "",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "26.webp",
+   "source_slide": 27,
+   "title": "Any questions?",
+   "text": "",
+   "notes": "",
+   "hidden_pictures": 1
+  }
+ ]
+}

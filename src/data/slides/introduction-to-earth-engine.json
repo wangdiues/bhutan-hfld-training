@@ -1,0 +1,202 @@
+{
+ "deck": "introduction-to-earth-engine",
+ "title": "Introduction to Google Earth Engine: Features, Capabilities and Access",
+ "day": 1,
+ "lesson": "day-1/introduction-to-earth-engine",
+ "source": "Day 1/D1 Introduction to GEE_ Features, Capabilities, and Access.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
+ "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "slides": [
+  {
+   "image": "01.webp",
+   "source_slide": 2,
+   "title": "",
+   "text": "- WHAT IS EARTH ENGINE?:\n- Public data catalog, Computation engine, Interactive development platforms and Save and share work routines",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "02.webp",
+   "source_slide": 3,
+   "title": "What Is Earth Engine?",
+   "text": "- Remote Sensing Archive with petabytes of data in one location\n- A cloud-based geospatial processing platform for executing large-scale data analysis.\n\n@Google",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "03.webp",
+   "source_slide": 4,
+   "title": "Example Applications",
+   "text": "- Classifying land cover conditions and change detection for Mekong Regional Land Cover Monitoring System:\n- https://landcovermapping.org/en/landcover/\n\n@SERVIR-SEA",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "04.webp",
+   "source_slide": 5,
+   "title": "Why Is It Such a Powerful Image Analysis Software?",
+   "text": "Public data catalog: vast amounts of publicly available data (you don’t need to store data)\n\nProcessing power (computation engine)\n\nInteractive development platforms\n\nSave and share work routines",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "05.webp",
+   "source_slide": 6,
+   "title": "Why Is It Such a Powerful Image Analysis Software?",
+   "text": "Public data catalog: vast amounts of publicly available data (you don’t need to store data)\n\nProcessing power (computation engine)\n\nInteractive development platforms\n\nSave and share work routines",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "06.webp",
+   "source_slide": 7,
+   "title": "Data",
+   "text": "- MODIS\n- Earth Engine  Catalog entry\n\n- Landsat\n- Earth Engine  Catalog entry\n\n- Sentinel\n- Earth Engine  Catalog entry\n\n| > hundreds public datasets |\n|---|\n| > thousands new images every day |\n| > millions of images |\n| > 100 petabytes of data |\n\n- Planet\n- Planet entry\n\n- Land cover\n- Earth Engine Catalog entry\n\n- Daily weather\n- Earth Engine Catalog entry\n\n@GOOGE EARTH ENGINE\n\n... and many more, updating daily!",
+   "notes": "",
+   "hidden_pictures": 12
+  },
+  {
+   "image": "07.webp",
+   "source_slide": 8,
+   "title": "Earth Engine Public Data Catalog",
+   "text": "| Imagery | Climate & Weather |\n|---|---|\n| Geophysical | Demographic |\n| Vector Data |   |\n\n@Dave Thau",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "08.webp",
+   "source_slide": 9,
+   "title": "Load Your Own Data",
+   "text": "- Shapefiles from yourPC\n- Shapefiles from the GEE Catalog\n\n@GOOGE EARTH ENGINE\n\nhttps://code.earthengine.google.com/07e09f6a0fdedb1b38670a947468216a",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "09.webp",
+   "source_slide": 10,
+   "title": "Make Your Own Data in the Map",
+   "text": "@GOOGE EARTH ENGINE",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "10.webp",
+   "source_slide": 11,
+   "title": "Why Is It Such a Powerful Image Analysis Software?",
+   "text": "Public data catalog: vast amounts of publicly available data (you don’t need to store data)\n\nProcessing power (computation engine)\n\nInteractive development platforms\n\nSave and share work routines",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "11.webp",
+   "source_slide": 12,
+   "title": "Computation Earth Engine",
+   "text": "Divides data  in independents grids\n\n- “The computation engine is a just in time\n- distributed computation model, ...”",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "12.webp",
+   "source_slide": 13,
+   "title": "Computation Earth Engine",
+   "text": "“The computation engine is a just in time distributed computation model, a cloud-based processing infrastructure that automatically parallelized analyses on many CPUs across many computers in Google’s data centers.”\n\n- Storage Clusters (petabytes of data)\n- Computing clusters (1,000’s of CPUs)",
+   "notes": "",
+   "hidden_pictures": 2
+  },
+  {
+   "image": "13.webp",
+   "source_slide": 14,
+   "title": "Computation Earth Engine",
+   "text": "- Storage Clusters (petabytes of data)\n- Computing clusters (1,000’s of CPUs)",
+   "notes": "",
+   "hidden_pictures": 3
+  },
+  {
+   "image": "14.webp",
+   "source_slide": 15,
+   "title": "Computation Earth Engine",
+   "text": "- Unprecedented speed: reduce processing times by orders of magnitude by using the distributed, cloud-based computing power\n- Ease of use and lower costs: online platform with easy access to data, scientific algorithms, computational power",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "15.webp",
+   "source_slide": 16,
+   "title": "Why Is It Such a Powerful Image Analysis Software?",
+   "text": "Public data catalog: vast amounts of publicly available data (you don’t need to store data)\n\nProcessing power (computation engine)\n\nInteractive development platforms\n\nSave and share work routines",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "16.webp",
+   "source_slide": 17,
+   "title": "Code Editor",
+   "text": "- What is it?\n- Web based IDE for the Earth Engine API\n- Access many pre-made geospatial tools",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "17.webp",
+   "source_slide": 18,
+   "title": "What Is Earth Engine?",
+   "text": "What can Earth Engine do?\n\nGet an image\n\nPick your: projection, resolution, bands, bounding-box, visualization",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "18.webp",
+   "source_slide": 19,
+   "title": "What Is Earth Engine?",
+   "text": "What can Earth Engine do?\n\nGet an image\n\nApply an algorithm to an image\n\nUse library functions or script your own",
+   "notes": "",
+   "hidden_pictures": 2
+  },
+  {
+   "image": "19.webp",
+   "source_slide": 23,
+   "title": "What Is Earth Engine?",
+   "text": "",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "20.webp",
+   "source_slide": 24,
+   "title": "What Is Earth Engine?",
+   "text": "What can Earth Engine do?\n\nGet an image\n\nApply an algorithm to an image\n\nFilter a collection\n\nMap an algorithm over a collection\n\nReduce a collection",
+   "notes": "",
+   "hidden_pictures": 3
+  },
+  {
+   "image": "21.webp",
+   "source_slide": 25,
+   "title": "What Is Earth Engine?",
+   "text": "- In interactive mode,the user can:\n- Edit their script\n- Run the script\n- Evaluate the results\n- Repeat, refine, and perfect\n- Share and publish\n\ncode.earthengine.google.com",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "22.webp",
+   "source_slide": 26,
+   "title": "Why Is It Such a Powerful Image Analysis Software?",
+   "text": "Public data catalog: vast amounts of publicly available data (you don’t need to store data)\n\nProcessing power (computation engine)\n\nInteractive development platforms\n\nSave and share work routines",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "23.webp",
+   "source_slide": 27,
+   "title": "When to Use Earth Engine?",
+   "text": "- EE Limitations:\n- Better suited to image analyses than vector-based analyses\n- Analysis based on pixel spatial relations are harder to complete (because of the processing on multiple CPUs). Image segmentation and hydrologic modeling options are limited or in testing phases.\n\n- EE Benefits:\n- Good for projects that requires:\n- Data coverage for a large region\n- Extensive data library\n- High speed, intensive processing capacity\n- Advanced raster processing tools",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "24.webp",
+   "source_slide": 28,
+   "title": "Registration Process",
+   "text": "Sign Up for GEE\n\nhttps://earthengine.google.com/signup/",
+   "notes": "",
+   "hidden_pictures": 2
+  }
+ ]
+}

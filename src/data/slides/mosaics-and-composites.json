@@ -1,0 +1,130 @@
+{
+ "deck": "mosaics-and-composites",
+ "title": "Creating Mosaics and Composites from Image Collections",
+ "day": 2,
+ "lesson": "day-2/mosaics-and-composites",
+ "source": "Day 2/D2-Creating Mosaics and Composites from Image Collections.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
+ "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "slides": [
+  {
+   "image": "01.webp",
+   "source_slide": 2,
+   "title": "Content Outlines",
+   "text": "OVERVIEW OF SENTINEL-2\n\nSentinel-2 images have a spatial resolution of 10 meters (for visible and NIR bands), the repeat cycle is shorter\n\nIMAGE PRE-PROCESSING CONCEPTS\n\nProvided in pre-processing, processing, and result sections.\n\nCREATE CLOUD-FREE SENTINEL-2 IMAGE COMPOSITE\n\nObserve persistent cloud cover throughout the year; Generate clear Sentinel-2 composites\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "02.webp",
+   "source_slide": 3,
+   "title": "Overview of Sentinel-2",
+   "text": "- Launched as part of the European Commission’s Copernicus program on June 23, 2015\n- Multispectral Instrument (MSI)\n- Wide-swath, high-resolution (10 to 60m)\n- Support Copernicus Land Monitoring studies, including the monitoring of vegetation, soil and water cover, as well as observation of inland waterways and coastal areas\n- Two products:\n- Level 1-C\n- Level 2A  (Cloud Score+  can be applied to either L1C or L2A collections)\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "03.webp",
+   "source_slide": 4,
+   "title": "Overview of Sentinel-2",
+   "text": "- Orbital Characteristics\n  - Altitude: 786 km.\n  - Inclination: 98.62 deg\n  - Period: 100.6 min\n  - Cycle: 10 days\n  - Type: Sun synchronous (Near-polar)\n- Swath Width: 290 km\n- Mean Local Solar Time (MLST) at the descending node is 10:30 (am).\n- Launch Mass: 1140 kg\n- Design life: 7 years (Nominal Mission) to 12 years (Maximum)\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "04.webp",
+   "source_slide": 5,
+   "title": "Image Pre-processing",
+   "text": "Atmospheric Correction\n\nRemoves the effects of atmospheric particles (like dust, water vapor) to retrieve true surface reflectance from satellite imagery\n\nRadiometric Correction\n\nAdjusts sensor errors and inconsistencies in image brightness to ensure the pixel values accurately reflect surface energy.\n\nTopographic Correction\n\nReduces illumination differences caused by terrain (e.g., slopes and shadows) to improve spectral consistency across varied topography.\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "05.webp",
+   "source_slide": 6,
+   "title": "Image Pre-processing",
+   "text": "Import Sentinel 2 Image\n\nShadow Masking\n\nCloud Masking\n\nBRDF Correction\n\nTopographic Correction\n\nCloud Free Composite\n\nWorkflow of creating a cloud free composite\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "06.webp",
+   "source_slide": 7,
+   "title": "Image Pre-processing",
+   "text": "Import Sentinel 2 Image\n\nimportS2_module\n\nShadow Masking\n\nshadowMask_module\n\ncloud_module\n\nCloud Masking\n\nmain\n\nbrdf_module\n\nBRDF Correction\n\ntopographic_module\n\nTopographic Correction\n\nCloud Free Composite\n\nWorking with Modules\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "07.webp",
+   "source_slide": 8,
+   "title": "Create Cloud-free Sentinel-2 Image Composite",
+   "text": "Click here\n\nReplace \"Day-1\" with \"S2Composite\" instead\n\nReplace it with the script’s name\n\nCreate repository framework of Sentinel 2 image\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "08.webp",
+   "source_slide": 9,
+   "title": "Create Cloud-free Sentinel-2 Image Composite",
+   "text": "Create new script (importS2_module)\n\n- Specify input and output bandnames\n- Spatial filter (filter with Geometry)\n- Temporal filter (filer with Date)\n- Filter with maximum Cloud Cover threshold\n- Scale the image\n\nimportS2_module\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "09.webp",
+   "source_slide": 10,
+   "title": "Create Cloud-free Sentinel-2 Image Composite",
+   "text": "Create new script (importS2_module)\n\n```js\n// import required modules\nvar importS2 = require(\"users/vteck_sig/Bhutan_training/S2Composite:importS2_module\");\n```\n\nYour account name registered\n\nYour repository created\n\nYour folder created\n\nYour script saved\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "10.webp",
+   "source_slide": 11,
+   "title": "Create Cloud-free Sentinel-2 Image Composite",
+   "text": "Create the Shadow masking module (shadowMask_module)\n\n- Specify input and output bandnames\n- Spatial filter (filter with Geometry)\n- Temporal filter (filer with Date)\n- Filter with maximum Cloud Cover threshold\n- Scale the image\n\nshadowMask_module\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "11.webp",
+   "source_slide": 12,
+   "title": "Create Cloud-free Sentinel-2 Image Composite",
+   "text": "Create the Cloud masking module (cloud_module)\n\n- Set thresholds to remove cloud from S2 image\n- Used cloud masking algorithm of S2 and compute a cloud score (Built on the idea of Landsat CloudScore algorithm)\n- Create a function to mask cloud using Sentinel-2 QA band\n\ncloud_module\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "12.webp",
+   "source_slide": 13,
+   "title": "Create Cloud-free Sentinel-2 Image Composite",
+   "text": "- BRDF Correction (Radiometric correction): brdf_module\n- Bidirectional Reflectance Distribution Function\n- Function of incidence and reflection of the light from a terrain surface by means of a physical model\n- BRDF plays an important role in the radiometric correction of satellite images\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 1
+  },
+  {
+   "image": "13.webp",
+   "source_slide": 14,
+   "title": "Create Cloud-free Sentinel-2 Image Composite",
+   "text": "Create Topography correction module (topographic_module)\n\n- Topographic illumination correction (terrain correction) : to observe geophysical values to remove the effects of topography in mountain areas.\n- Illumination conditions vary depending on sun position, slope and aspect and might occur signal to noise ratio\n- Adjusting differences in solar irradiance related to slope and aspect (topographic correction) can be used to reduce\n- Use Digital Elevation Model\n- First, calculate illumination condition (provided by Patrik Burns and Matt Macander)\n- Create illumination_Correction function\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "14.webp",
+   "source_slide": 15,
+   "title": "Create Cloud-free Sentinel-2 Image Composite",
+   "text": "Finalize all in main script and Export composite\n\nLet’s go to the main script: https://code.earthengine.google.com/2fd4b21119ef4b9c6ff6893f3a7e9c9e\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 0
+  },
+  {
+   "image": "15.webp",
+   "source_slide": 16,
+   "title": "GEE Tutorial Homepage",
+   "text": "efabook\n\nOpen Geo Blog\n\nCreating Mosaics and Composites",
+   "notes": "",
+   "hidden_pictures": 3
+  }
+ ]
+}
