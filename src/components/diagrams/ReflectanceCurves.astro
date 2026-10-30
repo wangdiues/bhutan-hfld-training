@@ -1,0 +1,160 @@
+---
+/**
+ * Original schematic of typical reflectance curves for vegetation, bare soil and clear water
+ * (task M4-08). Values are rounded, typical figures for teaching, not measurements. Lines are
+ * labelled at their ends and drawn with different dash patterns, so colour is not the only cue;
+ * the same values are in the table below the figure.
+ */
+const bands = [
+	{ name: 'Blue', nm: 490 },
+	{ name: 'Green', nm: 560 },
+	{ name: 'Red', nm: 665 },
+	{ name: 'NIR', nm: 842 },
+	{ name: 'SWIR-1', nm: 1610 },
+	{ name: 'SWIR-2', nm: 2190 },
+];
+const series = [
+	{ name: 'Vegetation', values: [5, 10, 4, 45, 24, 12], dash: '', cls: 'veg' },
+	{ name: 'Bare soil', values: [10, 14, 19, 27, 34, 30], dash: '8 4', cls: 'soil' },
+	{ name: 'Water', values: [8, 6, 3, 1, 0.5, 0.3], dash: '2 3', cls: 'water' },
+];
+const W = 640, H = 340, left = 56, right = 110, top = 20, bottom = 56;
+const pw = W - left - right, ph = H - top - bottom;
+const x = (i: number) => left + (i / (bands.length - 1)) * pw;
+const y = (v: number) => top + ph - (v / 50) * ph;
+---
+
+<figure class="hfld-diagram not-content">
+	<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="refl-title refl-desc">
+		<title id="refl-title">Typical reflectance of vegetation, bare soil and water</title>
+		<desc id="refl-desc">
+			Vegetation reflects little red light and a lot of near-infrared light. Bare soil reflects more as wavelength
+			increases. Clear water reflects a little blue and green and almost no infrared. The values are in the table below.
+		</desc>
+		{[0, 10, 20, 30, 40, 50].map((v) => (
+			<g>
+				<line x1={left} x2={left + pw} y1={y(v)} y2={y(v)} class="grid" />
+				<text x={left - 8} y={y(v) + 4} text-anchor="end" class="tick">{v}</text>
+			</g>
+		))}
+		{bands.map((b, i) => (
+			<text x={x(i)} y={top + ph + 18} text-anchor="middle" class="tick">{b.name}</text>
+		))}
+		<text x={left + pw / 2} y={H - 8} text-anchor="middle" class="axis">Band (visible → near infrared → shortwave infrared)</text>
+		<text x={16} y={top + ph / 2} text-anchor="middle" class="axis" transform={`rotate(-90 16 ${top + ph / 2})`}>Reflectance (%)</text>
+		{series.map((s) => (
+			<g>
+				<polyline
+					points={s.values.map((v, i) => `${x(i)},${y(v)}`).join(' ')}
+					class={`line ${s.cls}`}
+					stroke-dasharray={s.dash || undefined}
+				/>
+				{s.values.map((v, i) => <circle cx={x(i)} cy={y(v)} r="3.5" class={`dot ${s.cls}`} />)}
+				<text x={x(bands.length - 1) + 10} y={y(s.values[s.values.length - 1]) + 4} class={`label ${s.cls}`}>{s.name}</text>
+			</g>
+		))}
+	</svg>
+	<figcaption>
+		Typical reflectance in the Sentinel-2 bands (rounded, schematic values). The red-to-NIR jump of vegetation is what
+		NDVI measures.
+	</figcaption>
+	<div class="scroll" tabindex="0" role="region" aria-label="Reflectance values">
+	<table>
+		<caption class="sr-only">Typical reflectance (%) by band</caption>
+		<thead>
+			<tr><th scope="col">Surface</th>{bands.map((b) => <th scope="col">{b.name} ({b.nm} nm)</th>)}</tr>
+		</thead>
+		<tbody>
+			{series.map((s) => <tr><th scope="row">{s.name}</th>{s.values.map((v) => <td>{v}</td>)}</tr>)}
+		</tbody>
+	</table>
+	</div>
+</figure>
+
+<style>
+	.hfld-diagram {
+		margin-block: 1.5rem;
+	}
+	svg {
+		width: 100%;
+		height: auto;
+		max-width: 44rem;
+		display: block;
+		color: var(--sl-color-white);
+	}
+	.grid {
+		stroke: var(--sl-color-gray-5);
+		stroke-width: 1;
+	}
+	.tick,
+	.axis {
+		fill: currentColor;
+		font-size: 12px;
+	}
+	.axis {
+		font-weight: 600;
+	}
+	.line {
+		fill: none;
+		stroke-width: 3;
+	}
+	.label {
+		font-size: 13px;
+		font-weight: 600;
+	}
+	.veg {
+		stroke: #2f7d4a;
+		fill: #2f7d4a;
+	}
+	.soil {
+		stroke: #a0522d;
+		fill: #a0522d;
+	}
+	.water {
+		stroke: #2a62a8;
+		fill: #2a62a8;
+	}
+	.line.veg,
+	.line.soil,
+	.line.water {
+		fill: none;
+	}
+	:global([data-theme='dark']) .veg {
+		stroke: #6fcf8f;
+		fill: #6fcf8f;
+	}
+	:global([data-theme='dark']) .soil {
+		stroke: #e3a46e;
+		fill: #e3a46e;
+	}
+	:global([data-theme='dark']) .water {
+		stroke: #8fb6ee;
+		fill: #8fb6ee;
+	}
+	figcaption {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+		margin-top: 0.5rem;
+	}
+	table {
+		margin-top: 0.75rem;
+		font-size: var(--sl-text-sm);
+		border-collapse: collapse;
+	}
+	.scroll {
+		overflow-x: auto;
+	}
+	.scroll:focus-visible {
+		outline: 3px solid var(--sl-color-accent);
+	}
+	th,
+	td {
+		border: 1px solid var(--sl-color-gray-5);
+		padding: 0.25rem 0.5rem;
+		text-align: right;
+	}
+	th[scope='row'],
+	thead th:first-child {
+		text-align: left;
+	}
+</style>

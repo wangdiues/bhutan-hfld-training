@@ -1,17 +1,212 @@
 ---
-title: "Remote sensing fundamentals"
+title: "Fundamentals of remote sensing"
+description: How satellites measure reflected light, why vegetation, soil and water look different, and how spatial, spectral, temporal and radiometric resolution guide the choice of sensor.
 sidebar:
   order: 1
 ---
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Term from '~/components/Term.astro';
+import ReflectanceCurves from '~/components/diagrams/ReflectanceCurves.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["What does a satellite actually measure?", "Which sensor should I use for mapping Bhutan's forests?"]}
+  objectives={[
+    "Explain the reflectance curves of vegetation, water and soil.",
+    "Compare spatial, spectral, temporal and radiometric resolution.",
+    "Choose a sensor for a task.",
+  ]}
+  teaching={30} exercises={10}
+  prerequisites={["Day 1"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/remote-sensing-fundamentals/) give a visual summary. The deck draws on NASA's Applied Remote Sensing Training Program (ARSET).
 
-- Explain reflectance curves of vegetation, water and soil
-- Compare spatial, spectral, temporal and radiometric resolution
-- Choose a sensor for a task
+## What is remote sensing?
 
-**Time:** about 30 min teaching + 0 min practice.
+**Remote sensing** is getting information about an object without touching it. A photograph is the most familiar example. Data can come from the ground, from aircraft or drones, or from space, and the right method depends on three questions:
+
+- What information do you need?
+- How much detail?
+- How often do you need it?
+
+### Energy from the sun
+
+The energy Earth receives from the sun is **electromagnetic radiation**. The atmosphere and the surface reflect, absorb and emit it. Satellites carry instruments (sensors) that measure the radiation reflected or emitted from the land, water and air. With calibrated instruments, scientists can measure the height, temperature and moisture of almost any feature of the atmosphere, oceans, land and living things.
+
+The **electromagnetic spectrum** is the whole range of this radiation, from short gamma rays to long radio waves. Our eyes see only a narrow part, visible light. Satellite sensors also capture only parts of the spectrum: most optical sensors record visible, near-infrared (NIR) and shortwave-infrared (SWIR) light.
+
+### Why surfaces look different
+
+Each kind of surface reflects a different share of each wavelength. This pattern is its **spectral signature**.
+
+<ReflectanceCurves />
+
+- **Vegetation.** Chlorophyll in leaves absorbs most red (and blue) light. The leaves' internal structure reflects near-infrared light strongly, which our eyes can't see. That is why healthy vegetation looks green to us, but bright in NIR. As a canopy grows, matures and ages, these properties change. Water in the leaves absorbs some SWIR.
+- **Water.** Water absorbs green, red and especially near-infrared light more than blue, so water looks blue or blue-green, and very dark in NIR and SWIR. Satellites can also map sediment and algae in the upper layer of rivers, lakes and coastal water.
+- **Bare soil.** Reflectance usually rises steadily from visible to SWIR. Wet or organic-rich soil is darker; dry, sandy soil is brighter.
+
+### The atmosphere
+
+Light from the sun passes through the atmosphere twice: on the way down and on the way back up to the sensor. Gases and aerosols absorb and scatter part of it. **Atmospheric correction** removes these effects to give **surface reflectance**, which describes the surface itself. This is why the course uses surface-reflectance products such as `COPERNICUS/S2_SR_HARMONIZED`.
+
+<Theory title="From signature to index">
+Because vegetation reflects little red and a lot of NIR, the normalised difference $\text{NDVI} = (NIR - Red)/(NIR + Red)$ is high (about 0.6–0.9) for dense forest, near 0 for bare soil and negative for water. The next lesson, [Spectral indices](/bhutan-hfld-training/day-2/spectral-indices/), builds NDVI and other indices in Earth Engine.
+</Theory>
+
+## Satellites and sensors
+
+Satellites **carry** sensors. Sensor names are usually acronyms, sometimes including the satellite's name. Landsat 9, for example, has a spacecraft bus that carries two sensors: the **Operational Land Imager 2 (OLI-2)** and the **Thermal Infrared Sensor 2 (TIRS-2)**.
+
+Satellites differ in:
+
+- **orbit:** polar or non-polar low Earth orbit, or geostationary;
+- **energy source:** passive or active;
+- **spectrum:** visible, ultraviolet, infrared, microwave;
+- **measurement technique:** scanning or non-scanning, imagers or sounders;
+- **resolution:** spatial, spectral, temporal, radiometric;
+- **application:** weather, ocean colour, land mapping, air quality and others.
+
+### Orbits
+
+| Orbit | Height | Coverage | Repeat | Examples |
+|---|---|---|---|---|
+| **Geostationary** | about 36,000 km above the equator, turning with the Earth | always the same area | many observations a day | weather and communication satellites |
+| **Low Earth orbit (LEO)**, polar or non-polar | a few hundred to about 1,000 km | global or near-global | less frequent | polar: Landsat, Terra; non-polar: the International Space Station, GPM |
+| **Sun-synchronous (a polar LEO)** | as LEO | global | from daily to monthly; a wider swath gives more frequent views | Landsat, Sentinel-2 |
+
+A **sun-synchronous** satellite passes over each place at the same local time every day. Landsat, for example, crosses the equator at about 10 in the morning, so shadows and lighting are similar from one image to the next.
+
+### Passive and active sensors
+
+- **Passive sensors** measure energy that the Earth and atmosphere reflect or emit. Sunlight is the source for reflected light. Examples: Landsat OLI/TIRS, MODIS on Terra, Sentinel-2 MSI. They can't see through clouds.
+- **Active sensors** send out their own energy and measure what comes back. Most work in the microwave part of the spectrum, so they see through cloud and work day and night. Examples: radar such as **Sentinel-1** (C-band SAR), and lidar such as ICESat-2 and GEDI.
+
+[NASA Earthdata](https://www.earthdata.nasa.gov/) explains both kinds in more detail.
+
+<Callout type="bhutan">
+Bhutan context: southern Bhutan is cloudy for much of the monsoon. Optical sensors (Landsat, Sentinel-2) need the drier months; radar (Sentinel-1) can fill gaps because it sees through cloud, although it is harder to interpret on steep slopes.
+</Callout>
+
+## The four resolutions
+
+### Spatial resolution
+
+The ground area that one pixel covers, usually given as the length of one side of a square pixel. The higher the spatial resolution, the smaller each pixel, and the smaller the area one image covers.
+
+| Sensor | Spatial resolution |
+|---|---|
+| Commercial (e.g. Maxar WorldView, Planet SkySat) | under 1 m to 4 m |
+| Sentinel-2 | 10 m, 20 m, 60 m |
+| Landsat | 30 m |
+| MODIS | 250 m to 1 km |
+| GPM IMERG (rainfall) | about 10 km |
+
+An object smaller than a pixel can sometimes still be detected if it changes the pixel's value enough, such as a bright road.
+
+### Spectral resolution
+
+The number and width of the bands. Narrower bands mean higher spectral resolution.
+
+- **Panchromatic:** one broad band (black-and-white images).
+- **Multispectral:** about 3 to 15 bands (Landsat has 11, Sentinel-2 has 13).
+- **Hyperspectral:** hundreds of narrow bands.
+
+More, finer bands make it easier to tell surfaces apart, for example forest types.
+
+### Temporal resolution
+
+How often a sensor observes the same place, the **revisit time**. It depends on the orbit, the swath width and latitude: a wider swath, sensors that can be pointed, and more overlap near the poles all shorten it.
+
+| Sensor | Revisit |
+|---|---|
+| Landsat 8 or 9 | 16 days each; 8 days together |
+| Sentinel-2A and 2B | 10 days each; 5 days together |
+| MODIS (Terra and Aqua) | 1–2 days |
+| Commercial pointable satellites | daily or better |
+
+### Radiometric resolution
+
+How finely a sensor can tell small differences in energy apart, given as the number of bits. More bits means more grey levels and more detail in dark and bright areas.
+
+| Bits | Levels | Example |
+|---|---|---|
+| 12 | 4,096 | Landsat 8 OLI (Sentinel-2 MSI is also 12-bit) |
+| 10 | 1,024 | AVHRR |
+| 8 | 256 | Landsat 5 TM |
+| 6 | 64 | Landsat MSS |
+
+<Callout type="why">
+Why this matters: there is always a trade-off. Finer pixels cover smaller areas and often cost more; frequent revisits usually mean coarser pixels. For a national forest map of Bhutan, Sentinel-2 (10 m, 5 days, free) and Landsat (30 m, back to the 1980s, free) are the best balance, which is why the course uses them.
+</Callout>
+
+## Processing levels
+
+Satellite data is distributed at different levels of processing:
+
+| Level | What it is | Ease of use |
+|---|---|---|
+| 0 and 1 | Raw instrument data, possibly time-referenced; Level 1 adds calibration and georeferencing (for example Sentinel-2 Level-1C, top-of-atmosphere reflectance) | hardest |
+| 2 | Geophysical values derived by an algorithm, such as surface reflectance (Sentinel-2 Level-2A) | |
+| 3 | Level 2 mapped on a regular grid in space and time, with quality control | |
+| 4 | Level 3 combined with models or other data | easiest |
+
+The exact definitions vary slightly between agencies; these follow NASA's.
+
+## Where to find data
+
+- [Google Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets): used throughout this course.
+- [USGS EarthExplorer](https://earthexplorer.usgs.gov/): Landsat and other USGS archives.
+- [Copernicus Data Space Ecosystem](https://dataspace.copernicus.eu/): Sentinel-1 and Sentinel-2.
+- [NASA Earthdata](https://www.earthdata.nasa.gov/): MODIS, GEDI, GPM and many more.
+
+## Common mistakes
+
+- **Treating "high resolution" as one thing.** Say which resolution you mean: a 10 m sensor can revisit less often than a 250 m one.
+- **Comparing top-of-atmosphere images across dates.** Use surface reflectance, or the atmosphere's changes look like land changes.
+- **Expecting optical images through cloud.** Passive optical sensors can't see through cloud; use other dates, composites, or radar.
+- **Reading NIR as "green".** In a false-colour image (NIR, red, green), vegetation is red because NIR is shown in the red channel.
+
+## Practice
+
+<Challenge level="complete" time={10} hints={["Use the script from Image collections, or load COPERNICUS/S2_SR_HARMONIZED and add a median composite for January to April 2025.", "Turn on the Inspector, then click once on dense forest, once on the Wang Chhu river, and once on a bare field or riverbed.", "NDVI = (B8 − B4) / (B8 + B4)."]}>
+Display a Sentinel-2 composite around Thimphu. With the **Inspector**, read bands B2, B3, B4, B8 and B11 at three places: dense forest, the Wang Chhu river and bare ground. Do the values follow the curves in the diagram above? Work out NDVI for each place by hand.
+
+<Fragment slot="solution">
+Forest should show low B4 (red) and high B8 (NIR), so NDVI around 0.6–0.9. The river should be darkest in B8 and B11, with NDVI below 0 (or near 0 if it is shallow and full of sediment). Bare ground rises from B2 to B11, with NDVI near 0.1–0.2. Exact values depend on the date, slope and shadow.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-2-remote-sensing-fundamentals" questions={[
+  { q: "Why does healthy vegetation have a high NDVI?", options: ["It reflects a lot of red light and little NIR", "Chlorophyll absorbs red light while leaf structure reflects NIR strongly", "It emits thermal radiation", "Water in leaves reflects SWIR"], answer: 1, explain: "Low red and high NIR reflectance give a large normalised difference." },
+  { q: "Which surface is darkest in near-infrared?", options: ["Dense forest", "Dry bare soil", "Clear water", "Snow"], answer: 2, explain: "Water absorbs almost all near-infrared light." },
+  { q: "Sentinel-2 has 10 m pixels and Landsat 30 m pixels. Which resolution is this?", options: ["Spectral", "Spatial", "Temporal", "Radiometric"], answer: 1, explain: "Spatial resolution is the ground size of one pixel." },
+  { q: "You need to see forest under monsoon cloud in southern Bhutan in July. Which sensor is the best first choice?", options: ["Sentinel-2 (optical)", "Landsat 9 (optical)", "Sentinel-1 (radar)", "A 1 m commercial optical satellite"], answer: 2, explain: "Radar is an active microwave sensor and sees through cloud; optical sensors cannot." },
+  { q: "A 12-bit sensor can record 4,096 levels of brightness.", answer: true, explain: "2 to the power 12 is 4,096. That is radiometric resolution." },
+]} />
+
+<KeyPoints points={[
+  "Satellites measure reflected or emitted radiation; each surface has its own spectral signature.",
+  "Vegetation: low red, high NIR. Water: dark in NIR and SWIR. Soil: rising from visible to SWIR.",
+  "Spatial, spectral, temporal and radiometric resolution trade off against each other; choose the sensor for the task.",
+  "Use surface-reflectance (Level-2) products to compare images across dates.",
+]} />
+
+<Credit
+  source="D2 Fundamentals of Remote Sensing (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson; text adapted from the deck, which draws on NASA ARSET materials",
+    "NASA ARSET and NASA Earth Observatory figures replaced with an original reflectance diagram and tables",
+    "Added Sentinel-2 to the resolution and revisit tables, a Bhutan context note and links to data sources",
+    "Temporal resolution defined as revisit time (the slide equated it with one orbit cycle)",
+  ]}
+/>
