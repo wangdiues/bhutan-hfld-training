@@ -25,7 +25,7 @@
   {
    "image": "03.webp",
    "source_slide": 4,
-   "title": "Composite Preperation",
+   "title": "Composite Preparation",
    "text": "Composite preparation: It involves image pre-processing such as shadow and cloud masking, BRDF and topographic correction. Composites can be made using any available remote sensing imagery, such as: Landsat 5, 7, and 8 images, Sentinel-1, Sentinel-2, and Planet NICFI.",
    "notes": "",
    "hidden_pictures": 1
@@ -33,7 +33,7 @@
   {
    "image": "04.webp",
    "source_slide": 5,
-   "title": "Training Data Preperations",
+   "title": "Training Data Preparations",
    "text": "Training data preparation: It involves identifying typology for the particular country on the basis of which reference data are being collected. The reference data are segregated into training data and validation data. The training data are sampled to get information/data at pixel level. Several covariates are used in this step.",
    "notes": "",
    "hidden_pictures": 1
@@ -65,7 +65,7 @@
   {
    "image": "08.webp",
    "source_slide": 9,
-   "title": "Modulalr System Architicure",
+   "title": "Modular System Architecture",
    "text": "",
    "notes": "",
    "hidden_pictures": 1

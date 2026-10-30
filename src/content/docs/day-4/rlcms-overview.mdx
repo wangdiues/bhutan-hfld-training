@@ -31,7 +31,7 @@ The [slides for this lesson](/bhutan-hfld-training/slides/rlcms-overview/) give 
 
 The <Term id="rlcms" /> (Regional Land Cover Monitoring System) uses satellite data to produce customised, high-quality land-cover maps for a region. It works anywhere in the world because it uses publicly available global data (Landsat, MODIS, Sentinel-2) and an adaptable design: the **assembly logic** that turns probabilities into a map can be changed to match each country's land-cover classes and monitoring goals <Cite id="saah2020" />.
 
-RLCMS was developed by SERVIR-Mekong (in South-East Asia) with the support of the U.S. Forest Service, NASA's Applied Sciences Program, Google, the University of Maryland and the governments of countries in the region. The course uses the same approach for Bhutan.
+RLCMS was developed by SERVIR-Mekong (now SERVIR-Southeast Asia, SERVIR-SEA) with the support of the U.S. Forest Service, NASA's Applied Sciences Program, Google, the University of Maryland and the governments of countries in the region <Cite id="saah2020" />. The course uses the same approach for Bhutan.
 
 ## The four stages
 
@@ -56,7 +56,7 @@ Why this matters: splitting the work into stages means each part can be checked 
 Three features make RLCMS practical for a national agency:
 
 - **Modular architecture.** Composites, covariates, primitives and the assembly are separate modules. Each can be replaced, for example a new sensor for the composites, without changing the others.
-- **Customisable to the agency's classification system.** The assembly algorithm can be reconfigured to produce the classes a country reports, from the same primitives. The regional system, for example, uses biophysical primitives (evergreen, deciduous, tree canopy cover, rice, urban and built-up, cropland, mangrove, plantation forest and others) and assembles them into a shared 18-class typology; a country can assemble them into its own classes instead.
+- **Customisable to the agency's classification system.** The assembly algorithm can be reconfigured to produce the classes a country reports, from the same biophysical primitives (for example evergreen and deciduous forest, tree canopy cover, cropland, urban and built-up, water). A country can assemble them into its own classes instead of the regional typology.
 - **Easily updated.** New data and better algorithms can be added each year, and validation data from one year improve the next.
 
 ## Terms to know
@@ -124,6 +124,7 @@ For each RLCMS stage, write one line saying what it takes in and what it produce
     "Slides rewritten as a web lesson; terms linked to the glossary",
     "Typos corrected (\"preperation\", \"modulalr system architicure\")",
     "Figures from published RLCMS papers described in text instead of reused",
-    "\"SERVIR-SEA\" given as SERVIR-Mekong, the hub that developed RLCMS",
+    "SERVIR hub named as SERVIR-Mekong (now SERVIR-Southeast Asia), with a citation",
+    "Landsat 9 added to the list of usable imagery",
   ]}
 />
