@@ -41,7 +41,8 @@ export default defineConfig({
 				baseUrl: `https://github.com/${GITHUB_USER}/${REPO}/edit/main/`,
 			},
 			lastUpdated: true,
-			plugins: [starlightLinksValidator()],
+			// /slides/ pages are custom routes (src/pages/slides/), which the validator cannot see.
+			plugins: [starlightLinksValidator({ exclude: ['/bhutan-hfld-training/slides/', '/bhutan-hfld-training/slides/**'] })],
 			sidebar: [
 				{
 					label: 'Learn',

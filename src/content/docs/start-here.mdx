@@ -1,17 +1,192 @@
 ---
 title: "Start here"
+description: Set up Earth Engine, run your first script on Thimphu, and see how the five days fit together, from satellite composite to area estimate.
+duration: 20
+newContent: false
 sidebar:
   order: 0
 ---
+import { Steps, Tabs, TabItem, LinkCard } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import VersionNote from '~/components/VersionNote.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["What will I be able to do by the end of this course?", "What do I need before Day 1?"]}
+  objectives={[
+    "Set up an Earth Engine account and Cloud project.",
+    "Open the Code Editor and run a script.",
+    "Explain the course workflow, from composite to area estimate.",
+  ]}
+  teaching={10} exercises={10}
+  prerequisites={["A Google account", "A laptop with Chrome or Firefox", "Basic GIS ideas: raster, vector, projection"]}
+/>
 
-## In this lesson you will
+## What this course is
 
-- Set up an EE account and Cloud project
-- Open the Code Editor and run a script
-- Explain the course workflow from composite to area estimate
+This is a free, self-paced version of the **Bhutan ART-TREES HFLD Readiness Training** held in May 2026. Over five days you learn to produce the <Term id="activity-data" /> that Bhutan needs for its <Term id="hfld" /> submission under <Term id="art-trees" />: a land-cover map made in Google Earth Engine, and an area estimate for each class with a 90% confidence interval <Cite id="trees3" at="Section 8" />, based on a stratified reference sample <Cite id="olofsson2014" />.
 
-**Time:** about 10 min teaching + 10 min practice.
+By the end you can make a land-cover map for any Dzongkhag and report its accuracy and adjusted areas in a way a technical reviewer can check and repeat.
+
+<VersionNote standard="TREES 3.0">
+The training used TREES 2.0. TREES 3.0 was approved in June 2026, after the training, so this site cites TREES 3.0 and flags any differences from 2.0.
+</VersionNote>
+
+### Who it is for
+
+- **GIS officers** (for example in the Department of Forests and Park Services) who know Bhutan's forests and GIS software but are new to coding. This is the main audience.
+- **Forestry and environment graduates** who know remote-sensing theory and want hands-on Earth Engine and MRV skills.
+- **Trainers and reviewers** who want to teach the course or check its methods.
+- **Practitioners in other HFLD countries** who want to adapt the workflow.
+
+No programming experience is needed. Day 1 teaches the JavaScript you need.
+
+## Set up Earth Engine
+
+You need a Google account and an Earth Engine Cloud project. Non-commercial use (government, research, teaching) is free once the project is registered.
+
+<Steps>
+
+1. **Sign in.** Use a Google account that you can keep using after the course, such as your work account.
+
+2. **Register a Cloud project for Earth Engine.** Go to [code.earthengine.google.com/register](https://code.earthengine.google.com/register) and follow the steps: create a new Google Cloud project (or pick an existing one), choose **non-commercial use**, and describe your work, for example "forest monitoring for Bhutan's HFLD reporting". Write down the **project ID**. The Python examples need it.
+
+3. **Open the Code Editor.** Go to [code.earthengine.google.com](https://code.earthengine.google.com/). If it asks for a project, choose the one you just registered. The Code Editor opens with an empty script, a map below it and the Console on the right.
+
+4. **Check access to the training assets.** Some lessons read layers that the trainers shared, under `projects/bhutan-hfld-readiness-training/assets/`. If a lesson says an asset cannot be found, you do not have read access. Ask your trainer for access, or make the layer yourself with the earlier lesson's export script.
+
+</Steps>
+
+<Callout type="mistake" title="Common set-up problems">
+- **"Not signed up for Earth Engine" or "project not registered".** The Cloud project is not registered for Earth Engine yet. Finish step 2 with the same Google account.
+- **Several Google accounts signed in.** The Code Editor may use the wrong one. Use a private window, or sign out of the other accounts.
+- **Slow or patchy connection.** The Code Editor needs a working connection. Run scripts when you are online, and read the lessons ahead of time.
+</Callout>
+
+## Run your first script
+
+Paste the script below into the Code Editor and click **Run** (or press Ctrl+Enter). It prints a greeting, centres the map on Thimphu, and shows a cloud-filtered Sentinel-2 median composite for the 2025 dry season (January to April).
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="start-here/hello-bhutan.js" />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+print("Hello Bhutan")
+
+thimphu = ee.Geometry.Point([89.64, 27.47])
+s2 = (
+    ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+    .filterBounds(thimphu)
+    .filterDate("2025-01-01", "2025-05-01")
+    .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 20))
+)
+print("Number of images:", s2.size().getInfo())
+
+m = geemap.Map()
+m.centerObject(thimphu, 11)
+m.addLayer(s2.median(), {"bands": ["B4", "B3", "B2"], "min": 0, "max": 3000}, "Sentinel-2, Jan-Apr 2025")
+m
+```
+  </TabItem>
+</Tabs>
+
+<OpenInGEE script="start-here/hello-bhutan.js" />
+
+You should see `Hello Bhutan` and the number of images in the **Console**, and the Thimphu valley in natural colour on the map. Data: [Sentinel-2 surface reflectance (harmonized)](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED) in the Earth Engine Data Catalog.
+
+<Callout type="why">
+Why this matters: every lesson builds on this pattern. Load a collection, filter it by place, date and cloud cover, reduce it to one image, and display it. Day 1 explains each line.
+</Callout>
+
+## The workflow in nine stages
+
+The course follows one workflow. Each stage produces the input for the next, and each day covers one to three stages. The interactive version is on the [home page](/bhutan-hfld-training/).
+
+<Steps>
+
+1. **Define the area and the forest definition.** Set the area of interest and decide how Bhutan's forest definition becomes map classes. *Day 1:* [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/).
+
+2. **Build cloud-free composites.** Mask clouds and shadows, correct for terrain, and take a seasonal median of Sentinel-2 or Landsat images. *Day 2:* [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/).
+
+3. **Compute covariates.** Add indices, terrain and seasonal layers that help separate classes. *Day 3:* [Calculating covariates](/bhutan-hfld-training/day-3/covariates/).
+
+4. **Collect training data.** Place labelled points for each class. *Days 3 and 4:* [Collecting training data](/bhutan-hfld-training/day-4/training-data/).
+
+5. **Make primitives.** Train a Random Forest for each class and output a probability layer (a <Term id="primitive" />). *Day 3:* [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/).
+
+6. **Assemble the land-cover map.** Combine the primitives with decision rules into one categorical map. *Day 4:* [Assemblage](/bhutan-hfld-training/day-4/assemblage/).
+
+7. **Design a stratified sample.** Decide the sample size and allocate it across map classes. *Day 5:* [Designing a sampling frame](/bhutan-hfld-training/day-5/sampling-design/).
+
+8. **Interpret the reference sample.** Label each sample point from high-resolution imagery in Collect Earth Online. *Day 4:* [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/).
+
+9. **Estimate accuracy and area.** Build the confusion matrix, then the area-adjusted estimates and their 90% confidence intervals, and document everything. *Day 5:* [Accuracy and area](/bhutan-hfld-training/day-5/accuracy-and-area/).
+
+</Steps>
+
+<Callout type="bhutan">
+Bhutan context: the Constitution of Bhutan requires that at least 60% of the country stays under forest (Article 5(3)) <Cite id="constitution2008" />, so forest maps matter for national policy as well as for ART-TREES. Steep terrain and long monsoon cloud cover make mapping hard. That is why the course uses dry-season composites (January to April and October to December) and terrain correction.
+</Callout>
+
+## How to use this site
+
+- **Learn (Days 1 to 5)** are the tutorials. Work through them in order. Each one has the code, a quiz and practice at three levels: complete the code, fill in the blanks, and write it from scratch.
+- **[Slides](/bhutan-hfld-training/slides/)** play the original training decks in the browser, for a quick visual summary.
+- **Labs** are calculators and explorers, such as the sample-size and accuracy calculators, that reproduce the workshop spreadsheets.
+- **Explanation** pages give the theory behind a step. **How-to guides** are short recipes. **Reference** has the script library, the asset list and the [glossary](/bhutan-hfld-training/reference/glossary/).
+- Every code example has a JavaScript version for the Code Editor and a Python (geemap) version. Use whichever you prefer.
+- Quiz scores are saved only in your browser. Nothing is sent anywhere.
+
+## Practice
+
+<Challenge level="complete" time={10} hints={["Thimphu is at about 89.64° E, 27.47° N. Earth Engine takes longitude first.", "Paro is at about 89.41° E, 27.43° N."]} solution="start-here/hello-bhutan.js">
+Run the first script, then change it to show **Paro** instead of Thimphu. Replace the blank with Paro's coordinates and rename the variable to match.
+
+```js
+var paro = ee.Geometry.Point(___);
+Map.centerObject(paro, 11);
+```
+
+Does the number of images in the Console change? Why might it?
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="start-here" questions={[
+  { q: "Which stage comes first in the course workflow?", options: ["Building cloud-free composites", "Defining the area and putting the forest definition into practice", "Interpreting reference samples in Collect Earth Online", "Training a Random Forest"], answer: 1, explain: "Everything else depends on the area of interest and on how the forest definition becomes map classes, so that is decided first." },
+  { q: "Which order is correct?", options: ["Area and forest definition → composites → covariates → training data → primitives → assemblage → sample design → interpretation → accuracy and area estimate", "Primitives → composites → assemblage → covariates → area estimate", "Sample design → composites → area estimate → primitives", "Assemblage → primitives → covariates → composites"], answer: 0, explain: "Each stage uses the output of the one before it: composites feed covariates, which feed the classifiers that make primitives, which are assembled into the map that is then sampled and assessed." },
+  { q: "The area estimates the course reports come straight from counting pixels in the land-cover map.", answer: false, explain: "Pixel counts are biased by map errors. The course reports area-adjusted estimates from a stratified reference sample, with a 90% confidence interval (Day 5)." },
+  { q: "What do you need before you can run scripts in the Code Editor?", options: ["A paid Google Cloud subscription", "A Google account and a Cloud project registered for Earth Engine", "A local installation of Python and geemap", "Read access to the training assets"], answer: 1, explain: "Non-commercial use is free once a Cloud project is registered. Python is optional, and the training assets are only needed for some later lessons." },
+]} />
+
+<KeyPoints points={[
+  "Register a Cloud project for non-commercial Earth Engine use and note its project ID.",
+  "A first script loads a collection, filters it by place, date and cloud cover, reduces it to a median, and displays it.",
+  "The course follows nine stages, from area definition and composites to area-adjusted estimates with 90% confidence intervals.",
+]} />
+
+## References
+<References />
+
+<Credit
+  source="Bhutan ART-TREES HFLD Readiness Training: training agenda"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={["Course overview, audience and workflow written for the website from the agenda's daily objectives", "New: Earth Engine set-up steps and the Hello Bhutan script"]}
+/>
