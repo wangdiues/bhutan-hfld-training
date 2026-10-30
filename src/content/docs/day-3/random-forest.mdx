@@ -73,7 +73,7 @@ Two candidate questions:
 | Split | Yes branch | No branch | Weighted entropy $E_2$ | Information gain |
 |---|---|---|---|---|
 | NDVI > 0.5? | 6 pixels: 5 forest, 1 grass (E = 0.650) | 4 pixels: 2 grass, 2 water (E = 1.000) | 0.6 × 0.650 + 0.4 × 1.000 = 0.790 | 1.485 − 0.790 = **0.695** |
-| NIR reflectance < 0.10? | 2 pixels: 2 water (E = 0) | 8 pixels: 5 forest, 3 grass (E = 0.954) | 0.2 × 0 + 0.8 × 0.954 = 0.764 | 1.485 − 0.764 = **0.721** |
+| NIR reflectance < 0.10? | 2 pixels: 2 water (E = 0) | 8 pixels: 5 forest, 3 grass (E = 0.954) | 0.2 × 0 + 0.8 × 0.954 = 0.763 | 1.485 − 0.763 = **0.722** |
 
 The NIR question gains more information, so it becomes the **root node**: it separates the water perfectly. The tree then asks NDVI > 0.5 on the remaining 8 pixels to separate forest from grassland, and so on until the leaves are pure or too small to split.
 
@@ -132,7 +132,7 @@ These lines are a sketch: `trainingPoints`, `bandNames` and `composite` come fro
 - Handles thousands of input variables without removing any first.
 - Estimates which variables matter for the classification (variable importance).
 - Gives an internal, unbiased estimate of the generalisation error as the forest grows (out-of-bag error).
-- Copes well with missing data and keeps its accuracy when a large share of data is missing.
+- Copes well with missing data and keeps its accuracy when a large share of data is missing (in Breiman's original method; in Earth Engine, masked input pixels give masked output, so fill gaps in the covariates first).
 
 **Disadvantages**
 
@@ -159,11 +159,11 @@ Belgiu and Drăguţ review how Random Forest is used in remote sensing and give 
 
 ## Practice
 
-<Challenge level="complete" time={10} hints={["Entropy of a 50/50 split is 1.", "Entropy of a pure set is 0.", "Weight each branch by its share of the pixels."]}>
-In the example, the tree's second question is NDVI > 0.5 on the 8 non-water pixels (5 forest, 3 grassland). Suppose the yes branch gets 5 forest and 0 grassland, and the no branch 0 forest and 3 grassland. What is the information gain of this split?
+<Challenge level="complete" time={10} hints={["Use the 8 non-water pixels: 5 forest and 3 grassland, entropy 0.954.", "From the table, NDVI > 0.5 sends 5 forest and 1 grassland to yes, and 2 grassland to no.", "A pure branch has entropy 0. Weight each branch by its share of the 8 pixels."]}>
+After the NIR split, the tree asks **NDVI > 0.5?** of the 8 non-water pixels (5 forest, 3 grassland). The yes branch gets 5 forest and 1 grassland; the no branch gets 2 grassland. What is the information gain of this split? Would a split that sent all 5 forest one way and all 3 grassland the other do better?
 
 <Fragment slot="solution">
-Before: $E = 0.954$ (5 forest, 3 grass). After: both branches are pure, so $E_2 = 0$. The information gain is $0.954 - 0 = 0.954$, the largest possible for this set: the split separates the classes perfectly.
+Before: $E_1 = 0.954$. Yes branch (5 forest, 1 grass): $E = 0.650$, weight $6/8$. No branch (2 grass): $E = 0$, weight $2/8$. So $E_2 = 0.75 	imes 0.650 = 0.488$ and the gain is $0.954 - 0.488 = 0.467$. A perfect split (5 / 3) would leave both branches pure, $E_2 = 0$, for the largest possible gain, 0.954. The tree would split the yes branch again (for example on NIR or SWIR) to separate the remaining grassland pixel.
 </Fragment>
 </Challenge>
 
