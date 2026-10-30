@@ -41,7 +41,7 @@ Google Earth Engine is two things in one place <Cite id="gorelick2017" />:
 - a **remote-sensing archive** of several petabytes, with decades of satellite imagery and other geospatial data, ready to use;
 - a **cloud-based processing platform** that runs large analyses on Google's computers, so you don't need to download or store the data.
 
-A national example: the Regional Land Cover Monitoring System (<Term id="rlcms" />), which produces annual land-cover maps and change maps for the Mekong region, runs on Earth Engine. Its results can be viewed at [landcovermapping.org](https://landcovermapping.org/en/landcover/). Day 4 uses the same approach for Bhutan.
+A regional example: the Regional Land Cover Monitoring System (<Term id="rlcms" />), which produces annual land-cover maps and change maps for the Mekong region, runs on Earth Engine. Its results can be viewed at [landcovermapping.org](https://landcovermapping.org/en/landcover/). Days 3 and 4 use the same approach for Bhutan.
 
 ## The four parts of Earth Engine
 
@@ -164,7 +164,7 @@ It is less suited to:
 
 - **vector-heavy work**, such as editing topology or detailed cartography. Use QGIS or ArcGIS for that.
 - **analyses that depend on spatial relations between pixels across large areas**, such as image segmentation or hydrological modelling. Because the work is split across many computers, these options are limited or experimental.
-- **very large exports or long-running jobs**, which can hit memory and time limits. The [Debugging GEE](/bhutan-hfld-training/reference/debugging-gee/) page covers the common errors.
+- **very large exports or long-running jobs**, which can hit memory and time limits. The [debugging guide](/bhutan-hfld-training/how-to/debug-earth-engine/) covers the common errors.
 
 <Callout type="bhutan">
 Bhutan context: for HFLD activity data, Earth Engine does the heavy part, which is composites, covariates, classification and sampling across the whole country. Desktop GIS is still useful for preparing boundaries and for final map layouts.
@@ -188,12 +188,20 @@ Bhutan context: for HFLD activity data, Earth Engine does the heavy part, which 
 
 ## Practice
 
-<Challenge level="complete" time={5} hints={["Change only the filterDate line.", "October to December is Bhutan's other dry season."]} solution="day-1/introduction-to-earth-engine.js">
-Run the script, then change it to use **October to December 2025** instead of January to April. Compare the number of images and the mean NDVI. Which season has more cloud-free images near Thimphu?
+<Challenge level="complete" time={5} hints={["Change only the filterDate line.", "October to December comes after the monsoon. The course uses it as a second compositing window, alongside January to April."]}>
+Run the script, then change it to use **October to December 2025** instead of January to April. Compare the number of images and the mean NDVI. Which window has more cloud-free images near Thimphu?
 
 ```js
     .filterDate('2025-10-01', '___')
 ```
+
+<Fragment slot="solution">
+```js
+    .filterDate('2025-10-01', '2026-01-01')
+```
+
+The end date is exclusive, so `'2026-01-01'` includes all of 31 December 2025.
+</Fragment>
 </Challenge>
 
 ## Check your understanding

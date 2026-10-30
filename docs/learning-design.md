@@ -48,7 +48,7 @@ Assessed by: **the capstone** (M6-03). Each group makes a 6-class 2025 map for o
 | ID | Lesson | Obj | Assess | Time |
 |---|---|---|---|---|
 | M4-01 | ART-TREES HFLD requirements *(new)* | (1) state TREES 3.0 HFLD eligibility and what HFLD participants must document; (2) explain why activity data needs a forest definition put into practice and temporal consistency; (3) describe how uncertainty affects crediting (Section 8, deductions in Section 10) | Q×4 (with section citations); K: capstone report cites the relevant sections | 30+0 |
-| M4-02 | Introduction to GEE | (1) name the four parts of Earth Engine (catalog, compute, IDE, sharing); (2) choose when EE is the right tool and when it isn't | Q×3 | 20+0 |
+| M4-02 | Introduction to GEE | (1) name the four parts of Earth Engine (catalog, compute, IDE, sharing); (2) choose when EE is the right tool and when it isn't | Q×4; C(complete): change the date window of the five-operations script | 20+5 |
 | M4-03 | Code Editor & data archive | (1) find a dataset in the catalog and import it; (2) use the Inspector, Console and Tasks tabs; (3) draw a geometry | C(complete): import S2 and centre on Thimphu; Q×2 | 15+15 |
 | M4-04 | JavaScript basics | (1) declare variables, lists and objects; (2) write and call a function; (3) print to the Console | C(fill-in): an object for Thimphu with correct coordinates; Q×3 | 15+20 |
 | M4-05 | Image collections, filtering & reducers | (1) filter a collection by bounds, date and metadata; (2) visualise with min/max/palette; (3) reduce a collection to an image and an image to a region statistic | C(fill-in): the 2025 dry-season median for Paro; Q×3 (e.g. N→1 reducers) | 20+25 |
