@@ -67,6 +67,15 @@ const headingId = `challenge-${Math.random().toString(36).slice(2, 9)}`;
 </section>
 
 <style>
+	/* Solutions given in the "solution" slot wrap like script solutions (<Code wrap>), so the
+	   code block never scrolls sideways (axe: scrollable-region-focusable). */
+	.hfld-challenge__solution :global(pre) {
+		overflow-x: visible;
+	}
+	.hfld-challenge__solution :global(.ec-line .code) {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
 	.hfld-challenge {
 		margin-block: 1.5rem;
 		padding: 1rem 1.25rem;

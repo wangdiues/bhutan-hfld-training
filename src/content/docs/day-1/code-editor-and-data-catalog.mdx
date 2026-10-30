@@ -1,17 +1,426 @@
 ---
-title: "The Code Editor and data catalog"
+title: "Code Editor and data catalog"
+description: Find your way around the Earth Engine Code Editor, load images, image collections and feature collections from the data catalog, and inspect them.
 sidebar:
   order: 3
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import { Image } from 'astro:assets';
+import editor from '~/assets/day-1/code-editor-and-data-catalog/s03-7d5ae6aa92.webp';
+import catalog from '~/assets/day-1/code-editor-and-data-catalog/s04-a5544666af.webp';
+import scriptsTab from '~/assets/day-1/code-editor-and-data-catalog/s05-74691d1526.webp';
+import docsTab from '~/assets/day-1/code-editor-and-data-catalog/s05-5b9547bdad.webp';
+import assetsTab from '~/assets/day-1/code-editor-and-data-catalog/s05-9fa259f2a7.webp';
+import inspector from '~/assets/day-1/code-editor-and-data-catalog/s07-fbc979c7a9.webp';
+import consoleTab from '~/assets/day-1/code-editor-and-data-catalog/s07-f0ff60d550.webp';
+import tasksTab from '~/assets/day-1/code-editor-and-data-catalog/s07-f728dee7f8.webp';
+import helloWorld from '~/assets/day-1/code-editor-and-data-catalog/s10-b2eed06ea0.webp';
+import landsatScene from '~/assets/day-1/code-editor-and-data-catalog/s15-276fc511b6.webp';
+import s2Scene from '~/assets/day-1/code-editor-and-data-catalog/s16-b63f106007.webp';
+import landsatCol from '~/assets/day-1/code-editor-and-data-catalog/s17-b3dd5e9a0d.webp';
+import s2Col from '~/assets/day-1/code-editor-and-data-catalog/s19-d0c5dada7e.webp';
+import dzongkhags from '~/assets/day-1/code-editor-and-data-catalog/s21-a9059671d5.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["Where is everything in the Code Editor?", "How do I find a dataset and load it into a script?"]}
+  objectives={[
+    "Find a dataset in the catalog and import it into a script.",
+    "Use the Inspector, Console and Tasks tabs.",
+    "Draw a geometry on the map and use it in a script.",
+  ]}
+  teaching={15} exercises={15}
+  prerequisites={["Introduction to Earth Engine", "An Earth Engine account (Start here)"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/code-editor-and-data-catalog/) give a visual summary.
 
-- Find a dataset in the catalog and import it
-- Use the Inspector, Console and Tasks tabs
-- Draw a geometry
+## Step 1: Find your way around the Code Editor
 
-**Time:** about 15 min teaching + 15 min practice.
+Open the [Code Editor](https://code.earthengine.google.com/). It is a web-based development environment for the Earth Engine JavaScript API and has five areas:
+
+<Image src={editor} alt="Earth Engine Code Editor with five numbered areas: 1 search bar, 2 left panel (Scripts, Docs, Assets), 3 code editor, 4 right panel (Inspector, Console, Tasks), 5 map viewer." />
+
+1. **Search bar.** Finds datasets and places. Type "Sentinel-2" to find datasets, or "Thimphu" to zoom the map there.
+2. **Left panel**, with three tabs:
+   - **Scripts:** the scripts you save, listed under *Owner*, plus scripts shared with you (*Reader*, *Writer*) and Google's *Examples*.
+   - **Docs:** every Earth Engine function, grouped by type, with a search box. Search "random" to find the Random Forest classifier you use on Day 3.
+   - **Assets:** files you uploaded to or exported from Earth Engine.
+3. **Code editor.** Write JavaScript here, then click **Run** or press Ctrl+Enter (Cmd+Enter on a Mac). Scripts are **not saved automatically**: click **Save**.
+4. **Right panel**, with three tabs:
+   - **Inspector:** click the map to see the coordinates and the pixel values of every layer at that point.
+   - **Console:** the default tab. It shows whatever you `print()`, plus error messages.
+   - **Tasks:** shows exports and uploads waiting to run, running, or finished.
+5. **Map viewer.** The **geometry tools** at the top left draw points, lines, polygons and rectangles; the hand icon pans the map. The **Layers** menu at the top right shows, hides and adjusts the layers you add.
+
+<Image src={scriptsTab} alt="Scripts tab in the Code Editor showing the Owner list of script repositories." />
+
+<Image src={docsTab} alt="Docs tab in the Code Editor with a search for 'random' listing ee.Classifier and ee.Clusterer functions." />
+
+<Image src={assetsTab} alt="Assets tab in the Code Editor with the NEW button, ADD A PROJECT link and a legacy assets folder." />
+
+The right panel's three tabs look like this. Use the **Inspector** to check values, the **Console** to read printed output and errors, and **Tasks** to follow exports:
+
+<Image src={inspector} alt="Inspector tab after clicking the map: point coordinates, zoom level, scale and pixel values of a MODIS composite." />
+
+<Image src={consoleTab} alt="A two-line script that stores a number in a variable and prints it; the Console shows the printed value." />
+
+<Image src={tasksTab} alt="Tasks tab listing submitted ingestion tasks with their status." />
+
+## Step 2: Your first lines of JavaScript
+
+The Code Editor runs JavaScript. These few building blocks are enough for this lesson; [JavaScript basics](/bhutan-hfld-training/day-1/javascript-basics/) covers them in depth.
+
+A **comment** starts with `//`. Earth Engine ignores it, so you can explain your code or leave notes. Ctrl+/ (Cmd+/ on a Mac) comments or uncomments the selected lines. **`print()`** writes to the Console:
+
+```js
+// This is a comment!
+print('Hello World');
+```
+
+<Image src={helloWorld} alt="Code Editor after running print('Hello World'); an arrow points from the Run button to the output in the Console." />
+
+A **variable** (`var`) stores a value under a name. Text goes in single or double quotes. A **list** holds several values in square brackets, separated by commas:
+
+```js
+var city = 'Thimphu';
+print(city);
+var cities = ['Thimphu', 'Paro', 'Punakha', 'Wangdue Phodrang'];
+print(cities);
+```
+
+An **object** stores key–value pairs in curly braces. A **function** takes inputs, does some work and returns a result, so you can repeat the same steps with different values:
+
+```js
+var cityData = {
+  'city': 'Thimphu',
+  'coordinates': [89.64, 27.47],
+  'population': 114551
+};
+print(cityData);
+
+var greet = function(name) {
+  return 'Hello ' + name;
+};
+print(greet('World'));
+print(greet('Readers'));
+```
+
+<Callout type="mistake" title="Two fixes from the training slides">
+The slide placed Thimphu at longitude 83.63, which is in India. Thimphu is at about **89.64° E, 27.47° N**, and Earth Engine always takes **longitude first**. The slide also wrote the population as `114,551`. JavaScript does not allow commas inside numbers, so this is a syntax error: write `114551`.
+</Callout>
+
+## Step 3: Find a dataset in the catalog
+
+Everything you can load is listed in the [Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets). Each dataset page gives its ID, bands, dates, licence and a code snippet you can copy.
+
+<Image src={catalog} alt="Earth Engine Data Catalog web page listing featured datasets with thumbnails and short descriptions." />
+
+To import a dataset, either search for it in the Code Editor's search bar and click **Import**, which adds it under *Imports* at the top of your script, or copy its ID into your code, as in the steps below.
+
+## Step 4: Images, image collections and feature collections
+
+Earth Engine has two main kinds of data, each with a single item and a collection:
+
+| Kind | Single item | Collection | Notes |
+|---|---|---|---|
+| Raster | `ee.Image`: one image, which may have several bands and properties | `ee.ImageCollection`: a stack of images, indexed so you can filter it by time, area and metadata | Each band has its own name, data type, scale, mask and projection |
+| Table (vector) | `ee.Feature`: a geometry plus properties | `ee.FeatureCollection`: a table of features; columns become properties | All collections and items can have key–value properties |
+
+### A single Landsat image
+
+Load one Landsat 8 scene by its ID and display it in false colour (shortwave infrared, near infrared, red), which shows forest in green. Data: [Landsat 8 Collection 2 Tier 1 TOA](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_TOA).
+
+```js
+// Fundamental raster data type for choosing an individual image in Earth Engine.
+var LC8_image= ee.Image('LANDSAT/LC08/C02/T1_TOA/LC08_138041_20260101')
+
+//Display Image
+Map.addLayer(LC8_image,{bands:['B6', 'B5', 'B4'],min: 0.05, max: 0.8,gamma: 1.6}, 'Landsat8scene');
+```
+
+<Image src={landsatScene} alt="Code Editor with a Landsat 8 scene over Bhutan in false colour (bands 6, 5, 4: shortwave infrared, near infrared, red), forest in green." />
+
+The ID tells you where the image comes from:
+
+| Part of `LC08_138041_20260101` | Meaning |
+|---|---|
+| `LC08` | Landsat 8 (Operational Land Imager and TIRS) |
+| `138` | WRS-2 path |
+| `041` | WRS-2 row (path 138, row 41 covers western Bhutan) |
+| `20260101` | Acquisition date: 1 January 2026 |
+
+The collection path, `LANDSAT/LC08/C02/T1_TOA`, adds the Landsat 8 mission, Collection 2, Tier 1 and top-of-atmosphere reflectance.
+
+### A single Sentinel-2 image
+
+Do the same for Sentinel-2, in natural colour (red, green, blue). Data: [Sentinel-2 surface reflectance (harmonized)](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED).
+
+```js
+//Import single image
+//-----------------------------
+var s2_image= ee.Image('COPERNICUS/S2_SR_HARMONIZED/20250103T044201_20250103T044548_T45RYL')
+// Define visualization parameters for False Color
+//-----------------------------------------
+var rgbParams = {
+  bands: ['B4', 'B3', 'B2'],
+  min: 0,
+  max: 3000
+};
+//Display Image
+//-------------------------------------------
+Map.addLayer(s2_image,rgbParams, 's2scene');
+```
+
+<Image src={s2Scene} alt="Code Editor with a Sentinel-2 image over Bhutan displayed in false colour, vegetation shown red." />
+
+| Part of the image ID | Meaning |
+|---|---|
+| `COPERNICUS/S2_SR_HARMONIZED` | Sentinel-2 surface reflectance, harmonized across processing versions |
+| `20250103T044201` | Date and time (UTC) the satellite recorded the image: 3 January 2025, 04:42:01 |
+| `20250103T044548` | A second time stamp from the processing chain (the granule) |
+| `T45RYL` | The 100 km Sentinel-2 tile (UTM zone 45) |
+
+<Callout type="mistake" title="The comment says false colour">
+The comment in this code says "False Color", but bands B4, B3, B2 (red, green, blue) give a **natural-colour** image. The screenshot shows a false-colour version (near infrared as red). Try both: `bands: ['B8', 'B4', 'B3']` gives the false-colour view.
+</Callout>
+
+### Image collections: filter, count, pick the least cloudy
+
+Most work starts from a whole collection, filtered down. Both examples below need an area of interest, `aoi`. In the training you drew it on the map (Step 5); here it is a 10 km circle around Thimphu:
+
+```js
+var aoi = ee.Geometry.Point([89.64, 27.47]).buffer(10000);
+```
+
+For Landsat 8, filter by location, count the images, print the first one to see its properties, and display the least cloudy image:
+
+```js
+var l8col = ee.ImageCollection("LANDSAT/LC08/C02/T1_TOA");
+
+// filter by location/geometry
+l8col = l8col.filterBounds(aoi)
+
+// show the number of image in the collection
+print('number of images:',l8col.size())
+
+// filter by image property
+print(l8col.first())
+
+// filter by the least cloud cover
+var cloudfreeImg = l8col.sort("CLOUD_COVER", true).first() // true, false
+print('cloud free image',cloudfreeImg)
+
+
+var vis = {
+  bands: ['B4', 'B3', 'B2'], // Landsat RGB
+  min: 0,
+  max: 0.3
+};
+
+Map.centerObject(aoi, 10);
+Map.addLayer(cloudfreeImg, vis, 'Least Cloud Image');
+```
+
+<Image src={landsatCol} alt="Code Editor showing the least-cloudy Landsat image from a filtered collection displayed over Bhutan." />
+
+Earth Engine has Landsat collections back to the 1980s. Use **surface reflectance (SR)** for analysis across dates; top-of-atmosphere (TOA) is not corrected for the atmosphere.
+
+| Satellite | Sensor | Surface reflectance (SR) | Top of atmosphere (TOA) |
+|---|---|---|---|
+| Landsat 4 | TM | `LANDSAT/LT04/C02/T1_L2` | `LANDSAT/LT04/C02/T1_TOA` |
+| Landsat 5 | TM | `LANDSAT/LT05/C02/T1_L2` | `LANDSAT/LT05/C02/T1_TOA` |
+| Landsat 7 | ETM+ | `LANDSAT/LE07/C02/T1_L2` | `LANDSAT/LE07/C02/T1_TOA` |
+| Landsat 8 | OLI/TIRS | `LANDSAT/LC08/C02/T1_L2` | `LANDSAT/LC08/C02/T1_TOA` |
+| Landsat 9 | OLI-2/TIRS-2 | `LANDSAT/LC09/C02/T1_L2` | `LANDSAT/LC09/C02/T1_TOA` |
+
+For Sentinel-2, add a date filter, so you filter by **location**, **date** and **cloud cover** (a metadata property):
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+```js
+// Load sentinel 2 data product
+var collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterBounds(aoi)
+// show the number of image in the collection
+print('number of images:',collection.size())
+// filter by image property
+print(collection.first())
+var startingDate = '2024-01-01';
+var endDate = '2024-12-31'
+// filter by dates
+var s2_2024 = collection.filterDate(startingDate,endDate)
+print('2024 images:', s2_2024)
+// filter by the least cloud cover
+var cloudfreeImg = s2_2024.sort("CLOUDY_PIXEL_PERCENTAGE", true).first() // true, false
+print('cloud free image',cloudfreeImg)
+// Define visualization parameters for RGB
+var rgbParams = {
+  bands: ['B4', 'B3', 'B2'],
+  min: 0,
+  max: 3000
+};
+//Display image
+Map.addLayer(cloudfreeImg,rgbParams,'cloud free image')
+```
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+aoi = ee.Geometry.Point([89.64, 27.47]).buffer(10000)
+collection = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED").filterBounds(aoi)
+print("number of images:", collection.size().getInfo())
+
+s2_2024 = collection.filterDate("2024-01-01", "2024-12-31")
+cloudfree_img = s2_2024.sort("CLOUDY_PIXEL_PERCENTAGE", True).first()
+print("cloud free image:", cloudfree_img.get("system:index").getInfo())
+
+m = geemap.Map()
+m.centerObject(aoi, 10)
+m.addLayer(cloudfree_img, {"bands": ["B4", "B3", "B2"], "min": 0, "max": 3000}, "cloud free image")
+m
+```
+  </TabItem>
+</Tabs>
+
+<Image src={s2Col} alt="Code Editor showing a filtered Sentinel-2 image covering southern Bhutan." />
+
+The main Sentinel-2 collections:
+
+| Collection | Description | Earth Engine ID |
+|---|---|---|
+| Sentinel-2 MSI Level-1C | Top-of-atmosphere reflectance, not corrected for the atmosphere | `COPERNICUS/S2_HARMONIZED` |
+| Sentinel-2 MSI Level-2A | Surface reflectance, atmospherically corrected | `COPERNICUS/S2_SR_HARMONIZED` |
+| Cloud Score+ for Sentinel-2 | A cloud probability score (`cs_cdf`) for cloud masking (Day 2) | `GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED` |
+
+<Callout type="why">
+Why the harmonized collections: in January 2022 the European Space Agency changed Sentinel-2 processing, which shifted reflectance values. The `_HARMONIZED` collections remove that shift, so images from before and after can be compared. The older `COPERNICUS/S2` and `COPERNICUS/S2_SR` IDs on the training slide are deprecated in the catalog.
+</Callout>
+
+### Feature collections: Bhutan's Dzongkhags
+
+A **feature collection** is a table. Each row is a feature (a geometry such as a polygon for one Dzongkhag), and each column is a property, such as `gaul0_name` (country) or `gaul1_name` (Dzongkhag). Load the FAO GAUL 2024 boundaries from the community catalog and keep Bhutan's:
+
+```js
+var GAUL_2024_L1 = ee.FeatureCollection(
+  "projects/sat-io/open-datasets/FAO/GAUL/GAUL_2024_L1"
+);
+var dzongkhags = GAUL_2024_L1.filter(ee.Filter.eq('gaul0_name', 'Bhutan'));
+print('Dzongkhags:', dzongkhags.size(), dzongkhags.first());
+Map.addLayer(dzongkhags, {color: 'orange'}, 'Dzongkhags (GAUL 2024 level 1)');
+```
+
+<Image src={dzongkhags} alt="Bhutan's dzongkhag boundaries loaded as a FeatureCollection and coloured by district, with a legend." />
+
+To filter one area, first check which property holds its name: print a feature, or use the Inspector. Data: FAO GAUL 2024, from the [awesome-gee-community-catalog](https://gee-community-catalog.org/).
+
+## Step 5: Draw a geometry
+
+1. Hover over the geometry tools at the top left of the map and choose the **polygon** tool (or the point or rectangle tool).
+2. Click on the map to add corners around an area, for example Paro valley, and click the first point to close the shape.
+3. A new variable called `geometry` appears under *Imports* at the top of the script. Click its name to rename it, for example to `aoi`.
+4. Use it in code like any other geometry: `collection.filterBounds(aoi)`.
+
+Use the gear icon next to the layer in the geometry list to change its name, colour, or type (geometry, feature or feature collection).
+
+## The full script
+
+<CodeBlock script="day-1/code-editor-and-data-catalog.js" />
+
+<OpenInGEE script="day-1/code-editor-and-data-catalog.js" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `print()` | Writes values to the Console |
+| `ee.Image(id)` | Loads one image by its ID |
+| `ee.ImageCollection(id)` | Loads a collection of images |
+| `ee.FeatureCollection(id)` | Loads a table of features |
+| `.filterBounds()`, `.filterDate()`, `.filter()` | Filter a collection by place, time or property |
+| `.sort(property, ascending)`, `.first()` | Order a collection and take its first item |
+| `.size()` | Counts the items in a collection |
+| `Map.addLayer()`, `Map.centerObject()` | Display a layer; zoom the map to it |
+
+## Common mistakes
+
+- **Latitude first.** Earth Engine takes `[longitude, latitude]`. `[27.47, 89.64]` puts the point near the North Pole instead of in Thimphu.
+- **Not saving.** Scripts are not saved automatically. Save often, and give scripts clear names.
+- **Printing big collections.** `print()` of a collection with thousands of images is slow or fails. Print `.size()` or `.first()` instead.
+- **Wrong band names.** Landsat and Sentinel-2 number their bands differently: red is `B4` in both, but near infrared is `B5` in Landsat 8 and `B8` in Sentinel-2.
+
+<Callout type="bhutan">
+Bhutan context: western Bhutan, including Thimphu and Paro, is covered by Landsat path 138, and the country falls in UTM zones 45 and 46. Cloud is heavy from June to September, so expect far fewer clear images in those months.
+</Callout>
+
+## Practice
+
+<Challenge level="complete" time={15} hints={["The Sentinel-2 collection ID is 'COPERNICUS/S2_SR_HARMONIZED'.", "Map.centerObject(geometry, zoom) zooms the map to a geometry.", "Use the Inspector to check that the map is centred where you expect."]}>
+Load Sentinel-2 for 2025, keep only images over Thimphu, and show the least cloudy one with the map centred on Thimphu. Then use the **Inspector** to read the values of bands B4, B3 and B2 at the Tashichho Dzong.
+
+```js
+var thimphu = ee.Geometry.Point([89.64, 27.47]);
+var s2 = ee.ImageCollection('___')
+    .filterBounds(___)
+    .filterDate('2025-01-01', '2026-01-01');
+print('Images over Thimphu in 2025:', s2.size());
+var best = s2.sort('CLOUDY_PIXEL_PERCENTAGE').first();
+Map.centerObject(___, 12);
+Map.addLayer(best, {bands: ['B4', 'B3', 'B2'], min: 0, max: 3000}, 'Least cloudy, 2025');
+```
+
+<Fragment slot="solution">
+```js
+var thimphu = ee.Geometry.Point([89.64, 27.47]);
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+    .filterBounds(thimphu)
+    .filterDate('2025-01-01', '2026-01-01');
+print('Images over Thimphu in 2025:', s2.size());
+var best = s2.sort('CLOUDY_PIXEL_PERCENTAGE').first();
+Map.centerObject(thimphu, 12);
+Map.addLayer(best, {bands: ['B4', 'B3', 'B2'], min: 0, max: 3000}, 'Least cloudy, 2025');
+```
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-1-code-editor-and-data-catalog" questions={[
+  { q: "You click on the map to find the NIR value of a pixel. Which tab shows it?", options: ["Console", "Inspector", "Tasks", "Assets"], answer: 1, explain: "The Inspector shows the coordinates and the value of every layer at the point you click. The Console shows printed output and errors; Tasks shows exports." },
+  { q: "You started an export to Google Drive. Where do you follow its progress?", options: ["Tasks", "Docs", "Scripts", "Inspector"], answer: 0, explain: "Exports and uploads are queued in the Tasks tab, where you start them and see when they finish." },
+  { q: "Which line correctly creates a point at Thimphu?", options: ["ee.Geometry.Point([27.47, 89.64])", "ee.Geometry.Point([89.64, 27.47])", "ee.Geometry.Point([83.63, 27.47])", "ee.Geometry.Point(89.64; 27.47)"], answer: 1, explain: "Earth Engine takes longitude first, then latitude. 83.63° E is in India, not Bhutan." },
+  { q: "After you draw a polygon on the map, the Code Editor adds a variable named geometry under Imports, which you can use in your script.", answer: true, explain: "Drawn shapes become imports. Rename the variable (for example to aoi) and use it like any other geometry." },
+]} />
+
+<KeyPoints points={[
+  "The Code Editor has a search bar, a left panel (Scripts, Docs, Assets), the editor, a right panel (Inspector, Console, Tasks) and the map.",
+  "Find datasets in the catalog and load them by ID with ee.Image, ee.ImageCollection or ee.FeatureCollection.",
+  "Filter collections by location, date and metadata, then count, sort and pick images.",
+  "Geometries drawn on the map appear under Imports and can be used in code.",
+]} />
+
+<Credit
+  source="D1 Exploring Data Archive in GEE (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson; code copied from the slides",
+    "Malaysian examples (Johor, Kedah, Kelantan, Melaka) and Manila replaced with Bhutanese places",
+    "Thimphu's longitude corrected from 83.63 to 89.64; population written as 114551 (a comma inside a number is a JavaScript error)",
+    "The area of interest is defined in code around Thimphu instead of drawn on the map",
+    "GAUL feature collection filtered to Bhutan and displayed",
+    "Deprecated Sentinel-2 IDs (COPERNICUS/S2, COPERNICUS/S2_SR) replaced with the harmonized collections",
+    "Image ID explanation tables rewritten as text to match the IDs in the code",
+  ]}
+/>
