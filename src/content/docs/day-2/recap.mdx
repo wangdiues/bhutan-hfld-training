@@ -1,15 +1,54 @@
 ---
 title: "Day 2 recap quiz"
+description: Check what you remember from Day 2 (remote sensing, indices, composites, the Sentinel-2 and Landsat MRV products, importing and exporting), plus two questions from Day 1.
 sidebar:
   order: 7
 ---
+import Quiz from '~/components/Quiz.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import Callout from '~/components/Callout.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["What do I remember from Day 2, without looking back?"]}
+  objectives={["Recall the main ideas of Day 2 and two from Day 1 (spaced retrieval)."]}
+  teaching={0} exercises={15}
+  prerequisites={["All Day 2 lessons"]}
+/>
 
-## In this lesson you will
+Answer from memory first, then check. Retrieving what you learned, a day after learning it, makes it stick much better than re-reading. If you miss a question, follow the link to the lesson.
 
-- Retrieval of M4-08..13, plus 2 Day 1 items
+## What Day 2 covered
 
-**Time:** about 0 min teaching + 15 min practice.
+- [Fundamentals of remote sensing](/bhutan-hfld-training/day-2/remote-sensing-fundamentals/): reflectance, spectral signatures and the four resolutions.
+- [Spectral indices and functions](/bhutan-hfld-training/day-2/spectral-indices/): NDVI, NDWI, NDMI, EVI, SAVI; index functions mapped over collections.
+- [Mosaics and composites](/bhutan-hfld-training/day-2/mosaics-and-composites/): mosaic vs composite; atmospheric, BRDF and terrain correction.
+- [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/): Jan–Apr and Oct–Dec medians with Cloud Score+, TDOM and terrain correction.
+- [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/): the same product from Landsat 8/9.
+- [Importing and exporting data](/bhutan-hfld-training/day-2/import-and-export/): assets, Drive exports and videos.
+
+## Recap quiz
+
+<Quiz id="day-2-recap" title="Day 2 recap" questions={[
+  { q: "Which surface is bright in near-infrared but dark in red?", options: ["Clear water", "Healthy vegetation", "Bare soil", "Snow"], answer: 1, explain: "Chlorophyll absorbs red light and leaf structure reflects NIR strongly. See Fundamentals of remote sensing." },
+  { q: "Sentinel-2's 10 m pixels describe which resolution?", options: ["Spatial", "Spectral", "Temporal", "Radiometric"], answer: 0, explain: "Spatial resolution is the ground size of a pixel." },
+  { q: "Which index separates open water from land best?", options: ["NDVI (NIR, red)", "NDWI (green, NIR)", "NDMI (NIR, SWIR-1)", "SAVI"], answer: 1, explain: "Water reflects some green but almost no NIR, so (Green − NIR)/(Green + NIR) is positive over water." },
+  { q: "Why divide Sentinel-2 surface reflectance by 10,000 before computing EVI?", options: ["EVI's +1 term assumes reflectance between 0 and 1", "To speed up the calculation", "To convert to top-of-atmosphere", "It is not needed"], answer: 0, explain: "Sentinel-2 SR is stored as reflectance × 10,000; ratios like NDVI are unaffected, EVI is not." },
+  { q: "Why does the Bhutan MRV product use Jan–Apr and Oct–Dec?", options: ["Those months have enough clear images and stay inside the reporting year", "Sentinel-2 is switched off in the monsoon", "Those are the growing seasons", "To match Landsat's orbit"], answer: 0, explain: "The monthly image counts show strong support in these windows and almost none from June to August." },
+  { q: "Which step removes dark outliers likely to be shadows?", options: ["Cloud Score+", "TDOM", "BRDF correction", "Int16 conversion"], answer: 1, explain: "TDOM (temporal dark outlier mask) flags pixels much darker than usual in NIR and SWIR." },
+  { q: "How do you scale Landsat Collection 2 Level-2 values to surface reflectance?", options: ["× 0.0001", "× 0.0000275 − 0.2", "÷ 255", "× 10,000"], answer: 1, explain: "USGS's scale factor for Collection 2 Level-2 surface reflectance. See Landsat MRV composite." },
+  { q: "You want to keep a composite inside Earth Engine for later scripts. Which export do you use?", options: ["Export.image.toDrive", "Export.image.toAsset", "Export.table.toDrive", "Export.video.toDrive"], answer: 1, explain: "toAsset stores the image in your Cloud project." },
+  { q: "Day 1: which line correctly makes a point at Thimphu?", options: ["ee.Geometry.Point([27.47, 89.64])", "ee.Geometry.Point([89.64, 27.47])", "ee.Geometry.Point([83.63, 27.47])", "ee.Geometry.Point(89.64; 27.47)"], answer: 1, explain: "Earth Engine takes longitude first. See Code editor and data catalog." },
+  { q: "Day 1: what must a function return to be used with imageCollection.map()?", options: ["A number", "An ee.Image", "Nothing", "A string"], answer: 1, explain: "map() builds a new image collection, so the function must return an image. See Custom functions and mapping." },
+]} />
+
+<Callout type="why">
+Why this matters: Day 3 builds on all of this. Covariates are indices computed from the MRV composites, and the classifier trains on them.
+</Callout>
+
+<KeyPoints points={[
+  "Spectral signatures explain indices: vegetation is bright in NIR, water dark.",
+  "Scale reflectance correctly before formulas with constants (EVI, SAVI).",
+  "The MRV product is two seasonal median composites, masked for cloud and shadow and corrected for terrain.",
+  "Export to assets for later analysis; every export is a task you start.",
+]} />
