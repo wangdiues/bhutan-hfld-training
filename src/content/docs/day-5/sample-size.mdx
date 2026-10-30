@@ -23,6 +23,7 @@ import SampleSizeLab from '~/components/labs/SampleSizeLab.astro';
     "Compute stratum weights from mapped areas.",
     "Compute the total sample size for a target standard error.",
     "Compare equal, proportional and minimum-per-stratum allocation.",
+    "Choose an allocation and justify it.",
   ]}
   teaching={15} exercises={25}
   prerequisites={["Designing a stratified sampling frame"]}
@@ -54,7 +55,7 @@ The map has no deforestation class, so add one. Here deforestation comes from th
 
 ## Part 4: List the values in the stratification map
 
-Get the list of values the map contains, and give them readable names. The **stratification map** puts deforestation (10) on top of the land-cover classes and removes null pixels:
+Get the list of values the map contains, and give them readable names. The **stratification map** puts deforestation (10) on top of the land-cover classes; null pixels become 0 (`unmask(0)`), so they appear in the report as a "null" stratum, which the calculator counts as non-forest:
 
 <CodeBlock script="day-5/sample-size.js" lines={[98, 142]} />
 
@@ -111,9 +112,37 @@ The "ha per sample" columns show how many hectares each sample represents. Raisi
 
 For Part 2, add up the forest strata into one **forest** sample size and keep the **deforestation** sample size separate.
 
+The exercise text recommended a minimum of **80** (491 / 198 / 139 samples for the three forest strata and 80 for deforestation, so **828 forest and 80 deforestation**, about 1,729 ha per sample), based on its 908-sample total. With the spreadsheet's own total of 1,800, the average hectares per sample is lowest at a minimum of about **150**, giving 990 / 390 / 270 / 150, so **1,650 forest and 150 deforestation**. [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) uses whichever allocation you choose.
+
 <Callout type="bhutan">
 Bhutan context: forest covers most of the country and deforestation very little, so the deforestation stratum is tiny by area but critical for HFLD reporting. A minimum per stratum is what gives it enough samples.
 </Callout>
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `image.reduceRegion({reducer: ee.Reducer.frequencyHistogram(), ...})` | Lists the values in a raster and their pixel counts |
+| `ee.Number.parse(text)` | Turns the histogram's text keys into numbers |
+| `img.eq(value).multiply(ee.Image.pixelArea().divide(10000))` | Area in hectares of one stratum, pixel by pixel |
+| `list.iterate(fn, first)` | Builds the strata table one row at a time |
+| `ui.Chart.feature.byFeature(...).setChartType('Table')` | Shows the table in the Console |
+| `Export.table.toDrive({fileFormat: 'csv'})` | Exports the strata report |
+
+The same strata areas in Python (geemap), assuming `map_select` and `aoi` from the JavaScript version:
+
+```python
+import ee
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+areas = ee.Image.pixelArea().divide(10000).addBands(map_select.rename("stratum")).reduceRegion(
+    reducer=ee.Reducer.sum().group(groupField=1, groupName="stratum"),
+    geometry=aoi, scale=30, crs="EPSG:4326", maxPixels=1e13,
+)
+for g in areas.get("groups").getInfo():
+    print(g["stratum"], round(g["sum"], 1), "ha")
+```
 
 ## Common mistakes
 
@@ -135,9 +164,9 @@ A smaller margin of error needs more samples: n grows with 1/MoE², so going fro
 ## Check your understanding
 
 <Quiz id="day-5-sample-size" questions={[
-  { q: "What does a stratum's weight W mean?", options: ["Its expected accuracy", "Its share of the total mapped area", "Its number of samples", "Its standard deviation"], answer: 1, explain: "W = stratum area / total area." },
+  { q: "What does a stratum's weight W mean?", options: ["Its share of the total mapped area", "Its expected accuracy", "Its number of samples", "Its standard deviation"], answer: 0, explain: "W = stratum area / total area." },
   { q: "Why did splitting forest into three strata reduce the total sample size?", options: ["Forest became smaller", "Expected deforestation is concentrated in a small stratum, lowering the overall variance", "The margin of error changed", "Non-forest was removed"], answer: 1, explain: "Putting the risk where it is lowers ΣW·S and so the sample needed." },
-  { q: "Why is proportional allocation a poor choice for the deforestation stratum?", options: ["It gives it too many samples", "Its tiny area gives it very few samples", "It ignores the margin of error", "It is not allowed"], answer: 1, explain: "Rare strata need a minimum, or their accuracy can't be estimated." },
+  { q: "Why is proportional allocation a poor choice for the deforestation stratum?", options: ["It gives it too many samples", "It ignores the margin of error", "Its tiny area gives it very few samples", "It is not allowed"], answer: 2, explain: "Rare strata need a minimum, or their accuracy can't be estimated." },
   { q: "Halving the margin of error roughly quadruples the sample size.", answer: true, explain: "n is proportional to 1/SE², and SE is proportional to the margin of error." },
 ]} />
 

@@ -90,7 +90,7 @@ Assessed by: **the capstone** (M6-03). Each group makes a 6-class 2025 map for o
 | ID | Lesson | Obj | Assess | Time |
 |---|---|---|---|---|
 | M4-27 | Stratified sampling frame | (1) compare simple random, systematic, stratified and cluster designs; (2) explain why the strata are the map classes; (3) explain why maps can't be used as they are for areas | Q×4 | 25+0 |
-| M4-28 | Determining sample size | (1) compute n = (ΣWᵢSᵢ / SE)²; (2) compare equal, proportional and minimum-N allocation; (3) choose an allocation and justify it | L: Lab 1; C(fill-in): add a 3rd forest stratum; Q×3 | 20+30 |
+| M4-28 | Determining sample size | (1) compute n = (ΣWᵢSᵢ / SE)²; (2) compare equal, proportional and minimum-N allocation; (3) choose an allocation and justify it | L: Lab 1 (embedded); C(complete): ±20% margin of error and an allocation with a minimum per stratum; Q×4 | 15+25 |
 | M4-29 | Stratified sampling in GEE | (1) draw samples with `stratifiedSample`; (2) index them and build plots; (3) export for CEO | C(complete): 10 per class for one Dzongkhag; Q×2 | 15+25 |
 | M4-30 | Accuracy & area adjustment | (1) build a confusion matrix; (2) compute user's, producer's and overall accuracy; (3) compute area-adjusted estimates, SE and the 90% CI; (4) state the percentage uncertainty | L: Lab 2; C(fill-in): recompute the worked example (17,000 ha → 13,304 ± 2,360 ha); Q×4; K: capstone table | 25+35 |
 | M4-31 | Reporting & documentation *(new)* | (1) assemble an activity-data table for TREES 3.0; (2) document assumptions, versions and code so others can reproduce the work | K: capstone documentation checklist; Q×2 | 20+20 |
