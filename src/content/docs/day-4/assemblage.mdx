@@ -1,17 +1,187 @@
 ---
-title: "Assemblage with decision rules"
+title: "Assemblage: decision-tree rules"
+description: Combine the six primitives into one land-cover map with a decision tree of thresholds and class priorities, explore the rules interactively, compute class areas and export the map.
 sidebar:
   order: 3
 ---
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do six probability layers become one land-cover map?", "Why does the order of the rules matter?"]}
+  objectives={[
+    "Set class priorities and thresholds.",
+    "Apply rules to primitives to make a categorical map.",
+    "Explain how the rule order changes the result.",
+  ]}
+  teaching={20} exercises={30}
+  prerequisites={["Forest primitives with machine learning", "RLCMS overview and terms"]}
+/>
 
-## In this lesson you will
+The <Term id="assemblage" /> is the last RLCMS stage. It turns the six <Term id="primitive">primitives</Term> (the probability layers for forest, cropland, grassland, other land, settlement and wetland) into one categorical land-cover map, using a **decision tree** whose thresholds and order you choose <Cite id="saah2020" />. This is where a national class system and forest definition are put into practice.
 
-- Set class priorities and thresholds
-- Apply rules to primitives to make a categorical map
-- Explain how the rule order changes the result
+You can try the same logic, and see the Earth Engine rules it produces, in the [assemblage rule builder](/bhutan-hfld-training/labs/assemblage-builder/).
 
-**Time:** about 20 min teaching + 30 min practice.
+<Callout type="mistake" title="Assets you need">
+The script loads the trainers' 2025 Sentinel-2 primitives (`projects/servir-mekong/bhutan_primitives/s2_<Class>_2025`) and uses a Landsat image only to define the area of interest. Without access, point the six paths to your own primitives from [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) (each with a `target_probability` band from 0 to 1).
+</Callout>
+
+## Parts 1–3: Area, year and primitives
+
+Load an image whose footprint defines the area of interest, set the year, and load the six primitives. Each has a `target_probability` band, renamed to a short name, and they are stacked into one image:
+
+<CodeBlock script="day-4/assemblage.js" lines={[24, 55]} />
+
+## Part 4: Settings
+
+The order of `primitives` is the **priority order** of the rules, and `defaultThresholds` gives the probability each class needs before it is assigned:
+
+<CodeBlock script="day-4/assemblage.js" lines={[57, 92]} />
+
+| Priority | Primitive | Default threshold | Class code |
+|---|---|---|---|
+| 1 | forest | 0.50 | 1 |
+| 2 | crop | 0.55 | 2 |
+| 3 | grass | 0.55 | 3 |
+| 4 | other | 0.60 | 4 |
+| 5 | bu (built-up) | 0.30 | 5 |
+| 6 | wet | 0.25 | 6 |
+
+Rare classes such as built-up and wetland get lower thresholds, because their models are less confident even where they are right.
+
+## Part 5: The decision tree
+
+Two functions support the assemblage: one displays each primitive, and one turns the slider values into a decision tree in the text format that `ee.Classifier.decisionTree()` reads:
+
+<CodeBlock script="day-4/assemblage.js" lines={[93, 153]} />
+
+The tree is a chain of yes/no questions, in priority order:
+
+1. Is forest ≥ 0.50? **Yes** → class 1 (forest). **No** → next question.
+2. Is crop ≥ 0.55? **Yes** → class 2 (cropland). **No** → next.
+3. … grass, other, built-up …
+4. Is wet ≥ 0.25? **Yes** → class 6 (wetland). **No** → class 0 (unclassified).
+
+<Theory title="Why the order matters">
+A pixel can pass more than one threshold: forest 0.62 and crop 0.70, say. The tree stops at the **first** rule it passes, so this pixel becomes forest even though crop is more probable. Putting a class higher gives it priority in such conflicts. Changing the order, or a threshold, changes which class wins where primitives overlap, typically at edges, in agroforestry and in shrubland.
+</Theory>
+
+## Part 6: Apply the decision tree
+
+`process()` clears the map, shows each primitive, classifies the stack with the decision tree and displays the land-cover map:
+
+<CodeBlock script="day-4/assemblage.js" lines={[154, 180]} />
+
+## Parts 7 and 8: Legend and inspector
+
+A legend, and a panel that shows all six probabilities wherever you click on the map, so you can see why a pixel got its class:
+
+<CodeBlock script="day-4/assemblage.js" lines={[181, 262]} />
+
+## Part 9: Area by class
+
+Multiply each class mask by the pixel area (in hectares) and sum over the area of interest:
+
+<CodeBlock script="day-4/assemblage.js" lines={[263, 310]} />
+
+<Callout type="mistake" title="Corrected: class names in the area table">
+The decision tree gives class 1 to the first primitive (forest), class 2 to the second (crop), and so on. The exercise's area table listed "Cropland" first, so the forest and cropland areas were swapped. The course script names the classes in the same order as `primitives`.
+</Callout>
+
+These are **mapped** areas. They show the map's composition, but they are not the areas to report: on Day 5 you estimate areas, with confidence intervals, from a reference sample.
+
+## Parts 10 and 11: Export and run
+
+Export the map to an asset or to Drive. For a categorical map, `pyramidingPolicy: 'mode'` makes the zoomed-out views show the most common class instead of an average of class codes. `init()` builds the control panel; it was called but not defined in the exercise, so the course script adds one: a slider per primitive, a **Run assemblage** button, and export tools.
+
+<CodeBlock script="day-4/assemblage.js" lines={[311, 381]} />
+
+Move a slider, click **Run assemblage**, and watch the map and the areas change.
+
+## The full script
+
+<CodeBlock script="day-4/assemblage.js" />
+
+<OpenInGEE script="day-4/assemblage.js" hash="f3ac214d04f1543897bba62c26a9a878" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `ee.Classifier.decisionTree(string)` | A classifier from a decision tree written as text |
+| `image.classify(classifier)` | Applies the rules to every pixel |
+| `ui.Slider`, `ui.Button`, `ui.Textbox`, `ui.Panel` | Interactive controls in the Code Editor |
+| `Map.onClick(callback)` | Runs code where the user clicks |
+| `ee.Image.pixelArea()` | Pixel area in m², for class areas |
+| `Export.image.toAsset({..., pyramidingPolicy: {'.default': 'mode'}})` | Exports a categorical map correctly |
+
+## Common mistakes
+
+- **Thinking the highest probability always wins.** With a rule chain, the first rule passed wins; order matters.
+- **Thresholds set too high**, leaving many pixels unclassified (class 0). Check the map for holes.
+- **Mismatched class codes and names** in legends and area tables (see the correction above).
+- **Exporting a categorical map with the default (mean) pyramiding.** Zoomed-out views then show meaningless averages.
+
+<Callout type="bhutan">
+Bhutan context: the order and thresholds are a policy choice as much as a technical one. Putting forest first, with a threshold tied to the forest definition, makes forest win in mixed pixels; agroforestry and orchards then need care. Document the final order and thresholds: they are part of the method a verifier will check.
+</Callout>
+
+## Practice
+
+<Challenge level="blanks" time={20} hints={["Settlement is 'bu'; cropland is 'crop'.", "Move 'bu' before 'crop' in both arrays.", "Class codes follow the order, so update the names in computeArea, the legend and the palette too."]}>
+Settlements in Bhutan's valleys sit among fields, and the cropland rule often wins there. Give **settlement priority over cropland**: change `primitives`, `defaultThresholds` and the palette so built-up comes second, then re-run and compare the built-up area.
+
+```js
+var primitives = ['forest', '___', '___', 'grass', 'other', 'wet'];
+var defaultThresholds = [0.50, ___, ___, 0.55, 0.60, 0.25];
+```
+
+<Fragment slot="solution">
+```js
+var primitives = ['forest', 'bu', 'crop', 'grass', 'other', 'wet'];
+var defaultThresholds = [0.50, 0.30, 0.55, 0.55, 0.60, 0.25];
+```
+Class 2 is now built-up and class 3 cropland, so reorder `lcVis.palette` (`'267300', 'E600A9', 'AAFF00', …`), the legend and `classNames` the same way. The built-up area rises and cropland falls, mostly in mixed valley pixels.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-4-assemblage" questions={[
+  { q: "A pixel has forest = 0.62 and crop = 0.70. With forest first (threshold 0.50) and crop second, what class does it get?", options: ["Cropland, because it is more probable", "Forest, because the forest rule comes first and is passed", "Unclassified", "Both"], answer: 1, explain: "The decision tree stops at the first rule passed, so priority beats probability." },
+  { q: "What does a pixel that passes no rule become?", options: ["Forest", "The class with the highest probability", "Class 0 (unclassified)", "Wetland"], answer: 2, explain: "The last 'no' branch gives class 0." },
+  { q: "Why do built-up and wetland have lower thresholds?", options: ["They are less important", "Their models are less confident even where they are correct, because these classes are rare", "To make them larger", "Thresholds must decrease down the list"], answer: 1, explain: "Rare classes tend to have lower probabilities; lower thresholds let them be mapped." },
+  { q: "Mapped class areas from the assemblage are the areas to report for ART-TREES.", answer: false, explain: "Reported areas are estimated from a stratified reference sample (Day 5), which corrects map errors." },
+]} />
+
+<KeyPoints points={[
+  "The assemblage combines primitives with an ordered chain of threshold rules; the first rule passed sets the class.",
+  "Order and thresholds decide conflicts between classes; they put the class definitions into practice.",
+  "Keep class codes, names, legend and palette in the same order as the rules.",
+  "Mapped areas describe the map; reported areas come from the reference sample.",
+]} />
+
+<References />
+
+<Credit
+  source="EXERCISE D3 Final: Assemblage — Decision Tree Rule"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; code copied from the exercise",
+    "init(), called but not defined, written for the website (threshold sliders, run button, export tools)",
+    "Primitive stack, default thresholds and panel borders restored (commented out when the code was extracted)",
+    "Area table class names put in the decision tree's order (the exercise swapped forest and cropland)",
+    "Year set to 2025 to match the primitives",
+  ]}
+/>

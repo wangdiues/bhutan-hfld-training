@@ -5,14 +5,21 @@
  * Source: EXERCISE D3_ Final- Assemblage-DECISION TREE RULE.docx
  * Original authors: Ate Poortinga & Samuel (Conservation International).
  * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
- * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
+ * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
+ *   - init(), called but not defined in the exercise, is written here: a panel with one threshold
+ *     slider per primitive, buttons to re-run the assemblage and the areas, and export tools.
+ *   - Restored as in the exercise (commented out when the code was extracted): the primitive stack,
+ *     the default thresholds and the panel borders.
+ *   - computeArea() labelled class 1 "Cropland" and class 2 "Forest", but the decision tree numbers
+ *     classes in the order of `primitives` (forest = 1, crop = 2...); the names now follow that order.
+ *   - The year is 2025, matching the primitives (the exercise said 2024).
+ *
+ * The primitives (s2_<Class>_2025) and the Landsat image used for the area of interest are the
+ * trainers' assets; with no access, use your own primitives from the Forest primitives lesson.
  *
  * Original Code Editor script(s):
  *   https://code.earthengine.google.com/f3ac214d04f1543897bba62c26a9a878
  */
-
-/* global init */
-// init(): called but not defined in the source document (TODO M4-22: restore it from the original Code Editor script).
 
 // ---- Part 1: Import AOI ----
 // ============================================================
@@ -24,7 +31,7 @@ Map.centerObject(aoi, 6);
 
 // ---- Part 2: Define the year of analysis ----
 // Define the year of analysis (used for labeling outputs and organizing results)
-var year = 2024;
+var year = 2025;
 
 // ---- Part 3: Load Primitive Layers ----
 // ============================================================
@@ -44,7 +51,7 @@ var Wetland = ee.Image("projects/servir-mekong/bhutan_primitives/s2_Wetland_2025
   .select('target_probability').rename('wet');
 // Stack
 var primiImg = ee.Image.cat([
-// CropLand, Forest, Grassland, Otherland, Settlement, Wetland
+  CropLand, Forest, Grassland, Otherland, Settlement, Wetland
 ]);
 
 // ---- Part 4: Define Settings for Assemblage ----
@@ -57,12 +64,12 @@ var primitives = ['forest','crop','grass','other','bu','wet'];
 // These values determine how confident the model must be
 // before assigning a class to a pixel
 var defaultThresholds = [
-// 0.50, // forest
-// 0.55, // crop
-// 0.55, // grass
-// 0.60, // other
-// 0.30, // built-up
-// 0.25  // wetland
+  0.50, // forest
+  0.55, // crop
+  0.55, // grass
+  0.60, // other
+  0.30, // built-up
+  0.25  // wetland
 ];
 // 📌 Visualization settings for final land cover map
 var lcVis = {
@@ -183,7 +190,7 @@ function addLegend(){
       padding:'15px',
       width:'230px',
       backgroundColor:'white',
-// border:'3px solid #2C5AA0'
+      border:'3px solid #2C5AA0'
     }
   });
   // 📌 Add title
@@ -217,7 +224,7 @@ function addInspectPanel(){
       padding:'12px',
       width:'220px',
       backgroundColor:'white',
-// border:'3px solid #2C5AA0'
+      border:'3px solid #2C5AA0'
     }
   });
   // 📌 Panel title
@@ -261,8 +268,9 @@ function computeArea(){
   // 📌 Convert pixel size to hectares
   var pixelArea = ee.Image.pixelArea().divide(10000);
   // 📌 Class names (must match class IDs 1–6)
+  // Same order as `primitives`: the decision tree gives class i + 1 to primitives[i].
   var classNames = [
-    'Cropland','Forest','Grassland',
+    'Forest','Cropland','Grassland',
     'Other_land','Built_up','Wetland'
   ];
   var areaBands = [];
@@ -336,6 +344,29 @@ function exportToDrive(){
     maxPixels: 1e13
   });
   print('Exporting to Drive...');
+}
+
+// ---- Part 10b: User interface (init) ----
+// ============================================================
+// UI PANEL (written for the website: the exercise calls init() but does not define it)
+// ============================================================
+function init(){
+  var panel = ui.Panel({style: {width: '300px', padding: '8px'}});
+  panel.add(ui.Label('Assemblage thresholds', {fontWeight: 'bold', fontSize: '16px'}));
+  panel.add(ui.Label('Rules are applied top to bottom: the first primitive at or above its threshold sets the class.'));
+  primitives.forEach(function(p, i){
+    sliders[p] = ui.Slider({min: 0, max: 1, value: defaultThresholds[i], step: 0.05, style: {stretch: 'horizontal'}});
+    panel.add(ui.Label((i + 1) + '. ' + p));
+    panel.add(sliders[p]);
+  });
+  panel.add(ui.Button('Run assemblage', function(){ process(); computeArea(); }));
+  assetInput = ui.Textbox({placeholder: 'projects/<your-project>/assets/landcover_' + year});
+  panel.add(ui.Label('Export', {fontWeight: 'bold'}));
+  panel.add(assetInput);
+  panel.add(ui.Button('Export to asset', exportToAsset));
+  panel.add(ui.Button('Export to Drive', exportToDrive));
+  ui.root.insert(0, panel);
+  addInspectPanel();
 }
 
 // ---- Part 11: Run Application ----
