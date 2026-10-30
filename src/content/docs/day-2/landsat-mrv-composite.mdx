@@ -1,17 +1,221 @@
 ---
 title: "Landsat MRV composite"
+description: Build the annual Landsat 8/9 product for Bhutan's MRV, with harmonised surface reflectance, QA and TDOM masking, SCS+C terrain correction, and Jan–Apr and Oct–Dec medians exported as one 12-band Int16 image.
 sidebar:
   order: 5
 ---
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I make the same MRV product from Landsat?", "What changes when the sensor changes?"]}
+  objectives={[
+    "Harmonise Landsat 8/9 surface reflectance.",
+    "Apply QA-based masking and scaling.",
+    "Export a seasonal composite.",
+  ]}
+  teaching={20} exercises={30}
+  prerequisites={["Sentinel-2 MRV composite"]}
+/>
 
-## In this lesson you will
+This workflow follows the [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) step for step, adapted for Landsat 8 and 9. It turns raw imagery into a stable annual product for inter-annual monitoring and model training: masking, scaling, seasonal compositing and one structured export. The aim is not to use as much data as possible, but a consistent, repeatable dataset.
 
-- Harmonise Landsat 8/9 surface reflectance
-- Apply QA-based masking and scaling
-- Export a seasonal composite
+**Why Landsat as well as Sentinel-2?** Landsat has 30 m pixels, but its archive goes back to the 1980s, so it can extend a time series, such as an HFLD reference period, before Sentinel-2 began in 2015. The same method, applied to Landsat 5 or 7, can produce earlier years.
 
-**Time:** about 20 min teaching + 30 min practice.
+The workflow:
+
+1. collect all candidate Landsat 8 and 9 images for the reporting year;
+2. scale the values to surface reflectance;
+3. remove cloud, cloud shadow and snow with the QA band, then remaining shadows with TDOM;
+4. correct for terrain;
+5. reduce each season (January–April, October–December) to a median;
+6. merge the two seasons into one training-ready image.
+
+May to September is left out, as for Sentinel-2: the monsoon makes optical data unreliable, and using those months adds gaps and bias. Both windows stay inside the reporting year.
+
+<Callout type="mistake" title="Assets you need">
+The script reads Bhutan's boundary from `projects/bhutan-hfld-readiness-training/assets/Bhutan` and exports to the same project. Without access, use your own boundary asset and change `assetId` to a folder in your own Cloud project.
+</Callout>
+
+## Step 1: Study area and reporting year
+
+Bhutan is the study area and 2025 the reporting year; the two seasonal windows are defined once.
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" lines={[23, 32]} />
+
+| Function | Purpose |
+|---|---|
+| `ee.FeatureCollection()` | Loads Bhutan's boundary from an asset |
+| `ee.Date.fromYMD()` | Makes a date from year, month and day |
+| `advance(1, 'day')` | Moves the end date one day on, so the last day is included |
+
+## Step 2: Landsat 8 and 9 together
+
+Landsat 8 and 9 each revisit every 16 days. Merging the two gives an image every 8 days, which doubles the chance of a clear view. Data: [Landsat 8](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2) and [Landsat 9](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1_L2) Collection 2 Level-2 surface reflectance.
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" lines={[34, 45]} />
+
+## Step 3: Scale to surface reflectance
+
+Collection 2 Level-2 bands are stored as integers. USGS gives the scale factor: **reflectance = DN × 0.0000275 − 0.2**. The function scales the six optical bands, renames them `B2`–`B7`, and keeps the `QA_PIXEL` band for masking:
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" lines={[47, 57]} />
+
+| Landsat 8/9 band | Name | Sentinel-2 equivalent |
+|---|---|---|
+| B2, B3, B4 | blue, green, red | B2, B3, B4 |
+| B5 | near infrared | B8 |
+| B6, B7 | SWIR-1, SWIR-2 | B11, B12 |
+
+<Callout type="mistake" title="Band numbers differ between sensors">
+After this step, NIR is `B5` in the Landsat product but `B8` in the Sentinel-2 product. Don't mix the two composites' band names in one classifier.
+</Callout>
+
+## Step 4: QA masking
+
+`QA_PIXEL` stores quality flags as bits. `bitwiseAnd(1 << n)` tests bit *n*; a pixel is kept only where all three flags are 0:
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" lines={[58, 67]} />
+
+| Bit | Flag | Masked here? |
+|---|---|---|
+| 1 | dilated cloud | no |
+| 2 | cirrus | no |
+| 3 | cloud | yes |
+| 4 | cloud shadow | yes |
+| 5 | snow | yes |
+
+<Callout type="bhutan">
+Bhutan context: masking bit 5 removes snow, which is common on the high peaks in January–April. Those pixels will have few or no observations in the Jan–Apr composite; that is expected. (The manual describes the mask as "cloud, shadow and cirrus"; the code masks cloud, cloud shadow and snow.)
+</Callout>
+
+## Step 5: TDOM shadow masking
+
+QA masks miss some shadows, especially terrain shadows. TDOM finds pixels that are much darker than usual in NIR (B5) and SWIR-1 (B6), against statistics from a multi-year reference (from two years before the target year to one year after). Four parameters control it:
+
+| Parameter | Value | Effect |
+|---|---|---|
+| `zScoreThresh` | −1.2 | how far below normal both bands must be (lower masks less) |
+| `shadowSumThresh` | 0.15 | the NIR + SWIR-1 sum must also be below this (lower masks less) |
+| `contractPixels` | 2.0 | shrinks the mask to drop small, likely false patches |
+| `dilatePixels` | 2.5 | grows the mask to include shadow edges |
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" lines={[68, 110]} />
+
+These values differ from the Sentinel-2 workflow (−1.8, 0.20, 1.5, 2.5). Both sets come from the trainers' tuning for each sensor; check the preview layers if you change them.
+
+## Step 6: SCS+C terrain correction
+
+Slopes facing away from the sun look darker and can be mistaken for a different land cover. The **Sun-Canopy-Sensor + C** (SCS+C) method uses the [SRTM DEM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003). It computes the illumination condition (IC) from the sun's elevation and azimuth and each pixel's slope and aspect, fits a regression between IC and reflectance for each band (at 300 m, over slopes of at least 5°), and corrects the band. The functions are by Patrick Burns and Matt Macander.
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" lines={[112, 218]} />
+
+<Theory title="SCS+C">
+For each band, regress reflectance on IC: $\rho = a + b \cdot IC$, and set $c = a/b$. The corrected reflectance is $\rho_{corr} = \rho \, \dfrac{\cos S \cos Z + c}{IC + c}$, where $S$ is the slope and $Z$ the solar zenith angle ($90°$ minus the sun elevation). The $c$ term stops over-correction on faintly lit slopes, a known problem of the plain cosine correction.
+</Theory>
+
+## Step 7: Median, Int16 and band names
+
+Each season is reduced to its median. Multiplying by 10,000 and converting to Int16 keeps four decimal places of reflectance in half the space of a floating-point image. The bands are renamed with the season, and both composites are shown on the map:
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" lines={[220, 246]} />
+
+| Data type | Range |
+|---|---|
+| Float (before export) | 0.0–1.0 |
+| Int16 (exported) | 0–10,000 |
+
+## Step 8: Merge and export
+
+The two seasons become one 12-band image (six bands for January–April, six for October–December), exported at 30 m.
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" lines={[247, 256]} />
+
+<Callout type="implication">
+Training implication: the product gives two seasonal views of the same year, which improves class separability and reduces noise. Keep the windows and band structure identical between years.
+</Callout>
+
+## The full script
+
+<CodeBlock script="day-2/landsat-mrv-composite.js" />
+
+<OpenInGEE script="day-2/landsat-mrv-composite.js" hash="d294311d88eee5ab7cb82a26bbf33640" />
+
+The Python (Earth Engine API / geemap) version is [`scripts/gee/day-2/landsat_mrv_composite.py`](https://github.com/wangdiues/bhutan-hfld-training/blob/main/scripts/gee/day-2/landsat_mrv_composite.py). Its core loop:
+
+```python
+composites = []
+for season, (start, end) in seasons.items():
+    coll = get_landsat_collection(start, end).map(scale_landsat).map(mask_landsat)
+    coll = shadow_mask(coll).map(illumination_condition).map(illumination_correction)
+    composite = coll.median().multiply(10000).toInt16().select(bands)
+    composites.append(composite.rename([f"{b}_{season}" for b in bands]))
+export_image = composites[0].addBands(composites[1])
+```
+
+## Common mistakes
+
+- **Forgetting the scale factor.** Unscaled Collection 2 values (around 7,000–20,000) give wrong indices and thresholds.
+- **Using the Sentinel-2 band names.** NIR is `B5` here.
+- **Changing the windows between years.** The training distribution changes with them.
+- **Masking cirrus by accident or not at all.** Check which QA bits you test; the comment and the code should agree.
+- **An export name that doesn't match the year.** Build names from `targetYear`, as the course script now does.
+
+## Practice
+
+<Challenge level="blanks" time={30} hints={["Only targetYear needs to change.", "Landsat 9 started in late 2021, so 2024 has both satellites."]}>
+Make the Landsat composite for **2024** and export it to your own asset folder.
+
+```js
+var targetYear = ___;
+// ...
+Export.image.toAsset({
+  image: exportImage,
+  description: 'bhutan_ls89_' + targetYear + '_janapr_octdec',
+  assetId: 'projects/___/assets/bhutan_ls89_' + targetYear + '_janapr_octdec',
+  region: Bhutan.geometry(),
+  scale: 30,
+  maxPixels: 1e13
+});
+```
+
+<Fragment slot="solution">
+Set `var targetYear = 2024;` and replace the project in `assetId` with your own Cloud project ID. Check the preview layers before starting the task in the **Tasks** tab.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-2-landsat-mrv-composite" questions={[
+  { q: "Why merge Landsat 8 and Landsat 9?", options: ["They have different bands", "Together they revisit every 8 days instead of 16, giving more clear views", "Landsat 9 replaces Landsat 8's SWIR bands", "To get 10 m resolution"], answer: 1, explain: "Two satellites in the same orbit, offset by 8 days, double the observation frequency." },
+  { q: "How do you convert Landsat Collection 2 Level-2 values to surface reflectance?", options: ["Divide by 10,000", "Multiply by 0.0000275 and subtract 0.2", "Multiply by 0.0001", "No conversion is needed"], answer: 1, explain: "USGS's scale factor for Collection 2 Level-2 surface reflectance is DN × 0.0000275 − 0.2." },
+  { q: "Which QA_PIXEL bits does the course mask?", options: ["1, 2 and 3", "3, 4 and 5: cloud, cloud shadow and snow", "Only bit 3", "2 and 4"], answer: 1, explain: "The code tests bits 3, 4 and 5. Cirrus (bit 2) and dilated cloud (bit 1) are not masked." },
+  { q: "The exported Landsat product stores reflectance × 10,000 as Int16.", answer: true, explain: "Multiplying by 10,000 keeps four decimal places; Int16 halves the size of a float image." },
+]} />
+
+<KeyPoints points={[
+  "Landsat follows the Sentinel-2 workflow: same windows, same structure, sensor-specific bands and parameters.",
+  "Scale Collection 2 Level-2 values with × 0.0000275 − 0.2 and mask with QA_PIXEL bits.",
+  "TDOM and SCS+C terrain correction handle Bhutan's shadows and slopes.",
+  "Export one 12-band Int16 image per year; keep windows and band order fixed across years.",
+]} />
+
+<Credit
+  source="D2 Bhutan MRV Landsat Optical Composite Workflow (manual)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; code copied from the manual's script",
+    "The drawn preview point defaults to Thimphu",
+    "Export description and asset name built from targetYear (the description said 2024 while the asset said 2025)",
+    "QA mask described as cloud, cloud shadow and snow, as the code does (the manual said cirrus)",
+    "Added band, QA-bit and parameter tables, the SCS+C formula, practice and a quiz",
+  ]}
+/>

@@ -5,14 +5,20 @@
  * Source: D2-Bhutan_MRV_Landsat_Optical_Composite.docx
  * Original authors: Ate Poortinga & Samuel (Conservation International).
  * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
- * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
+ * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
+ *   - `geometry` (a drawn point used only for the preview layers) defaults to Thimphu.
+ *   - The export description used 2024 while the year and asset were 2025; both now use targetYear,
+ *     and the asset name drops the "_yourname" placeholder.
+ *
+ * Learners need read access to projects/bhutan-hfld-readiness-training/assets/Bhutan, or can
+ * replace it with their own boundary asset; change assetId to a folder in your own project.
  *
  * Original Code Editor script(s):
  *   https://code.earthengine.google.com/d294311d88eee5ab7cb82a26bbf33640
  */
 
-/* global geometry */
-// geometry: a Code Editor import. Draw a point or polygon over Bhutan before running.
+// A point used only to preview single images. (In the training, a point drawn on the map.)
+var geometry = ee.Geometry.Point([89.64, 27.47]);
 
 // ---- 3. Step 1 - Define study area and reporting year ----
 var countries = ee.FeatureCollection('projects/bhutan-hfld-readiness-training/assets/Bhutan')
@@ -235,15 +241,15 @@ var visRGB_oct = {
   min: 0,
   max: 3000
 };
-Map.addLayer(janAprComposite.clip(studyArea), visRGB_jan, 'Jan-Apr RGB 2025');
-Map.addLayer(octDecComposite.clip(studyArea), visRGB_oct, 'Oct-Dec RGB 2025');
+Map.addLayer(janAprComposite.clip(studyArea), visRGB_jan, 'Jan-Apr RGB ' + targetYear);
+Map.addLayer(octDecComposite.clip(studyArea), visRGB_oct, 'Oct-Dec RGB ' + targetYear);
 
 // ---- Function ----
 var exportImage = janAprComposite.addBands(octDecComposite);
 Export.image.toAsset({
   image: exportImage,
-  description: 'bhutan_ls89_2024_janapr_octdec',
-  assetId: 'projects/bhutan-hfld-readiness-training/assets/landsatComposite/bhutan_ls89_2025_yourname',
+  description: 'bhutan_ls89_' + targetYear + '_janapr_octdec',
+  assetId: 'projects/bhutan-hfld-readiness-training/assets/landsatComposite/bhutan_ls89_' + targetYear + '_janapr_octdec',
   region: Bhutan.geometry(),
   scale: 30,
   maxPixels: 1e13
