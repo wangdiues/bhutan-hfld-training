@@ -1,17 +1,242 @@
 ---
-title: "Spectral indices"
+title: "Spectral indices and functions"
+description: Compute NDVI, NDWI, NDMI, EVI and SAVI from Sentinel-2, write index functions, map them over a collection, and make minimum, median and maximum index composites.
 sidebar:
   order: 2
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import Term from '~/components/Term.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I turn bands into a measure of vegetation or water?", "How do I compute an index for every image in a year?"]}
+  objectives={[
+    "Compute NDVI and NDWI with band maths (and normalizedDifference).",
+    "Compute EVI and SAVI with expression().",
+    "Produce minimum, median and maximum index composites.",
+  ]}
+  teaching={20} exercises={30}
+  prerequisites={["Fundamentals of remote sensing", "Custom functions and mapping"]}
+/>
 
-## In this lesson you will
+A **spectral index** combines two or more bands into one number that highlights a property of the surface, such as green vegetation or water. Indices are among the most useful <Term id="covariate">covariates</Term> for classifying forest on Day 3. This exercise builds five of them from Sentinel-2. Data: [Sentinel-2 surface reflectance (harmonized)](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED).
 
-- Compute NDVI and NDWI with `normalizedDifference`
-- Compute EVI/SAVI with `expression`
-- Produce min/median/max index composites
+| Index | Formula (Sentinel-2 bands) | Highlights |
+|---|---|---|
+| NDVI | (NIR − Red) / (NIR + Red) = (B8 − B4) / (B8 + B4) | green vegetation <Cite id="tucker1979" /> |
+| NDWI | (Green − NIR) / (Green + NIR) = (B3 − B8) / (B3 + B8) | open water |
+| NDMI | (NIR − SWIR-1) / (NIR + SWIR-1) = (B8 − B11) / (B8 + B11) | water in leaves and soil moisture |
+| EVI | 2.5 × (NIR − Red) / (NIR + 6 Red − 7.5 Blue + 1) | vegetation, less saturated in dense forest |
+| SAVI | 1.5 × (NIR − Red) / (NIR + Red + 0.5) | vegetation where soil shows through |
 
-**Time:** about 20 min teaching + 30 min practice.
+## 1.1 NDVI from one image
+
+Load one Sentinel-2 image of western Bhutan (9 January 2024). Select the near-infrared (B8) and red (B4) bands and compute NDVI. Then define how to show NDVI (−1 to 1, blue–white–green), a true-colour view (red, green, blue: B4, B3, B2, values 0–3000) and a SWIR–NIR–red view (B11, B8, B4, with a gamma of 1.4), which is good for looking at vegetation. Add the three layers and print NDVI to the Console.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-2/spectral-indices.js" lines={[20, 55]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+s2img = ee.Image("COPERNICUS/S2_SR_HARMONIZED/20240109T044141_20240109T044757_T45RYL")
+ndvi = s2img.normalizedDifference(["B8", "B4"]).rename("NDVI")
+ndwi = s2img.normalizedDifference(["B3", "B8"]).rename("NDWI")
+
+m = geemap.Map()
+m.centerObject(s2img, 9)
+m.addLayer(s2img, {"bands": ["B4", "B3", "B2"], "min": 0, "max": 3000}, "RGB")
+m.addLayer(s2img, {"bands": ["B11", "B8", "B4"], "min": 0, "max": 3000, "gamma": 1.4}, "SWIR-NIR-Red")
+m.addLayer(ndvi, {"min": -1, "max": 1, "palette": ["blue", "white", "green"]}, "NDVI")
+m.addLayer(ndwi, {"min": -1, "max": 1, "palette": ["white", "blue"]}, "NDWI")
+m
+```
+  </TabItem>
+</Tabs>
+
+<Callout type="why">
+Why this matters: in the NDVI layer, forest is dark green (0.6 to 0.9), farmland and grassland paler, bare ground and settlements near 0 or white, and rivers blue (below 0). Click around with the Inspector to see the values.
+</Callout>
+
+The same NDVI in one line: `s2img.normalizedDifference(['B8', 'B4'])`. It computes (first − second) / (first + second) and is the usual way to write any normalised difference.
+
+## 1.2 NDWI from the same image
+
+The Normalized Difference Water Index uses the green (B3) and near-infrared (B8) bands. Water reflects some green light but almost no NIR, so water is positive and land is negative:
+
+<CodeBlock script="day-2/spectral-indices.js" lines={[57, 71]} />
+
+## 1.3 NDVI minimum, median and maximum over a year
+
+One image shows one day. To describe a whole year, compute NDVI for every image and reduce the stack. Filter the collection to Thimphu, 2024 and less than 5% cloud. Write NDVI as a **function** that takes an image and returns it with an `NDVI` band added, `map()` it over the collection, then reduce: minimum, median and maximum for each pixel.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-2/spectral-indices.js" lines={[73, 106]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+aoi = ee.Geometry.Point([89.64, 27.47])
+s2_collection = (
+    ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+    .filterBounds(aoi)
+    .filterDate("2024-01-01", "2024-12-31")
+    .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 5))
+)
+
+
+def calculate_ndvi(image):
+    ndvi = image.select("B8").subtract(image.select("B4")).divide(image.select("B8").add(image.select("B4")))
+    return image.addBands(ndvi.rename("NDVI"))
+
+
+ndvi_collection = s2_collection.map(calculate_ndvi).select("NDVI")
+ndvi_params = {"min": -1, "max": 1, "palette": ["blue", "white", "green"]}
+m = geemap.Map()
+m.centerObject(aoi, 9)
+m.addLayer(ndvi_collection.min(), ndvi_params, "Min NDVI")
+m.addLayer(ndvi_collection.median(), ndvi_params, "Median NDVI")
+m.addLayer(ndvi_collection.max(), ndvi_params, "Max NDVI")
+m
+```
+  </TabItem>
+</Tabs>
+
+What the three composites tell you:
+
+- **Maximum NDVI** shows each pixel at its greenest. It hides most clouds (clouds have low NDVI) and shows where vegetation grows at some point in the year.
+- **Minimum NDVI** shows each pixel at its least green: dry season, after harvest, or under leftover cloud, snow or shadow.
+- **Median NDVI** is the typical value, robust to the odd bad image.
+- The **difference** between maximum and minimum separates evergreen forest (small difference) from deciduous forest and crops (large difference).
+
+## 1.4 NDMI over a year
+
+The exercise also computes a NIR/SWIR-1 index for every image. It is often called NDWI too (after Gao), but it measures the **water in leaves and soil**, not open water, so this course calls it **NDMI** (moisture index):
+
+<CodeBlock script="day-2/spectral-indices.js" lines={[108, 130]} />
+
+<Callout type="mistake" title="Two indices called NDWI">
+The training exercise used the name NDWI for both (Green − NIR) and (NIR − SWIR-1). They measure different things: the first separates open water from land; the second tracks moisture in vegetation. Always give the formula when you report an index.
+</Callout>
+
+## 1.5 EVI and SAVI
+
+Some indices have more than two bands or constants. Write them with `expression()`, which reads a formula as text and takes a dictionary that maps the names in the formula to bands:
+
+<CodeBlock script="day-2/spectral-indices.js" lines={[132, 157]} />
+
+- **EVI** (Enhanced Vegetation Index) corrects for some atmospheric and soil effects and saturates less than NDVI in dense forest, which is useful in Bhutan's broadleaf forests.
+- **SAVI** (Soil-Adjusted Vegetation Index) adds a soil factor, L = 0.5, which helps where vegetation is sparse.
+
+<Callout type="mistake" title="Scale the reflectance first">
+Sentinel-2 surface reflectance is stored as reflectance × 10,000 (a value of 2,500 means 25%). The constants in EVI (+1) and SAVI (+0.5) assume reflectance between 0 and 1, so divide the bands by 10,000 first. The training exercise used the raw values, which gives wrong EVI and SAVI. Ratios such as NDVI and NDWI are not affected, because the scale cancels.
+</Callout>
+
+<Theory title="Normalised differences">
+For bands $a$ and $b$, $ND = (a - b)/(a + b)$ always lies between −1 and 1, and any common scale factor or overall brightness change cancels. That is why NDVI is robust to illumination, but also why it saturates (stops increasing) over dense canopy, where EVI keeps responding.
+</Theory>
+
+## The full script
+
+<CodeBlock script="day-2/spectral-indices.js" />
+
+<OpenInGEE script="day-2/spectral-indices.js" hash="946119d88943098d0e8c6bc7fb7bcc12" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `image.select('B8')` | Picks a band |
+| `a.subtract(b).divide(a.add(b))` | Band maths, pixel by pixel |
+| `image.normalizedDifference(['B8', 'B4'])` | (B8 − B4) / (B8 + B4) in one step; names the band `nd` |
+| `image.expression(formula, {name: band})` | Computes a formula written as text |
+| `image.addBands(band)` | Adds a band, keeping the others |
+| `collection.map(fn).select('NDVI').min()`, `.median()`, `.max()` | Index composites |
+
+## Common mistakes
+
+- **Swapping the bands.** (Red − NIR) gives the negative of NDVI: forest becomes negative.
+- **Forgetting `rename()`.** The index keeps the first band's name (`B8`) and later code selects the wrong band.
+- **Using unscaled reflectance in EVI or SAVI.** Divide Sentinel-2 values by 10,000 first.
+- **Reading maximum NDVI as "the best image".** It is assembled pixel by pixel from different dates.
+
+<Callout type="bhutan">
+Bhutan context: maximum and minimum NDVI help separate evergreen broadleaf and conifer forest (green all year) from deciduous forest, scrub and farmland (much lower in the dry season). Steep north-facing slopes are in deep shadow in winter, which lowers all indices; Day 2's terrain correction reduces this.
+</Callout>
+
+## Practice
+
+You can also explore how reflectance values change each index in the [spectral index explorer](/bhutan-hfld-training/labs/spectral-index-explorer/).
+
+<Challenge level="blanks" time={20} hints={["EVI needs NIR (B8), red (B4) and blue (B2).", "Divide each band by 10000 so reflectance is between 0 and 1.", "Map the function over the collection, then select('EVI').median()."]} solution="day-2/spectral-indices-solution.js">
+Write a function that adds an **EVI** band, map it over the January to April 2025 Sentinel-2 images of Paro valley, and show the median EVI.
+
+```js
+var paro = ee.Geometry.Rectangle([89.25, 27.30, 89.50, 27.55]);
+var addEVI = function(image) {
+  var evi = image.expression(
+    '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
+    {
+      'NIR': image.select('___').divide(10000),
+      'RED': image.select('___').divide(10000),
+      'BLUE': image.select('___').divide(10000)
+    }
+  ).rename('___');
+  return image.___(evi);
+};
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+    .filterBounds(paro)
+    .filterDate('2025-01-01', '2025-05-01')
+    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
+    .map(___);
+Map.centerObject(paro, 11);
+Map.addLayer(s2.select('EVI').___().clip(paro), {min: 0, max: 0.8, palette: ['white', 'yellow', 'green']}, 'Median EVI');
+```
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-2-spectral-indices" questions={[
+  { q: "Which Sentinel-2 bands give NDVI?", options: ["B3 and B8", "B8 and B4", "B8 and B11", "B2 and B4"], answer: 1, explain: "NDVI = (NIR − Red) / (NIR + Red) = (B8 − B4) / (B8 + B4)." },
+  { q: "Why divide Sentinel-2 bands by 10,000 before computing EVI?", options: ["To make the image load faster", "EVI's constants (+1, 6, 7.5) assume reflectance between 0 and 1", "To convert to NDVI", "Because B2 is in a different projection"], answer: 1, explain: "Sentinel-2 SR stores reflectance × 10,000. Ratios like NDVI are unaffected, but formulas with added constants are not." },
+  { q: "A pixel has a high maximum NDVI but a low minimum NDVI over the year. What is it most likely to be?", options: ["Evergreen forest", "Open water", "Cropland or deciduous vegetation", "A building"], answer: 2, explain: "A large seasonal range means the vegetation is green part of the year and bare or dry the rest." },
+  { q: "(Green − NIR)/(Green + NIR) and (NIR − SWIR-1)/(NIR + SWIR-1) measure the same thing.", answer: false, explain: "The first highlights open water; the second, often called NDMI, tracks water in vegetation and soil." },
+]} />
+
+<KeyPoints points={[
+  "Normalised differences such as NDVI and NDWI are band ratios between −1 and 1; normalizedDifference() computes them in one step.",
+  "Write each index as a function that adds a band, then map() it over a collection.",
+  "Minimum, median and maximum composites describe how an index behaves over a year.",
+  "Use expression() for multi-band formulas, and scale Sentinel-2 to 0–1 reflectance first.",
+]} />
+
+<References />
+
+<Credit
+  source="D2 Exercise: Calculating Spectral Indices and Working with Functions"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; the sections (each repeated as full code) curated into one script",
+    "The drawn geometry replaced by a point at Thimphu",
+    "The NIR/SWIR-1 index renamed NDMI to avoid two different indices both called NDWI",
+    "EVI and SAVI computed from reflectance scaled to 0–1 (divide by 10,000)",
+    "Final section repeating the image-collection code from Day 1 left out",
+    "Added an index table, Python (geemap) versions, a fill-in EVI exercise and a quiz",
+  ]}
+/>
