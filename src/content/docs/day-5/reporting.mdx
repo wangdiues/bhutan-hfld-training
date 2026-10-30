@@ -26,10 +26,10 @@ import VersionNote from '~/components/VersionNote.astro';
 />
 
 :::note[New content]
-This lesson was written for the website; it was not part of the May 2026 training materials. The trainers will review it. The exact ART-TREES reporting requirements are covered in [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/); this lesson focuses on the activity data and the evidence behind them.
+This lesson was written for the website; it was not part of the May 2026 training materials. The trainers will review it. The exact ART-TREES reporting requirements will be covered in [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/) (being written); this lesson focuses on the activity data and the evidence behind them.
 :::
 
-The end product of the course is not a map but a set of **numbers with their evidence**: the area of each activity (for example forest loss) for each period, with confidence intervals, and a record that lets a verifier check how they were made. ART-TREES programmes are verified by an independent body, so transparency and reproducibility matter as much as the numbers themselves <Cite id="trees3" />.
+The end product of the course is not a map but a set of **numbers with their evidence**: the area of each activity (for example forest loss) for each period, with confidence intervals, and a record that lets a verifier check how they were made. ART-TREES programmes are verified by an independent body, so transparency and reproducibility matter as much as the numbers themselves.
 
 <VersionNote standard="TREES 3.0">
 The training used TREES 2.0. Check the TREES 3.0 requirements for the reporting period, the activity-data categories and the uncertainty provisions before finalising tables.
@@ -39,7 +39,7 @@ The training used TREES 2.0. Check the TREES 3.0 requirements for the reporting 
 
 Report, for each period and each activity, the **area-adjusted estimate** from the reference sample, not the mapped area. A clear table has one row per class or activity:
 
-| Class / activity | Mapped area (ha) | Adjusted area (ha) | SE (ha) | 90% CI (ha) | Uncertainty (± %) | User's accuracy | Producer's accuracy |
+| Class / activity | Mapped area (ha) | Adjusted area (ha) | SE (ha) | 90% CI (ha) | Uncertainty (± %) | User's accuracy | Producer's accuracy (area-weighted) |
 |---|---|---|---|---|---|---|---|
 | Stable forest | … | … | … | … to … | … | … | … |
 | Forest loss (deforestation) | … | … | … | … to … | … | … | … |
@@ -51,7 +51,7 @@ The [accuracy and area calculator](/bhutan-hfld-training/labs/accuracy-area-esti
 - the **confusion matrix** in sample counts, and the **stratum weights** (mapped areas);
 - the **sample size per stratum** and how it was allocated;
 - the **period** (start and end dates) and the **forest definition** used;
-- the **estimator** (stratified, Olofsson et al. 2014) and the confidence level (90%, z = 1.6449) <Cite id="olofsson2014" />.
+- the **estimator** (stratified, Olofsson et al. 2014) <Cite id="olofsson2014" /> and the confidence level (the course uses 90%, z = 1.6449; check the level your standard requires).
 
 <Callout type="mistake" title="Totals must add up">
 The adjusted areas of all classes should add up to the total mapped area. If they don't, a stratum probably has no samples (see the [calculator](/bhutan-hfld-training/labs/accuracy-area-estimator/)): fix the sample, don't adjust the numbers.
@@ -59,7 +59,7 @@ The adjusted areas of all classes should add up to the total mapped area. If the
 
 ## The assumptions log
 
-Every choice that affects the numbers belongs in a log, written as you go, not at the end. A simple table works:
+Every choice that affects the numbers belongs in a log, written as you go, not at the end. A simple table works. The rows below are an illustrative example (the dates are invented; a minimum of 150 per stratum is the site's alternative to the training's 80):
 
 | Date | Step | Decision | Why | Effect / evidence |
 |---|---|---|---|---|
@@ -67,7 +67,7 @@ Every choice that affects the numbers belongs in a log, written as you go, not a
 | 2026-05-12 | Covariates | bands scaled to 0–1 reflectance before EVI/SAVI | constants assume 0–1 | — |
 | 2026-05-14 | Assemblage | forest first, threshold 0.50 | matches the forest definition | primitive accuracy plot |
 | 2026-05-16 | Sampling | minimum 150 per stratum | deforestation stratum needs enough samples | calculator output |
-| 2026-05-20 | Interpretation | mixed plots labelled by majority class | response design § 3 | double-interpretation agreement |
+| 2026-05-20 | Interpretation | mixed plots labelled by majority class | the project's response design ([Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/)) | double-interpretation agreement |
 
 Include, at least: the forest definition and how it maps to classes and thresholds; image windows and cloud thresholds; masks (cloud, shadow, snow); covariates; training data sources and dates; classifier settings and seeds; assemblage order and thresholds; strata, sample sizes and the seed of the sample; the response design; and any corrections made afterwards.
 
