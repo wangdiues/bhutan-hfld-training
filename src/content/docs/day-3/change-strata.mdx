@@ -1,16 +1,197 @@
 ---
 title: "Change detection and loss strata"
+description: Combine forest maps from two dates into stable forest, loss, gain and stable non-forest strata, measure their mapped areas, and see why rare change needs a stratum of its own.
 sidebar:
   order: 4
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
+<LessonHeader
+  questions={["How do I turn two forest maps into a map of change?", "Why does forest loss need its own stratum for sampling?"]}
+  objectives={[
+    "Build stable forest, loss and non-forest strata from two dates.",
+    "Explain why rare change classes need their own stratum.",
+  ]}
+  teaching={20} exercises={25}
+  prerequisites={["Forest primitives with machine learning"]}
+/>
+
+:::note[New content]
+This lesson was written for the website; it was not part of the May 2026 training materials. The trainers will review it.
 :::
 
-## In this lesson you will
+ART-TREES activity data are about **change**: how much forest was lost (or gained) over a period. A change map comes from comparing forest at the start and at the end of the period. That map is not the final answer. It is used to divide the country into <Term id="stratum">strata</Term> for the reference sample on Day 5, where accuracy and area are estimated <Cite id="olofsson2014" />.
 
-- Build stable forest / loss / non-forest strata from two dates
-- Explain why rare change classes need their own stratum
+## From two forest maps to four strata
 
-**Time:** about 20 min teaching + 25 min practice.
+For each pixel, combine its forest status at the start and at the end of the period:
+
+| Start | End | Stratum | Code |
+|---|---|---|---|
+| forest | forest | **stable forest** | 1 |
+| forest | not forest | **loss** | 2 |
+| not forest | not forest | **stable non-forest** | 3 |
+| not forest | forest | **gain** | 4 |
+
+A small function does this for any two forest masks (1 = forest, 0 = not), so it works with any source:
+
+<CodeBlock script="day-3/change-strata.js" lines={[11, 33]} />
+
+`ee.Image(0).where(condition, value)` starts from 0 and writes each stratum code where its condition is true. The result keeps only pixels mapped in both years.
+
+## Part A: strata from Hansen Global Forest Change
+
+To run straight away without training assets, use the open [Hansen Global Forest Change](https://developers.google.com/earth-engine/datasets/catalog/UMD_hansen_global_forest_change_2023_v1_11) data: tree canopy cover in 2000 and the year of loss (2001–2023). Forest at the start of 2020 is forest in 2000 with no loss up to 2019; forest at the end of 2023 has no loss up to 2023. Then compute the mapped area of each stratum with `ee.Image.pixelArea()` and a grouped sum:
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-3/change-strata.js" lines={[35, 56]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+bhutan = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Bhutan"))
+
+
+def make_strata(forest_start, forest_end):
+    return (
+        ee.Image(0)
+        .where(forest_start.eq(1).And(forest_end.eq(1)), 1)  # stable forest
+        .where(forest_start.eq(1).And(forest_end.eq(0)), 2)  # loss
+        .where(forest_start.eq(0).And(forest_end.eq(0)), 3)  # stable non-forest
+        .where(forest_start.eq(0).And(forest_end.eq(1)), 4)  # gain
+        .updateMask(forest_start.mask().And(forest_end.mask()))
+        .rename("stratum")
+        .toByte()
+    )
+
+
+gfc = ee.Image("UMD/hansen/global_forest_change_2023_v1_11").clip(bhutan)
+forest2000 = gfc.select("treecover2000").gte(10)
+lossyear = gfc.select("lossyear")
+strata = make_strata(
+    forest2000.And(lossyear.gte(1).And(lossyear.lte(19)).Not()),
+    forest2000.And(lossyear.gte(1).And(lossyear.lte(23)).Not()),
+)
+areas = ee.Image.pixelArea().divide(10000).addBands(strata).reduceRegion(
+    reducer=ee.Reducer.sum().group(groupField=1, groupName="stratum"),
+    geometry=bhutan.geometry(), scale=30, maxPixels=1e13,
+)
+print(areas.getInfo())
+
+m = geemap.Map()
+m.centerObject(bhutan, 8)
+m.addLayer(strata, {"min": 1, "max": 4, "palette": ["1a9850", "d73027", "bdbdbd", "4575b4"]}, "Strata 2020-2023")
+m
+```
+  </TabItem>
+</Tabs>
+
+The map uses green for stable forest, red for loss, grey for stable non-forest and blue for gain; the Inspector shows the stratum code of any pixel, and the Console lists the area of each.
+
+<Callout type="mistake" title="Hansen is not Bhutan's forest map">
+Hansen's "tree cover" is not a forest definition: it includes plantations and orchards, its loss year can lag the real event, and gain is only mapped for 2000–2012. It is useful for practice and for comparison, but Bhutan's activity data should come from its own maps, made with its forest definition (Part B). The 10% canopy threshold here is only an example; set it from the forest definition you report.
+</Callout>
+
+## Part B: strata from your own forest primitives
+
+With forest primitives for two years (from [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/), run once on each year's composite), threshold each probability layer to get forest masks, then use the same function:
+
+<CodeBlock script="day-3/change-strata.js" lines={[58, 65]} />
+
+The assets named here are examples; replace them with your own exports. A threshold of 0.5 means "more trees voted forest than not"; the [assemblage](/bhutan-hfld-training/day-4/assemblage/) on Day 4 refines this with rules across all classes.
+
+<Callout type="why">
+Why this matters: comparing two independently classified maps adds the errors of both. A pixel misclassified in either year looks like change. That is why the loss stratum always contains false change, and why its area must be estimated from a reference sample rather than counted from the map.
+</Callout>
+
+## Why loss needs its own stratum
+
+In Bhutan, forest loss covers a tiny share of the country: far less than 1% over a few years. If you drew a simple random sample of, say, 1,000 points across the country, only a handful would fall in places where loss really happened, too few to estimate the loss area or its accuracy with any confidence.
+
+**Stratified sampling** fixes this. Because loss is its own stratum, you can put many more samples there than its area alone would give, for example 100 or more, while the large stable strata get fewer than their share. Each stratum's samples are later weighted by its mapped area, so the estimate stays unbiased <Cite id="olofsson2014" />.
+
+<Theory title="Weights and allocation">
+A stratum's weight is its share of the mapped area, $W_h = A_h / A$. With stratified estimation, any allocation of samples to strata gives unbiased area estimates, as long as each stratum's samples are weighted by $W_h$. So you can over-sample the rare loss stratum to make its estimate precise. [Lab: sample size](/bhutan-hfld-training/labs/sample-size-calculator/) computes how many samples you need and compares allocations.
+</Theory>
+
+<Callout type="bhutan">
+Bhutan context: the Day 5 sampling design uses forest strata plus a deforestation stratum, exactly this idea. Gain is rare and often unreliable in maps; many programmes merge it with stable non-forest or keep it as a small separate stratum, depending on whether removals are reported.
+</Callout>
+
+## The full script
+
+<CodeBlock script="day-3/change-strata.js" />
+
+<OpenInGEE script="day-3/change-strata.js" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `ee.Image(0).where(condition, value)` | Writes a value where a condition is true |
+| `a.and(b)`, `a.not()` | Combine masks |
+| `image.updateMask(mask)` | Keeps only pixels mapped in both years |
+| `ee.Image.pixelArea()` | Area of each pixel in m² |
+| `ee.Reducer.sum().group({groupField, groupName})` | Sums a band separately for each value of another band |
+
+## Common mistakes
+
+- **Reporting map change as the answer.** Map-based loss area is biased by classification errors; estimate area from the reference sample (Day 5).
+- **Different forest definitions in the two years** (different thresholds, classes or sensors): differences in method then look like change.
+- **Forgetting that `lossyear` counts from 2001**: 19 means 2019, 23 means 2023.
+- **Strata with different masks in each year.** Unmatched masks shrink the area; use the same area of interest and sensor for both years.
+
+## Practice
+
+<Challenge level="blanks" time={20} hints={["Loss years are counted from 2001: 2020 is 20, 2023 is 23.", "Forest at the start of 2021 has no loss up to 2020.", "Print the grouped areas and compare stratum 2."]}>
+Make strata for **2021–2023** from Hansen GFC and compare the loss area with 2020–2023.
+
+```js
+var lossBefore = gfc.select('lossyear').gte(1).and(gfc.select('lossyear').lte(___));
+var lossToEnd = gfc.select('lossyear').gte(1).and(gfc.select('lossyear').lte(___));
+var strata2123 = makeStrata(forest2000.and(lossBefore.not()), forest2000.and(lossToEnd.not()));
+```
+
+<Fragment slot="solution">
+```js
+var lossBefore = gfc.select('lossyear').gte(1).and(gfc.select('lossyear').lte(20));
+var lossToEnd = gfc.select('lossyear').gte(1).and(gfc.select('lossyear').lte(23));
+var strata2123 = makeStrata(forest2000.and(lossBefore.not()), forest2000.and(lossToEnd.not()));
+```
+Run the grouped area sum on `strata2123`. Its loss stratum (code 2) covers one year less of loss than 2020–2023, so it should be smaller.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-3-change-strata" questions={[
+  { q: "A pixel is forest in 2020 and not forest in 2025. Which stratum is it?", options: ["Stable forest", "Loss", "Stable non-forest", "Gain"], answer: 1, explain: "Forest at the start and not at the end is loss." },
+  { q: "Why does forest loss get its own stratum?", options: ["It is the largest class", "It is rare, so a separate stratum lets you put enough samples there to estimate it precisely", "Earth Engine requires it", "To avoid weighting by area"], answer: 1, explain: "Stratification lets you over-sample a rare class; area weights keep the estimate unbiased." },
+  { q: "Why is the mapped area of the loss stratum not reported directly?", options: ["It is too small to measure", "Classification errors in either year create false change, so the map area is biased", "Pixels are too large", "ART-TREES only accepts Hansen data"], answer: 1, explain: "Map errors bias pixel counts; areas are estimated from the stratified reference sample." },
+  { q: "Over-sampling the loss stratum makes the area estimate biased.", answer: false, explain: "Not if each stratum's samples are weighted by its area share; any allocation then gives unbiased estimates." },
+]} />
+
+<KeyPoints points={[
+  "Two forest maps give four strata: stable forest, loss, stable non-forest and gain.",
+  "Compute each stratum's mapped area with pixelArea and a grouped sum.",
+  "Loss is rare; a stratum of its own lets the reference sample cover it well.",
+  "Map change is biased by errors in both maps; estimate areas from the reference sample.",
+]} />
+
+<References />
