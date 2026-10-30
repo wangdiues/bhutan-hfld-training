@@ -28,7 +28,8 @@ export interface AccuracyResult {
 	colTotals: number[];
 	weights: number[];
 	totalAreaHa: number;
-	/** Strata with no samples: estimates for the whole map are incomplete if this is non-empty. */
+	/** Strata with mapped area but no samples: estimates for the whole map are incomplete if this is non-empty.
+	 * (A class with no mapped area, e.g. one that only appears as a reference label, is not a stratum.) */
 	emptyStrata: number[];
 	sampleBased: { usersAccuracy: Maybe[]; producersAccuracy: Maybe[]; overallAccuracy: Maybe; kappa: Maybe };
 	/** Estimated area proportions p̂ᵢⱼ = Wᵢ nᵢⱼ / nᵢ. */
@@ -57,7 +58,7 @@ export function accuracyArea(input: AccuracyInput): AccuracyResult {
 		throw new Error('Sample counts must be non-negative numbers.');
 	}
 	const totalAreaHa = sum(mappedAreaHa);
-	if (!(totalAreaHa > 0)) throw new Error('Total mapped area must be greater than zero.');
+	if (!Number.isFinite(totalAreaHa) || !(totalAreaHa > 0)) throw new Error('Total mapped area must be a finite number greater than zero.');
 
 	const rowTotals = matrix.map(sum);
 	const colTotals = matrix[0].map((_, j) => sum(matrix.map((r) => r[j])));
@@ -83,7 +84,8 @@ export function accuracyArea(input: AccuracyInput): AccuracyResult {
 	const pDiag = cellProportions.map((r, i) => r[i]);
 	const areaWeighted = {
 		producersAccuracy: pDiag.map((p, j) => div(p, referenceProportion[j])),
-		overallAccuracy: rowTotals.some((r) => r === 0) ? null : sum(pDiag),
+		// Undefined if a stratum with mapped area has no samples (part of the map is unassessed).
+		overallAccuracy: rowTotals.some((r, i) => r === 0 && weights[i] > 0) ? null : sum(pDiag),
 	};
 	const adjustedAreaHa = referenceProportion.map((p) => p * totalAreaHa);
 
@@ -109,7 +111,7 @@ export function accuracyArea(input: AccuracyInput): AccuracyResult {
 		colTotals,
 		weights,
 		totalAreaHa,
-		emptyStrata: rowTotals.flatMap((r, i) => (r === 0 ? [i] : [])),
+		emptyStrata: rowTotals.flatMap((r, i) => (r === 0 && weights[i] > 0 ? [i] : [])),
 		sampleBased,
 		cellProportions,
 		areaWeighted,

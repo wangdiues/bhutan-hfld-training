@@ -77,10 +77,13 @@ export function runAccuracyLab(input: AccuracyLabInput): Outcome<AccuracyLabResu
 				return { ok: false, error: `Map ${names[i]} / reference ${names[j]}: sample counts must be whole numbers, 0 or more.` };
 		}
 	}
-	if (!(input.mappedAreaHa.reduce((s, a) => s + a, 0) > 0))
-		return { ok: false, error: 'The total mapped area is 0. Enter the mapped area of each class.' };
+	const total = input.mappedAreaHa.reduce((s, a) => s + a, 0);
+	if (!Number.isFinite(total)) return { ok: false, error: 'The mapped areas are too large to add up. Check the units (hectares).' };
+	if (!(total > 0)) return { ok: false, error: 'The total mapped area is 0. Enter the mapped area of each class.' };
 	if (input.matrix.flat().every((x) => x === 0)) return { ok: false, error: 'The confusion matrix is empty. Enter the sample counts.' };
 	if (!(input.z > 0)) return { ok: false, error: 'Choose a confidence level.' };
+	if (input.thresholdPercent !== null && !(Number.isFinite(input.thresholdPercent) && input.thresholdPercent > 0))
+		return { ok: false, error: 'The uncertainty threshold must be a positive percentage, or empty.' };
 
 	const r = accuracyArea({ mappedAreaHa: input.mappedAreaHa, matrix: input.matrix, z: input.z, varianceRule: input.varianceRule });
 	const warnings: string[] = [];
@@ -217,12 +220,14 @@ export function parseConfusionCsv(text: string): Outcome<ParsedCsv> {
 		if (row[0] !== refNames[i])
 			return { ok: false, error: `Row ${i + 2} is "${row[0]}", but the matrix needs the map classes in the same order as the columns ("${refNames[i]}" here).` };
 		const cells = row.slice(1).filter((_, c) => c + 1 !== areaCol);
+		if (cells.some((c) => c === '')) return { ok: false, error: `Row ${i + 2} (${row[0]}): a count is empty. Enter 0 where there are no samples.` };
 		const nums = cells.map((c) => Number(c.replace(/,/g, '')));
 		if (nums.length !== refNames.length || nums.some((x) => !Number.isFinite(x) || x < 0 || !Number.isInteger(x)))
 			return { ok: false, error: `Row ${i + 2} (${row[0]}): every count must be a whole number, 0 or more.` };
 		matrix.push(nums);
 		if (areaCol !== -1) {
-			const a = Number((row[areaCol] ?? '').replace(/,/g, ''));
+			const rawArea = (row[areaCol] ?? '').replace(/,/g, '');
+			const a = rawArea === '' ? NaN : Number(rawArea);
 			if (!Number.isFinite(a) || a < 0) return { ok: false, error: `Row ${i + 2} (${row[0]}): the area must be a number of hectares.` };
 			areas.push(a);
 		}

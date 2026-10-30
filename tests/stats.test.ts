@@ -208,4 +208,21 @@ describe('Lab 2 page — accuracy lab module', () => {
 		expect(order).toMatchObject({ ok: false });
 		if (!order.ok) expect(order.error).toMatch(/same order/);
 	});
+	it('handles review edge cases: overflow, reference-only classes, blank CSV cells', () => {
+		expect(runAccuracyLab({ ...workbookExample(), mappedAreaHa: [1e308, 1e308, 1] })).toMatchObject({ ok: false });
+		const refOnly = runAccuracyLab({
+			classes: ['Forest', 'Non-Forest', 'Cloud'],
+			mappedAreaHa: [600, 400, 0],
+			matrix: [[50, 2, 1], [3, 40, 0], [0, 0, 0]],
+			z: 1.6449,
+			varianceRule: 'olofsson',
+			thresholdPercent: null,
+		});
+		if (!refOnly.ok) throw new Error(refOnly.error);
+		expect(refOnly.value.raw.emptyStrata).toEqual([]);
+		expect(refOnly.value.adjustedTotalHa).toBeCloseTo(1000, 9);
+		expect(refOnly.value.overallArea).not.toBeNull();
+		expect(parseConfusionCsv(',A,B\nA,1,\nB,2,3\n')).toMatchObject({ ok: false });
+		expect(parseConfusionCsv(',A,B,area_ha\nA,1,0,\nB,2,3,5\n')).toMatchObject({ ok: false });
+	});
 });

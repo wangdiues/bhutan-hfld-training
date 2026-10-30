@@ -106,6 +106,10 @@ import '~/styles/labs.css';
 	const dash = (why: string) => `<span tabindex="0" title="${esc(why)}" aria-label="not computable: ${esc(why)}">—</span>`;
 	const pct = (x: Maybe, why: string, d = 1) => (x === null ? dash(why) : `${fmt(x * 100, d)}%`);
 
+	/** Blank inputs are NaN in state and null once saved as JSON. */
+	const numOrBlank = (x: unknown) => typeof x === 'number' || x === null;
+	const unblank = (x: number | null) => (x === null ? NaN : x);
+
 	function isInput(x: unknown): x is AccuracyLabInput {
 		if (!x || typeof x !== 'object') return false;
 		const v = x as Record<string, unknown>;
@@ -113,10 +117,11 @@ import '~/styles/labs.css';
 		return (
 			k >= 2 &&
 			(v.classes as unknown[]).every((c) => typeof c === 'string') &&
-			Array.isArray(v.mappedAreaHa) && v.mappedAreaHa.length === k && v.mappedAreaHa.every((a) => typeof a === 'number') &&
+			Array.isArray(v.mappedAreaHa) && v.mappedAreaHa.length === k && v.mappedAreaHa.every(numOrBlank) &&
 			Array.isArray(v.matrix) && v.matrix.length === k &&
-			v.matrix.every((r) => Array.isArray(r) && r.length === k && r.every((c) => typeof c === 'number')) &&
-			typeof v.z === 'number' && (v.varianceRule === 'olofsson' || v.varianceRule === 'workbook')
+			v.matrix.every((r) => Array.isArray(r) && r.length === k && r.every(numOrBlank)) &&
+			(v.z === 1.6449 || v.z === 1.96) && (v.varianceRule === 'olofsson' || v.varianceRule === 'workbook') &&
+			(v.thresholdPercent === null || typeof v.thresholdPercent === 'number')
 		);
 	}
 
@@ -128,7 +133,9 @@ import '~/styles/labs.css';
 		connectedCallback() {
 			this.form = this.querySelector('form')!;
 			const saved = loadJSON<unknown>(KEY);
-			this.state = isInput(saved) ? saved : workbookExample();
+			this.state = isInput(saved)
+				? { ...saved, mappedAreaHa: saved.mappedAreaHa.map(unblank), matrix: saved.matrix.map((r) => r.map(unblank)) }
+				: workbookExample();
 			this.drawMatrix();
 			this.setOptions();
 			this.form.addEventListener('input', (e) => {
