@@ -56,7 +56,7 @@ Each kind of surface reflects a different share of each wavelength. This pattern
 Light from the sun passes through the atmosphere twice: on the way down and on the way back up to the sensor. Gases and aerosols absorb and scatter part of it. **Atmospheric correction** removes these effects to give **surface reflectance**, which describes the surface itself. This is why the course uses surface-reflectance products such as `COPERNICUS/S2_SR_HARMONIZED`.
 
 <Theory title="From signature to index">
-Because vegetation reflects little red and a lot of NIR, the normalised difference $\text{NDVI} = (NIR - Red)/(NIR + Red)$ is high (about 0.6–0.9) for dense forest, near 0 for bare soil and negative for water. The next lesson, [Spectral indices](/bhutan-hfld-training/day-2/spectral-indices/), builds NDVI and other indices in Earth Engine.
+Because vegetation reflects little red and a lot of NIR, the normalised difference $\text{NDVI} = (NIR - Red)/(NIR + Red)$ is high (about 0.6–0.9) for dense forest, low (about 0.1–0.2) for bare soil and negative for water. The next lesson, [Spectral indices](/bhutan-hfld-training/day-2/spectral-indices/), builds NDVI and other indices in Earth Engine.
 </Theory>
 
 ## Satellites and sensors
@@ -80,7 +80,7 @@ Satellites differ in:
 | **Low Earth orbit (LEO)**, polar or non-polar | a few hundred to about 1,000 km | global or near-global | less frequent | polar: Landsat, Terra; non-polar: the International Space Station, GPM |
 | **Sun-synchronous (a polar LEO)** | as LEO | global | from daily to monthly; a wider swath gives more frequent views | Landsat, Sentinel-2 |
 
-A **sun-synchronous** satellite passes over each place at the same local time every day. Landsat, for example, crosses the equator at about 10 in the morning, so shadows and lighting are similar from one image to the next.
+A **sun-synchronous** satellite passes over any place at about the same local solar time whenever it is overhead (not every day: Landsat returns every 16 days). Landsat, for example, crosses the equator at about 10 in the morning, so shadows and lighting are similar from one image to the next.
 
 ### Passive and active sensors
 
@@ -126,7 +126,7 @@ How often a sensor observes the same place, the **revisit time**. It depends on 
 | Sensor | Revisit |
 |---|---|
 | Landsat 8 or 9 | 16 days each; 8 days together |
-| Sentinel-2A and 2B | 10 days each; 5 days together |
+| Sentinel-2 (two satellites in orbit) | 10 days each; 5 days together |
 | MODIS (Terra and Aqua) | 1–2 days |
 | Commercial pointable satellites | daily or better |
 
@@ -208,5 +208,7 @@ Forest should show low B4 (red) and high B8 (NIR), so NDVI around 0.6–0.9. The
     "NASA ARSET and NASA Earth Observatory figures replaced with an original reflectance diagram and tables",
     "Added Sentinel-2 to the resolution and revisit tables, a Bhutan context note and links to data sources",
     "Temporal resolution defined as revisit time (the slide equated it with one orbit cycle)",
+    "Sun-synchronous orbit: same local time at each pass, not a daily pass (the slide's Paris example)",
+    "Multispectral given as about 3 to 15 bands (slide: 3 to 10); MODIS revisit 1–2 days (slide: 2); commercial revisit daily or better (slide: OrbView 1–2 days)",
   ]}
 />
