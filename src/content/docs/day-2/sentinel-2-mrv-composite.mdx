@@ -112,7 +112,7 @@ Training implication: deep terrain and cloud shadows can look like water, bare s
 
 A slope facing the sun looks brighter than the same land cover on a shaded slope. The correction computes the **illumination condition** (IC), how directly each pixel faces the sun, from the slope and aspect of the [SRTM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003) DEM and the image's sun angles. For each band, a regression of reflectance on IC (over slopes of at least 5°) gives a correction factor *c*, and the band is adjusted:
 
-<Theory title="The SCS+C correction">
+<Theory title="The SCS+C correction" more="/explanation/compositing-and-terrain-correction/">
 $IC = \cos Z \cos S + \sin Z \sin S \cos(\phi_{sun} - \phi_{aspect})$, where $Z$ is the solar zenith angle and $S$ the slope. With $\rho = a \cdot IC + b$ fitted per band and $c = b/a$, the corrected reflectance is $\rho_{corr} = \rho \, \dfrac{\cos S \cos Z + c}{IC + c}$. Pixels facing the sun are darkened, shaded pixels brightened, and flat ground barely changes.
 </Theory>
 

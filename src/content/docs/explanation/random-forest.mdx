@@ -1,0 +1,49 @@
+---
+title: "How Random Forest works"
+description: Decision trees, bagging and random feature choice, and why Random Forest suits land-cover mapping from satellite covariates.
+newContent: true
+sidebar:
+  order: 4
+---
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+
+Random Forest is the classifier behind the course's forest primitives. It is popular for land-cover mapping because it works well with many covariates, needs little tuning and rarely overfits badly <Cite id="breiman2001" />.
+
+## One tree
+
+A **decision tree** splits the training samples again and again with yes/no questions, such as "is NDVI in January–April above 0.55?". At each step it chooses the question that best separates the classes. One common measure is **entropy**, $E = -\sum_i p_i \log_2 p_i$, where $p_i$ is the share of class $i$ in a group. A pure group has entropy 0. The best split is the one with the biggest **information gain**, the drop in entropy from before the split to the size-weighted average after it. Splitting stops when the groups are pure or too small; each end group (leaf) predicts its majority class.
+
+A single deep tree fits its training data very closely, including its noise, so it predicts new data poorly. It is also unstable: a few different samples can give a different tree.
+
+## Many trees
+
+Random Forest grows many trees (the course uses 100 to 200) and lets them vote. Two kinds of randomness make the trees different from each other:
+
+1. **Bagging.** Each tree is trained on a random sample of the training data. In Breiman's method this is a bootstrap sample, drawn with replacement, so each tree sees about two thirds of the samples; in Earth Engine, `bagFraction` sets the share (0.5 by default).
+2. **Random feature choice.** At each split, a tree considers only a random subset of the covariates (in Earth Engine, `variablesPerSplit`; by default the square root of the number of covariates).
+
+Errors of individual trees then partly cancel out in the vote. The samples a tree did not see (its **out-of-bag** samples) give a built-in estimate of accuracy, which is optimistic when training samples are clustered in space.
+
+## Classes or probabilities
+
+The vote can be reported as the winning class or as the share of trees voting for each class. In Earth Engine, `setOutputMode('PROBABILITY')` returns that share for a two-class (yes/no) model. The course trains one yes/no model per class and keeps the probability: these are the RLCMS **primitives** ([RLCMS primitives and assemblage](/bhutan-hfld-training/explanation/rlcms-primitives-and-assemblage/)).
+
+## Settings that matter
+
+| Setting | Effect |
+|---|---|
+| number of trees | more trees give stabler results, with little gain past a few hundred |
+| `variablesPerSplit` | fewer makes trees more different; more makes each tree stronger |
+| `minLeafPopulation` | larger leaves give smoother, less overfitted results |
+| `bagFraction` | the share of samples each tree sees |
+
+Training data matter far more than these settings. Samples should cover every class across Bhutan's regions, elevations and seasons, and be checked for label errors ([Collecting training data](/bhutan-hfld-training/day-4/training-data/)).
+
+## Limits
+
+- Random Forest cannot predict well for conditions it has never seen in training, such as a forest type found only at elevations with no samples.
+- Its accuracy on training or out-of-bag data is not the map's accuracy. Map accuracy comes from an independent probability sample ([Area estimation](/bhutan-hfld-training/explanation/area-estimation/)).
+- Variable importance shows which covariates the trees used most, not which ones cause the differences.
+
+<References />

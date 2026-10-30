@@ -17,7 +17,7 @@ This lab does what the Day 5 workbook *Exercise D5-Sample Size Calculator.xlsx* 
 
 ## How it works
 
-<Theory title="Stratified sample size">
+<Theory title="Stratified sample size" more="/explanation/area-estimation/">
 For strata with weights $W_i = A_i / A$ and expected proportions $p_i$ of the target class, the standard deviation in each stratum is $S_i = \sqrt{p_i(1-p_i)}$. To estimate the target class with standard error $SE$, you need
 $$ n = \left( \frac{\sum_i W_i S_i}{SE} \right)^2 $$
 samples <Cite id="olofsson2014" at="Eq. 13" />. Here $SE = (\text{MoE}/100) \times W_\text{target} / z$, so a ±25% margin of error at 90% confidence ($z = 1.6449$) sets the target.

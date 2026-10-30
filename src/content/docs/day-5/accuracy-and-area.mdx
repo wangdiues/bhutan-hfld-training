@@ -67,7 +67,7 @@ A <Term id="confusion-matrix" /> counts the samples by map class (rows: what the
 
 A common reading of kappa (Landis and Koch): below 0 poor; 0–0.20 slight; 0.21–0.40 fair; 0.41–0.60 moderate; 0.61–0.80 substantial; 0.81–1.00 almost perfect. Olofsson et al. advise **against** relying on kappa for accuracy reporting <Cite id="olofsson2014" />; report user's, producer's and overall accuracy instead.
 
-<Theory title="Stratified estimators">
+<Theory title="Stratified estimators" more="/explanation/area-estimation/">
 With stratified sampling, each stratum $h$ has weight $W_h = A_h/A$. The estimated area proportion of reference class $j$ is $\hat p_{\cdot j} = \sum_h W_h \, n_{hj}/n_{h\cdot}$, the adjusted area is $\hat A_j = A\,\hat p_{\cdot j}$, and its standard error is $SE(\hat A_j) = A\sqrt{\sum_h W_h^2 \frac{\hat p_{j|h}(1-\hat p_{j|h})}{n_{h\cdot}-1}}$. The 90% confidence interval is $\hat A_j \pm 1.6449\,SE(\hat A_j)$ <Cite id="olofsson2014" />. Producer's and overall accuracy must also be weighted by $W_h$; the plain counts in the matrix are biased under stratified sampling.
 </Theory>
 

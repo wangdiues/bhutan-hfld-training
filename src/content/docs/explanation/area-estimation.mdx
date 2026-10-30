@@ -1,0 +1,52 @@
+---
+title: "Design-based area estimation"
+description: Why reported areas come from a probability sample rather than from counting map pixels, and how the stratified estimators of Olofsson et al. (2014) work.
+newContent: true
+sidebar:
+  order: 7
+---
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+
+Day 5 turns a map and a reference sample into areas with confidence intervals. This page explains the reasoning, following Olofsson et al. <Cite id="olofsson2014" />.
+
+## Why not count pixels?
+
+Every map has errors. Some pixels mapped as deforestation are still forest (**commission**), and some real deforestation was mapped as forest (**omission**). The mapped area equals the true area plus commission minus omission. The two rarely balance, so for a rare class such as deforestation the mapped area is often far from the true area. Pixel counting also gives no measure of uncertainty.
+
+## The design-based idea
+
+Instead, we take a **probability sample** of locations: every location has a known chance of being chosen. At each sample location, an interpreter records the **reference** class from better evidence (high-resolution imagery, field visits). The map is used only to make the sample efficient.
+
+Because the selection probabilities are known, statistics from the sample give **unbiased** estimates of the true area of each class, and the sampling theory gives their standard errors <Cite id="cochran1977" />. This is called *design-based* inference: the estimates rest on how the sample was drawn, not on a model of the map's errors.
+
+## Strata
+
+The map classes are used as **strata**: the sample is drawn separately in each one. This lets us put more samples in small but important strata, such as deforestation, than a simple random sample would. Each stratum $h$ has a weight $W_h = A_h/A$, its share of the mapped area. As long as each stratum's results are weighted by $W_h$, any allocation of samples gives an unbiased estimate.
+
+## The estimators
+
+From the sample, $n_{hj}$ is the number of samples in stratum $h$ with reference class $j$, and $n_{h\cdot}$ the number of samples in stratum $h$.
+
+- The proportion of the area in reference class $j$: $\hat p_{\cdot j} = \sum_h W_h \, n_{hj}/n_{h\cdot}$.
+- The area of class $j$: $\hat A_j = A \, \hat p_{\cdot j}$.
+- Its standard error: $SE(\hat A_j) = A\sqrt{\sum_h W_h^2 \dfrac{\hat p_{j|h}(1-\hat p_{j|h})}{n_{h\cdot}-1}}$, where $\hat p_{j|h} = n_{hj}/n_{h\cdot}$.
+- The 90% confidence interval: $\hat A_j \pm 1.6449 \, SE(\hat A_j)$ (1.96 for 95%).
+
+Producer's and overall accuracy must be weighted by $W_h$: the plain counts of a confusion matrix are biased for them when strata are sampled at different rates. User's accuracy, $n_{hh}/n_{h\cdot}$, needs no weighting when the strata are the map classes.
+
+## Sample size
+
+The total sample size follows from the precision you want. With $S_h = \sqrt{p_h(1-p_h)}$, where $p_h$ is the expected share of the target class in stratum $h$ (the expected user's accuracy in the target class's own stratum), $n = \left(\sum_h W_h S_h / SE\right)^2$. This is Eq. 13 in <Cite id="olofsson2014" narrative />, which states it for overall accuracy; the course applies the same formula to the area proportion of the target class. Halving the target standard error multiplies $n$ by four. The sample is then shared out, often with a minimum per stratum so that rare strata get enough samples. Try it in the [sample size calculator](/bhutan-hfld-training/labs/sample-size-calculator/).
+
+## What can still go wrong
+
+The estimators are unbiased only if the sample was drawn as designed and the reference labels are right.
+
+- **Reference errors.** Interpreters can be wrong, especially in shadowed or mixed plots. Use clear rules, good imagery and a second interpreter for some plots ([Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/)).
+- **Changing the sample afterwards.** Dropping "difficult" plots or adding convenient ones breaks the known selection probabilities.
+- **Using training data as reference.** Training samples weren't drawn with known probabilities and were used to build the map.
+
+Work through a full example in the [accuracy and area estimator](/bhutan-hfld-training/labs/accuracy-area-estimator/) and [Accuracy assessment and area adjustment](/bhutan-hfld-training/day-5/accuracy-and-area/).
+
+<References />

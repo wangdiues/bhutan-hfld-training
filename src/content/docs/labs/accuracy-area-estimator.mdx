@@ -17,7 +17,7 @@ This lab does what the Day 5 workbook *Exercise D5-Confusion Matrix, Accuracy As
 
 ## How it works
 
-<Theory title="Area-adjusted estimates">
+<Theory title="Area-adjusted estimates" more="/explanation/area-estimation/">
 With stratum weights $W_i = A_i / A$ and $n_{ij}$ samples mapped as $i$ with reference class $j$, the estimated area proportion of each cell is $\hat p_{ij} = W_i \, n_{ij} / n_{i\cdot}$. The adjusted area of class $j$ is $\hat A_j = A \sum_i \hat p_{ij}$, with standard error
 $$ SE(\hat p_{\cdot j}) = \sqrt{\sum_i W_i^2 \, \frac{\hat p_{j|i}(1 - \hat p_{j|i})}{n_{i\cdot} - 1}}, \qquad \hat p_{j|i} = n_{ij} / n_{i\cdot} $$
 <Cite id="olofsson2014" at="Eqs. 9–10" />. The standard error of the area is $SE(\hat A_j) = A \, SE(\hat p_{\cdot j})$ (Eq. 11), and the confidence interval is $\hat A_j \pm z \, SE(\hat A_j)$, with $z = 1.6449$ for 90%.

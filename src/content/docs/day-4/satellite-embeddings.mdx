@@ -84,7 +84,7 @@ Why this matters: an embedding already contains seasonal and multi-sensor inform
 
 Each pixel's embedding is a vector in 64-dimensional space. Two vectors are similar when they point in the same direction. Because the vectors have unit length, their **dot product** (multiply the 64 pairs of values and add them up) equals the cosine of the angle between them:
 
-<Theory title="Dot product = cosine similarity">
+<Theory title="Dot product = cosine similarity" more="/explanation/embeddings/">
 For unit vectors $\mathbf{a}$ and $\mathbf{b}$, $\mathbf{a}\cdot\mathbf{b} = \sum_{i=0}^{63} a_i b_i = \cos\theta$. It runs from **1** (same direction: very similar) through **0** (at right angles: unrelated) to **−1** (opposite).
 </Theory>
 

@@ -72,7 +72,7 @@ The tree is a chain of yes/no questions, in priority order:
 3. … grass, other, built-up …
 4. Is wet ≥ 0.25? **Yes** → class 6 (wetland). **No** → class 0 (unclassified).
 
-<Theory title="Why the order matters">
+<Theory title="Why the order matters" more="/explanation/rlcms-primitives-and-assemblage/">
 A pixel can pass more than one threshold: forest 0.62 and crop 0.70, say. The tree stops at the **first** rule it passes, so this pixel becomes forest even though crop is more probable. Putting a class higher gives it priority in such conflicts. Changing the order, or a threshold, changes which class wins where primitives overlap, typically at edges, in agroforestry and in shrubland.
 </Theory>
 

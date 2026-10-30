@@ -117,7 +117,7 @@ Slopes facing away from the sun look darker and can be mistaken for a different 
 
 <CodeBlock script="day-2/landsat-mrv-composite.js" lines={[112, 218]} />
 
-<Theory title="SCS+C">
+<Theory title="SCS+C" more="/explanation/compositing-and-terrain-correction/">
 For each band, regress reflectance on IC: $\rho = a + b \cdot IC$, and set $c = a/b$. The corrected reflectance is $\rho_{corr} = \rho \, \dfrac{\cos S \cos Z + c}{IC + c}$, where $S$ is the slope and $Z$ the solar zenith angle ($90°$ minus the sun elevation). The $c$ term stops over-correction on faintly lit slopes, a known problem of the plain cosine correction.
 </Theory>
 

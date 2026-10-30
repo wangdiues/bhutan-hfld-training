@@ -1,0 +1,53 @@
+---
+title: "Compositing and terrain correction"
+description: Why the course builds seasonal median composites with cloud, shadow and terrain corrections, and what each step does to the pixels.
+newContent: true
+sidebar:
+  order: 3
+---
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+
+A single satellite image of Bhutan almost always has cloud, cloud shadow or snow somewhere, and its steep valleys make the same forest look different from one slope to the next. The MRV composites in Day 2 deal with both problems before any classification starts.
+
+## Why composite
+
+A **composite** combines many images of the same place into one image, choosing a value for each pixel and band. It gives a clear view of the whole country, and the same method can be repeated for every year, which makes maps from different years comparable. That repeatability matters more for MRV than a perfect view on any one day.
+
+## Masking before compositing
+
+Each image is cleaned first:
+
+- **Clouds** are masked with Cloud Score+ for Sentinel-2, and with the `QA_PIXEL` band for Landsat.
+- **Cloud shadows** that the masks miss are removed with **TDOM** (Temporal Dark Outlier Mask). A pixel that is much darker in both NIR and SWIR than its multi-year average for that place is probably in shadow, so it is masked.
+- Masks are often grown by a few pixels, because cloud edges are thin and hard to detect.
+
+## Why the median
+
+After masking, each pixel has several clear values. The composite takes the **median**. Remaining cloud is bright and remaining shadow is dark, so they sit at the extremes and the median ignores them as long as most values are clear. The mean would mix them in.
+
+The course builds two composites per year, **January–April** and **October–December**. They avoid the monsoon, and the difference between them (for example, deciduous trees and crops in and out of leaf) helps a classifier separate classes.
+
+## Terrain correction (SCS+C)
+
+On a slope facing the Sun, the ground receives more light than flat ground; on a slope facing away, less. Without correction, a classifier may learn "shaded forest" and "sunlit forest" as different things.
+
+The **illumination condition** $IC$ measures how directly the Sun hits each pixel:
+
+$$IC = \cos Z \cos S + \sin Z \sin S \cos(\phi_{sun} - \phi_{aspect})$$
+
+where $Z$ is the solar zenith angle, $S$ the slope and $\phi$ the azimuths of the Sun and of the slope. For each band, the method fits a line $\rho = a + b \cdot IC$ over slopes of at least 5° and sets $c = a/b$. The corrected reflectance is
+
+$$\rho_{corr} = \rho \, \frac{\cos S \cos Z + c}{IC + c}.$$
+
+Sunlit pixels are darkened, shaded pixels brightened, and flat ground barely changes. The $c$ term keeps faintly lit slopes from being over-brightened, the weakness of a plain cosine correction <Cite id="soenen2005" />. The correction needs an elevation model (SRTM at 30 m in the course) and works less well in deep shadow, where little light reaches the ground at all.
+
+## BRDF
+
+Reflectance also changes with the angle from which the satellite looks and the angle of the Sun, a property described by the bidirectional reflectance distribution function (BRDF). Images taken near the edge of a swath can look brighter or darker than those near the centre. A BRDF correction normalises the images to one standard geometry. It matters most when images from different dates or satellites are combined.
+
+## What it means for the method
+
+Compositing and correction reduce differences that have nothing to do with land cover. They do not remove all of them: some cloud, haze or deep shadow remains in places. Check the composite visually before using it ([Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/), [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/)).
+
+<References />

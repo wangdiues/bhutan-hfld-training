@@ -133,7 +133,7 @@ The classifier applied to the covariate stack gives a binary map (1 = forest, 0 
 
 <CodeBlock script="day-3/forest-primitives.js" lines={[340, 386]} />
 
-<Theory title="Why probabilities, not classes">
+<Theory title="Why probabilities, not classes" more="/explanation/rlcms-primitives-and-assemblage/">
 A binary map hides how sure the model is: a pixel at 0.51 and one at 0.99 both become "forest". A probability layer keeps that information, so the assemblage step can set its own thresholds and decide between classes that compete for the same pixel (for example, forest at 0.55 and cropland at 0.60).
 </Theory>
 

@@ -56,5 +56,11 @@
 		"short": "Brown et al. 2025",
 		"text": "Brown, C. F., et al. (2025). AlphaEarth Foundations: An embedding field model for accurate and efficient global mapping from sparse label data. arXiv:2507.22291.",
 		"url": "https://arxiv.org/abs/2507.22291"
+	},
+	{
+		"id": "soenen2005",
+		"short": "Soenen et al. 2005",
+		"text": "Soenen, S. A., Peddle, D. R., & Coburn, C. A. (2005). SCS+C: A modified sun-canopy-sensor topographic correction in forested terrain. IEEE Transactions on Geoscience and Remote Sensing, 43(9), 2148–2159.",
+		"url": "https://doi.org/10.1109/TGRS.2005.852480"
 	}
 ]

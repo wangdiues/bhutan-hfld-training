@@ -147,7 +147,7 @@ Some indices have more than two bands or constants. Write them with `expression(
 Sentinel-2 surface reflectance is stored as reflectance × 10,000 (a value of 2,500 means 25%). The constants in EVI (+1) and SAVI (+0.5) assume reflectance between 0 and 1, so divide the bands by 10,000 first. The training exercise used the raw values, which gives wrong EVI and SAVI. Ratios such as NDVI and NDWI are not affected, because the scale cancels.
 </Callout>
 
-<Theory title="Normalised differences">
+<Theory title="Normalised differences" more="/explanation/remote-sensing-physics/">
 For bands $a$ and $b$, $ND = (a - b)/(a + b)$ always lies between −1 and 1, and any common scale factor or overall brightness change cancels. That is why NDVI is robust to illumination, but also why it saturates (stops increasing) over dense canopy, where EVI keeps responding.
 </Theory>
 

@@ -1,0 +1,40 @@
+---
+title: "Satellite embeddings"
+description: What the 64 numbers of the Satellite Embedding dataset mean, why similar places have similar embeddings, and how to use them for classification and change.
+newContent: true
+sidebar:
+  order: 6
+---
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+
+The Satellite Embedding dataset gives every 10 m pixel on land a list of 64 numbers for each year since 2017. The numbers come from AlphaEarth Foundations, a model from Google DeepMind <Cite id="brown2025" />. This page explains what they are and how the course uses them.
+
+## What an embedding is
+
+An **embedding** is a short list of numbers that summarises something complex. The model looks at a whole year of data for a place, from optical, radar and other sources, and compresses it into 64 values. It was trained so that the 64 values keep the information needed to reconstruct those observations.
+
+No single number has a fixed meaning such as "greenness". What matters is the pattern: **places that look and behave alike over the year get similar embeddings**. A pine forest near Bumthang and one near Haa should be close to each other, and far from a paddy field in Punakha.
+
+## Measuring similarity
+
+The 64 values of each pixel form a vector of length 1 (a **unit vector**). For two unit vectors $\mathbf{a}$ and $\mathbf{b}$, the dot product
+
+$$\mathbf{a}\cdot\mathbf{b} = \sum_{i=0}^{63} a_i b_i = \cos\theta$$
+
+is the **cosine similarity**: 1 for vectors pointing the same way (very similar), 0 for unrelated ones and −1 for opposite ones. In Earth Engine it is a multiplication followed by a sum over the bands ([Satellite embeddings](/bhutan-hfld-training/day-4/satellite-embeddings/)).
+
+## Three uses in the course
+
+1. **Classification.** Use the 64 bands as covariates, alone or with spectral indices. Because the embeddings already summarise a year of data, a classifier often needs fewer training samples ([Embeddings: classification and similarity](/bhutan-hfld-training/day-4/embeddings-classification-similarity/)).
+2. **Similarity search.** Take the embedding of a few known pixels (for example, a cardamom plantation) and map the similarity of every other pixel to them.
+3. **Change.** Compare the same pixel's embeddings in two years. A similarity well below 1 marks a pixel whose land surface changed, which helps target samples for rare classes such as deforestation ([Determining sample size](/bhutan-hfld-training/day-5/sample-size/)).
+
+## Limits
+
+- **Not directly interpretable.** You can't read a land-cover class from the numbers; you need labelled samples or reference pixels.
+- **Annual.** One embedding per year: changes within a year are blended, and the year must match your reporting period.
+- **Model versions.** If the model or dataset is updated, embeddings can change. Record the dataset version you used.
+- **Not a substitute for reference data.** A low similarity shows that something changed, not what changed or whether it counts as deforestation. Map accuracy and areas still come from a reference sample ([Area estimation](/bhutan-hfld-training/explanation/area-estimation/)).
+
+<References />
