@@ -47,7 +47,7 @@ print(cities);
 // 3. Dictionary
 var cityData = {
   'city': city,
-  'population': 114551, // 2017 census (the source had 787000, close to Bhutan's national population)
+  'population': 114551, // Thimphu Thromde, 2017 census (the source had 787000, close to Bhutan's national population)
   'coordinates': [89.64, 27.47]
 };
 print(cityData);
@@ -214,7 +214,7 @@ Bhutan context: GAUL 2015 boundaries are old and simplified. For reporting, use 
 
 ## Practice
 
-<Challenge level="blanks" time={15} hints={["Paro is at about 89.41° E, 27.43° N. Earth Engine takes longitude first.", "Lists are numbered from 0, so the first item is [0].", "ee.Geometry.Point() accepts a list of two numbers."]} solution="day-1/javascript-basics-solution.js">
+<Challenge level="blanks" time={15} hints={["Find Paro town on the map and click it with the Inspector to read its coordinates. Earth Engine takes longitude first.", "Lists are numbered from 0, so the first item is [0].", "ee.Geometry.Point() accepts a list of two numbers."]} solution="day-1/javascript-basics-solution.js">
 Create an object for **Paro** with its name and coordinates, print its longitude, write a function that describes any place object, and put a point on the map.
 
 ```js
@@ -273,7 +273,7 @@ print(countCities(cities));
   date="May 2026"
   changes={[
     "Converted to a web lesson; code copied from the exercise",
-    "Thimphu's population corrected from 787000 to 114551 (2017 census) and the unexplained land_area replaced by coordinates",
+    "Thimphu's population corrected from 787000 to 114551 (Thimphu Thromde, 2017 census) and the unexplained land_area replaced by coordinates",
     "Added explanations, Python (geemap) versions, practice exercises and a quiz",
   ]}
 />
