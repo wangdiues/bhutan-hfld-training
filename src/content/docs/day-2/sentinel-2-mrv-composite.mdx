@@ -54,7 +54,7 @@ The manual counted the available images per month (training example):
 | May | 19 | weak support |
 | June | 1 | do not use for an optical composite |
 | July | 1 | do not use for an optical composite |
-| August | — (not reported) | very weak support |
+| August | 8 | very weak support |
 | September | 15 | weak support |
 | October | 31 | usable support |
 | November | 73 | very strong support |
@@ -85,7 +85,7 @@ Training implication: this is the first place where seasonality is kept. Don't m
 </Callout>
 
 <Callout type="mistake" title="Corrected: surface reflectance">
-The training script loaded `COPERNICUS/S2_HARMONIZED`, which is Level-1C top-of-atmosphere reflectance, while the manual specifies surface reflectance and the shadow step (Step 5) uses `COPERNICUS/S2_SR_HARMONIZED` as its reference. Comparing the two products mixes atmospheric effects into the shadow test. The course script uses `COPERNICUS/S2_SR_HARMONIZED` throughout.
+The training script loaded `COPERNICUS/S2_HARMONIZED`, which is Level-1C top-of-atmosphere reflectance, while the manual specifies surface reflectance and the shadow step (Step 4) uses `COPERNICUS/S2_SR_HARMONIZED` as its reference. Comparing the two products mixes atmospheric effects into the shadow test. The course script uses `COPERNICUS/S2_SR_HARMONIZED` throughout.
 </Callout>
 
 ## Step 3: Cloud Score+
@@ -100,7 +100,7 @@ Training implication: cloud left in the inputs teaches the model cloud artefacts
 
 ## Step 4: TDOM shadow cleaning
 
-**TDOM** (temporal dark outlier mask) finds pixels that are much darker in near infrared and SWIR than usual for that place. It compares each image with the mean and standard deviation over the previous three years. A pixel is masked as shadow when both its NIR and SWIR-1 z-scores are below −1.8 and their sum is below 0.20 reflectance. The mask is shrunk by 1.5 pixels to drop isolated pixels, then grown by 2.5 pixels to cover shadow edges. TDOM only updates the mask; no z-score or mask bands are kept.
+**TDOM** (temporal dark outlier mask) finds pixels that are much darker in near infrared and SWIR than usual for that place. It compares each image with the per-pixel mean and standard deviation of a reference collection that runs from the start of the same season three years earlier (1 January or 1 October) to the end of the target season, every month included, with no pixel-level cloud masking. A pixel is masked as shadow when both its NIR and SWIR-1 z-scores are below −1.8 and their sum is below 0.20 reflectance. The mask is shrunk by 1.5 pixels to drop isolated pixels, then grown by 2.5 pixels to cover shadow edges. TDOM only updates the mask; no z-score or mask bands are kept.
 
 <CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[61, 101]} />
 
@@ -112,7 +112,7 @@ Training implication: deep terrain and cloud shadows can look like water, bare s
 
 A slope facing the sun looks brighter than the same land cover on a shaded slope. The correction computes the **illumination condition** (IC), how directly each pixel faces the sun, from the slope and aspect of the [SRTM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003) DEM and the image's sun angles. For each band, a regression of reflectance on IC (over slopes of at least 5°) gives a correction factor *c*, and the band is adjusted:
 
-<Theory title="The C-correction">
+<Theory title="The SCS+C correction">
 $IC = \cos Z \cos S + \sin Z \sin S \cos(\phi_{sun} - \phi_{aspect})$, where $Z$ is the solar zenith angle and $S$ the slope. With $\rho = a \cdot IC + b$ fitted per band and $c = b/a$, the corrected reflectance is $\rho_{corr} = \rho \, \dfrac{\cos S \cos Z + c}{IC + c}$. Pixels facing the sun are darkened, shaded pixels brightened, and flat ground barely changes.
 </Theory>
 
@@ -126,7 +126,7 @@ Take the median of each season, convert to Int16 to halve the storage, and add t
 
 <CodeBlock script="day-2/sentinel-2-mrv-composite.js" lines={[176, 193]} />
 
-The manual mentions clamping values to a reflectance-like range before the conversion; the script converts without clamping. Surface reflectance fits easily in Int16 (−32,768 to 32,767), so this does no harm.
+The manual mentions clamping values to a reflectance-like range before the conversion; the script converts without clamping. Normal surface reflectance fits easily in Int16 (−32,768 to 32,767), but in deep shade the terrain correction can produce extreme values where IC + c is close to 0, so check the composite for outliers (and consider clamping, for example `.clamp(0, 10000)`).
 
 ## Step 7: Merge and export
 
@@ -136,7 +136,7 @@ Merge the two seasons into one image and export it to an asset at 10 m.
 
 Expected band order: `B2_jan_apr, B3_jan_apr, B4_jan_apr, B8_jan_apr, B11_jan_apr, B12_jan_apr, B2_oct_dec, B3_oct_dec, B4_oct_dec, B8_oct_dec, B11_oct_dec, B12_oct_dec`.
 
-Click **Run** in the **Tasks** tab to start the export. A national 10 m export takes a while, often an hour or more.
+Click **Run** in the **Tasks** tab to start the export. A national 10 m export can take a long time; follow it in the Tasks tab.
 
 ## The full script
 
@@ -244,7 +244,7 @@ Everything else follows from these two values. A stricter threshold removes more
 
 <KeyPoints points={[
   "Two seasonal composites (Jan–Apr, Oct–Dec) within the reporting year give a stable, repeatable MRV product for Bhutan.",
-  "Cloud Score+ removes cloud and haze; TDOM removes shadows; the C-correction evens out terrain illumination.",
+  "Cloud Score+ removes cloud and haze; TDOM removes shadows; the SCS+C correction evens out terrain illumination.",
   "Export one 12-band Int16 image per year with season-named bands and no QA bands.",
   "Use surface reflectance throughout, and inspect each step before exporting.",
 ]} />
@@ -257,6 +257,6 @@ Everything else follows from these two values. A stricter threshold removes more
     "Converted to a web lesson; the manual's full script kept as the course script (the step sections repeat it)",
     "Main collection changed from COPERNICUS/S2_HARMONIZED (Level-1C) to COPERNICUS/S2_SR_HARMONIZED, as the manual specifies and the TDOM reference requires",
     "The drawn preview point defaults to Thimphu; asset access and export path explained",
-    "Added the C-correction formula, a Python (geemap) port, practice tasks and a quiz",
+    "Added the SCS+C correction formula, a Python (geemap) port, practice tasks and a quiz",
   ]}
 />
