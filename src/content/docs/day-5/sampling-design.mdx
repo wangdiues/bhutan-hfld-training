@@ -1,17 +1,198 @@
 ---
-title: "Designing a stratified sample"
+title: "Designing a stratified sampling frame"
+description: Why land-cover maps can't give areas on their own, how strata are chosen, how simple random, systematic and cluster designs compare, and how stratification feeds sample size and allocation.
 sidebar:
   order: 1
 ---
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import { Image } from 'astro:assets';
+import mapSamples from '~/assets/day-5/sampling-design/s02-0d8cc037e3.webp';
+import ceoMap from '~/assets/day-5/sampling-design/s05-223ec9b1ac.webp';
+import ceoImagery from '~/assets/day-5/sampling-design/s05-77781520b8.webp';
+import frame from '~/assets/day-5/sampling-design/s06-e6ea1172ca.webp';
+import randomPts from '~/assets/day-5/sampling-design/s07-ff42194bb0.webp';
+import systematicPts from '~/assets/day-5/sampling-design/s07-7a872bea67.webp';
+import clusters from '~/assets/day-5/sampling-design/s07-e92312d8d1.webp';
+import workflow from '~/assets/day-5/sampling-design/s11-diagram.webp';
+import vmd from '~/assets/day-5/sampling-design/s12-diagram.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["Why can't I report areas straight from my land-cover map?", "Which sampling design should I use, and how are strata chosen?"]}
+  objectives={[
+    "Compare simple random, systematic, stratified and cluster designs.",
+    "Explain why the strata are the map classes.",
+    "Explain why maps can't be used as they are for areas.",
+  ]}
+  teaching={25} exercises={5}
+  prerequisites={["Change detection and loss strata", "Collect Earth Online"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/sampling-design/) give a visual summary.
 
-- Compare simple random, systematic, stratified and cluster designs
-- Explain why the strata are the map classes
-- Explain why maps can't be used as they are for areas
+Day 5 turns the map into reported numbers. Three linked parts decide how much time and effort that takes, and how complex the interpretation is: the **data collection requirements**, the **sampling design**, and the **sample size**. This lesson covers the design; the next two compute the [sample size](/bhutan-hfld-training/day-5/sample-size/) and [draw the sample in Earth Engine](/bhutan-hfld-training/day-5/stratified-sampling-gee/).
 
-**Time:** about 25 min teaching + 0 min practice.
+<Image src={mapSamples} alt="Bhutan land cover map with sample points scattered across the strata." />
+
+## Why not use the map as it is?
+
+A land-cover map is a model, and models make errors:
+
+- **Classification errors.** Some pixels are in the wrong class.
+- **No sign of over- or under-estimation.** Counting pixels doesn't tell you whether the map has too much or too little of a class.
+- **No uncertainty.** A pixel count has no confidence interval.
+
+For example, a plot the map labels **deforestation** may turn out, on high-resolution imagery, to be a **forest edge**:
+
+<Image src={ceoMap} alt="Collect Earth Online plot over the stratification map, with the class legend." />
+
+<Image src={ceoImagery} alt="The same Collect Earth Online plot over high-resolution imagery." />
+
+So we take a **sample**: points whose true class is checked against better data (high-resolution imagery or field visits). The sample lets us:
+
+1. estimate the area of each class without bias;
+2. assess the map's accuracy;
+3. quantify the uncertainty of the estimates <Cite id="olofsson2014" />.
+
+## Stratification
+
+**Strata** divide the area into parts that are sampled separately. In practice, the strata are the **map classes** (or groups of them), because:
+
+- **detection accuracy differs** between land-cover types, so some classes need more samples than others;
+- **accuracy requirements differ**: for example, a minimum accuracy may be required for forest;
+- **rare classes**, such as deforestation, would hardly be sampled at all without their own stratum (see [Change detection and loss strata](/bhutan-hfld-training/day-3/change-strata/)).
+
+Methodologies can also require specific stratification, for example by **deforestation risk** and **forest type**.
+
+<Image src={frame} alt="Forest and non-forest map of Bhutan used as the sampling frame." />
+
+<Theory title="Why strata make estimates more precise">
+Within each stratum the samples are more alike than across the whole map, so each stratum's estimate has a smaller variance. Weighting each stratum's results by its share of the mapped area, $W_h = A_h/A$, combines them into an unbiased estimate for the whole area. Any allocation of samples to strata stays unbiased as long as these weights are used.
+</Theory>
+
+## Probability sampling designs
+
+Every design below is a **probability sample**: each unit (pixel or plot) has a known chance of selection, which is what makes unbiased estimation possible.
+
+| Design | How | Advantages | Disadvantages |
+|---|---|---|---|
+| **Simple random** | every sampling unit (pixel) has an equal chance of being selected | the most potential sampling units, so the sample is easy to enlarge | points can be hard to reach in the field |
+| **Systematic** | samples at fixed distances and directions from each other (a grid) | easy to locate in the field | fewer potential units; spatial patterns that line up with the grid (terrain, field layouts) must be identified and stratified |
+| **Cluster** | a cluster of samples around each selected unit; combinable with random or systematic selection | more confident interpretation, since nearby samples help | samples within a cluster are correlated; time-consuming |
+
+With a **stratified** design, any of these is applied within each stratum: for example, stratified random sampling draws a simple random sample in each map class.
+
+<Image src={randomPts} alt="Stratified sample points shown over a forest map of part of Bhutan." />
+
+<Image src={systematicPts} alt="Close-up of the stratified map with sample points marked in white." />
+
+<Image src={clusters} alt="Clustered sample plots, each a 3 by 3 grid of points, placed over a classified map." />
+
+<Callout type="why">
+Why this matters: the design determines which formulas you use to estimate areas and their uncertainty. Stratified random sampling, used in this course, has simple, well-established estimators.
+</Callout>
+
+## Sample size
+
+Two basic ideas:
+
+- **Area proportions determine how samples are allocated** between strata;
+- **expected accuracy determines the total sample size.**
+
+It is a balance between minimum accuracy requirements and the level of effort (LOE).
+
+| Larger sample | Smaller sample |
+|---|---|
+| estimated accuracy closer to the actual accuracy | less effort, less time, less quality control |
+
+Keep in mind:
+
+- **A larger sample doesn't make the map more accurate**; it makes the *estimate* of accuracy more precise.
+- **Stratification quality is critical.** Strata should be modular (easy to divide) and represent reality.
+- **Increase the sample strategically** if your first assumptions about accuracy turn out wrong.
+
+[OpenMRV](https://openmrv.org/)'s module "Sampling design for estimation of area and map accuracy" covers these choices in detail. The exercise for this step is [Determining sample size](/bhutan-hfld-training/day-5/sample-size/), with the [sample size calculator lab](/bhutan-hfld-training/labs/sample-size-calculator/).
+
+## Data inputs and workflow
+
+From the project area and one or more stratification layers, compute each stratum's **area proportion**; with the sampling design, these give the **sample size** of each stratum and then the **sampling units**:
+
+<Image src={workflow} alt="Workflow diagram: project area and stratification layers give area proportions, which set the sample size for each stratum and then the sampling units, following the sampling design." />
+
+The trainers' example follows Verra's VMD0055 module: 3 forest types (evergreen, semi-evergreen, deciduous) × 3 deforestation-risk classes (high, medium, low) give 9 strata, with a clustered simple random design of 2,100 samples (18,900 sample units, 9 per cluster):
+
+<Image src={vmd} alt="The same workflow for the VMD0055 example: 3 forest types times 3 deforestation-risk classes give 2,100 samples." />
+
+## Earth Engine functions for sampling
+
+| Function | Use |
+|---|---|
+| `image.reduceRegion()` | computes a statistic of a raster within a geometry: here, the area of each stratum |
+| `ee.Reducer` | the statistic for `reduceRegion` (for example a grouped sum) |
+| `ee.Image.pixelArea()` | the area of each pixel in m²; divide by 10,000 for hectares |
+| `image.updateMask()` | removes areas from the sampling frame |
+| `image.stratifiedSample()` | takes a list of class values and a list of sample sizes, and places points at the centres of randomly selected pixels of each class. Ask for more than you need, then trim each stratum later |
+| `geometry.buffer()` | turns a point into a circle: clustered samples, or checking for overlap |
+| `geometry.bounds()` | turns a circle into a square: square sampling plots |
+| `collection.iterate()` | runs a function cumulatively: for example checking overlaps between samples; computationally heavy, so run it as a separate step |
+| `collection.limit()` | trims a collection to a given size: the sample of each stratum |
+
+[Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) uses these in practice.
+
+<Callout type="bhutan">
+Bhutan context: the course's Day 5 design stratifies by forest (split into three strata), non-forest and deforestation, and allocates samples so the small deforestation stratum is well covered. Steep terrain makes field visits hard, so reference data come mostly from high-resolution imagery in Collect Earth Online.
+</Callout>
+
+## Common mistakes
+
+- **Reporting pixel counts** as areas.
+- **Using training data as reference data.** Reference samples must come from a probability sample, independent of training.
+- **A systematic grid that lines up with landscape patterns** (terraces, ridges) without stratifying them.
+- **Forgetting the weights**: averaging all samples equally when strata were sampled at different rates.
+
+## Practice
+
+<Challenge level="complete" time={5} hints={["Think about field access, interpretation effort and correlation."]}>
+For Bhutan's HFLD reference sample, interpreted mostly from imagery, which design would you choose: simple random, systematic or clustered (each stratified by map class)? Give one reason for and one against.
+
+<Fragment slot="solution">
+A reasonable choice is **stratified simple random**: imagery interpretation doesn't need field access, so the disadvantage of random points (hard to reach) hardly matters, and the estimators are simple. Against: random points can fall in hard-to-interpret places (cloud, shadow). Clustered plots would make interpretation more confident but correlate the samples and add effort; systematic grids risk lining up with terraces and ridges.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-5-sampling-design" questions={[
+  { q: "Why can't areas be taken straight from a land-cover map?", options: ["Maps are too large", "Maps contain classification errors, don't show over- or under-estimation, and give no uncertainty", "Pixel counts are always too small", "ART-TREES forbids maps"], answer: 1, explain: "A probability sample corrects the bias and gives confidence intervals." },
+  { q: "Why are map classes used as strata?", options: ["Accuracy differs between classes, requirements differ, and rare classes need their own samples", "It is the only option in Earth Engine", "To reduce the number of samples to zero", "Because strata must be equal in size"], answer: 0, explain: "Stratifying by class lets you sample each class adequately, especially rare change." },
+  { q: "What is a disadvantage of systematic sampling?", options: ["Hard to locate in the field", "Patterns that line up with the grid can bias it unless stratified", "It cannot be used with strata", "Every pixel has an equal chance"], answer: 1, explain: "Regular landscape patterns such as terrain or field layouts can align with the grid." },
+  { q: "A larger sample makes the land-cover map more accurate.", answer: false, explain: "It makes the estimate of accuracy (and of areas) more precise; the map itself is unchanged." },
+]} />
+
+<KeyPoints points={[
+  "Maps have errors and no uncertainty; a probability sample gives unbiased areas, accuracy and confidence intervals.",
+  "Strata are usually the map classes, so rare classes such as deforestation get enough samples.",
+  "Simple random, systematic and cluster designs trade field access, effort and correlation.",
+  "Area proportions drive allocation; expected accuracy drives total sample size.",
+]} />
+
+<References />
+
+<Credit
+  source="D5 Designing a Stratified Random Sampling Frame (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson",
+    "References to \"EXERCISE D4\" corrected to the Day 5 exercises",
+    "Stock photo not reused; trainers' screenshots and workflow diagrams kept",
+  ]}
+/>
