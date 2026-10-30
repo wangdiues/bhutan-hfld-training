@@ -1,18 +1,224 @@
 ---
 title: "Forest primitives with machine learning"
+description: Train a Random Forest on labelled samples and covariates to produce a forest probability layer (a primitive), check its accuracy and variable importance, and export it with a consistent name.
 sidebar:
   order: 3
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I turn training points and covariates into a map of where forest is likely?", "How good is that map, and which inputs mattered?"]}
+  objectives={[
+    "Sample covariates at training points.",
+    "Train Random Forest in probability mode.",
+    "Read accuracy and variable importance.",
+    "Export a primitive with the naming convention.",
+  ]}
+  teaching={30} exercises={45}
+  prerequisites={["Calculating covariates", "Random Forest theory"]}
+/>
 
-## In this lesson you will
+A <Term id="primitive" /> is a probability layer for one land-cover class: for every pixel, the likelihood (0 to 1, or 0 to 100) that it belongs to that class. Instead of one classifier choosing among all classes at once, you train a separate **one-class-versus-the-rest** Random Forest for each class, then combine the primitives with rules on Day 4 (the [assemblage](/bhutan-hfld-training/day-4/assemblage/)) <Cite id="saah2020" />. This lesson builds the **forest** primitive; the same script makes the others by changing one word.
 
-- Sample covariates at training points
-- Train RF in probability mode
-- Read out-of-bag accuracy and variable importance
-- Export a primitive with the naming convention
+<Callout type="mistake" title="Inputs you need">
+The script reads two assets from the training project: the labelled samples `trainingData/Bhutan_labels_multiclass` and a 2025 Landsat composite (one participant's export, `landsatComposite/bhutan_ls89_2025_TashiY`). Without access, use your own composite from the [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/) lesson and your own labelled points with a `class_name` property ([Collecting training data](/bhutan-hfld-training/day-4/training-data/)). Change the export `assetId` to your own project.
+</Callout>
 
-**Time:** about 30 min teaching + 45 min practice.
+## Part 1: The area of interest
+
+Load Bhutan's Dzongkhags from [FAO GAUL 2015 level 1](https://developers.google.com/earth-engine/datasets/catalog/FAO_GAUL_2015_level1) and use the whole country as the area of interest.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[23, 31]} />
+
+## Part 2: Choose the target class
+
+The class you set here is the **target** (labelled 1); every other class becomes **non-target** (0). The options are `"CropLand"`, `"Forest"`, `"Grassland"`, `"Otherland"`, `"Settlement"` and `"Wetland"`.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[33, 39]} />
+
+## Parts 3 and 4: Samples and composite
+
+Load the labelled training samples and the seasonal Landsat composite, and look at both seasons.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[41, 83]} />
+
+## Part 5: The covariate stack
+
+This is the covariate function from [Calculating covariates](/bhutan-hfld-training/day-3/covariates/), applied to both seasons, plus terrain covariates and, this time, the JRC water covariates (`unmask(0)` fills places that never had water, so they don't mask the whole stack).
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[85, 215]} />
+
+## Part 6: Target and non-target labels
+
+Each sample gets a binary `target` property: 1 if its `class_name` equals the target class, otherwise 0. The Console shows how many samples there are of each class and of each binary label; the map shows target samples in green and the rest in grey.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[217, 245]} />
+
+## Part 7: Sample the covariates and split the data
+
+`sampleRegions` reads every covariate at every sample point (at 30 m). A random column then splits the samples: 90% for training and 10% held back for validation.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[247, 273]} />
+
+## Part 8: Balance the training set
+
+Non-forest samples (all the other classes together) usually outnumber forest samples. A classifier trained on unbalanced data leans towards the larger group. So the training set keeps all target samples and a random selection of the same number of non-target samples. The validation set stays unbalanced, so its accuracy reflects the real mix.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[274, 292]} />
+
+## Part 9: Train the Random Forest
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-3/forest-primitives.js" lines={[294, 311]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+# Assumes `training` (a FeatureCollection with the covariate bands and "target") and
+# `bands` (the covariate band names) built as in the JavaScript version.
+classifier = ee.Classifier.smileRandomForest(numberOfTrees=200, bagFraction=0.7, seed=42).train(
+    features=training, classProperty="target", inputProperties=bands
+)
+validation_matrix = validation.classify(classifier).errorMatrix("target", "classification")
+print("Validation overall accuracy:", validation_matrix.accuracy().getInfo())
+print("Variable importance:", classifier.explain().get("importance").getInfo())
+
+target_probability = covariates.select(bands).classify(classifier.setOutputMode("PROBABILITY"))
+```
+  </TabItem>
+</Tabs>
+
+- `numberOfTrees: 200`: the number of decision trees.
+- `bagFraction: 0.7`: each tree is trained on a random 70% of the training samples.
+- `seed: 42`: makes the random choices repeatable, so you get the same forest each run.
+
+## Part 10: Accuracy
+
+The script builds a confusion matrix twice: on the **training** samples (how well the forest fits the data it learned from; this is always optimistic) and on the **validation** samples (how well it predicts samples it did not see).
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[312, 335]} />
+
+| Measure | Meaning |
+|---|---|
+| Overall accuracy | share of samples classified correctly |
+| Kappa | agreement beyond what chance would give |
+| Producer's accuracy | for each class, the share of its reference samples the model got right (omission errors) |
+| Consumer's accuracy | Earth Engine's name for user's accuracy: for each predicted class, the share that is correct (commission errors) |
+
+<Callout type="mistake" title="This is not the accuracy you report">
+The 10% validation samples come from the same training set, often collected in the same places. They show how well the model generalises, but they are not a statistically valid accuracy assessment. For ART-TREES reporting, accuracy and areas come from an independent stratified sample interpreted in Collect Earth Online (Day 5).
+</Callout>
+
+## Part 11: Variable importance
+
+`classifier.explain()` reports how much each covariate contributed to the forest's splits. Use it to see which inputs separate the target class, and to drop covariates that add nothing.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[336, 339]} />
+
+## Part 12: Classify and map the probability
+
+The classifier applied to the covariate stack gives a binary map (1 = forest, 0 = non-forest). In **probability mode** it gives, for each pixel, the share of trees that voted forest: the forest primitive.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[340, 386]} />
+
+<Theory title="Why probabilities, not classes">
+A binary map hides how sure the model is: a pixel at 0.51 and one at 0.99 both become "forest". A probability layer keeps that information, so the assemblage step can set its own thresholds and decide between classes that compete for the same pixel (for example, forest at 0.55 and cropland at 0.60).
+</Theory>
+
+## Part 13: Export
+
+Export the binary map and the probability map to Drive, the validation points as a CSV, and the probability layer to an asset. The asset name follows one convention for every primitive: `ls_<Class>_<year>` in a `primitives` folder, for example `ls_Forest_2025`, so the assemblage script can find all six by name.
+
+<CodeBlock script="day-3/forest-primitives.js" lines={[388, 428]} />
+
+## The full script
+
+<CodeBlock script="day-3/forest-primitives.js" />
+
+<OpenInGEE script="day-3/forest-primitives.js" hash="20a6b64518a83c65143487aaf9822564" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `ee.Algorithms.If(cond, a, b)` | Server-side if/else, here inside `map()` |
+| `image.sampleRegions({collection, properties, scale})` | Reads covariate values at points |
+| `collection.randomColumn(name, seed)` | Adds a uniform random number (0–1) to each feature |
+| `.sort(column).limit(n)` | Takes n features in random order (balancing) |
+| `ee.Classifier.smileRandomForest({...}).train({...})` | Trains a Random Forest |
+| `classifier.setOutputMode('PROBABILITY')` | Returns class-1 probabilities instead of labels |
+| `features.classify(c).errorMatrix(actual, predicted)` | Confusion matrix and accuracy measures |
+| `classifier.explain()` | Variable importance and other model details |
+
+## Common mistakes
+
+- **Reporting training accuracy.** It is always high; use the validation set to judge the model, and Day 5's independent sample to report.
+- **A `class_name` that doesn't match `targetClass` exactly** (for example "Cropland" vs "CropLand"): every sample becomes non-target. Check the binary histogram.
+- **Masked covariates.** A masked band in the stack masks the pixel in the output; fill water layers with `unmask(0)` as the script does.
+- **Exporting with the wrong year in the name.** Keep the year of the composite.
+
+<Callout type="bhutan">
+Bhutan context: the forest primitive is the core of Bhutan's activity data. Check it against what you know: forest should follow the valley slopes, with lower probabilities on farmland near Paro and Punakha, on high pastures and above the treeline.
+</Callout>
+
+## Practice
+
+<Challenge level="complete" time={25} hints={["Only Part 2 changes.", "Run the script and check the binary histogram in the Console.", "The export name changes automatically."]}>
+Run the script for **Forest** and look at the validation accuracy and the five most important covariates. Which season's covariates matter most?
+
+<Fragment slot="solution">
+Run the script as it is (`targetClass = "Forest"`). Open "Variable importance" in the Console and sort the values: typically NIR- and SWIR-based indices, Tasseled Cap greenness and wetness, and elevation rank high for forest. The validation accuracy is in "Validation overall accuracy".
+</Fragment>
+</Challenge>
+
+<Challenge level="scratch" time={20} hints={["Change targetClass.", "Exports are named from targetClass."]}>
+Make the **Grassland** primitive and export it. Compare its map with the forest primitive: where do the two compete?
+
+<Fragment slot="solution">
+Set `var targetClass = "Grassland";` in Part 2, run, and start the exports in the Tasks tab (the asset is named `ls_Grassland_2025`). Grassland and forest compete at forest edges, in shrubland and around the treeline, where both probabilities are moderate; the assemblage step decides those pixels.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-3-forest-primitives" questions={[
+  { q: "What is a forest primitive?", options: ["A binary forest/non-forest map", "A per-pixel probability that a pixel is forest", "A set of forest training points", "A covariate"], answer: 1, explain: "A primitive is a probability layer for one class, from a one-versus-rest model." },
+  { q: "Why is the training set balanced but the validation set not?", options: ["To make training faster", "So the model doesn't lean to the larger class, while validation still reflects the real mix", "Validation must have equal numbers", "Earth Engine requires it"], answer: 1, explain: "Balancing helps the classifier; an unbalanced validation set keeps its accuracy honest." },
+  { q: "Which accuracy should be reported for ART-TREES?", options: ["Training accuracy", "The 10% validation accuracy", "Accuracy from an independent stratified reference sample", "Kappa from the training matrix"], answer: 2, explain: "Reported accuracy and areas come from an independent stratified sample (Day 5)." },
+  { q: "classifier.explain() shows which covariates the forest relied on most.", answer: true, explain: "Its 'importance' entry gives each covariate's contribution to the splits." },
+]} />
+
+<KeyPoints points={[
+  "Train one Random Forest per class (target versus the rest); in probability mode it gives a primitive.",
+  "Balance the training set; keep validation unbalanced; never report training accuracy.",
+  "Use variable importance to understand and trim the covariates.",
+  "Export each primitive with the same naming convention so the assemblage can combine them.",
+]} />
+
+<References />
+
+<Credit
+  source="EXERCISE D3 Part 2: Forest Probability Layers — Calculating Forest Primitives for HFLD Using Machine Learning"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; code copied from the exercise",
+    "Bands divided by 10,000 before computing covariates (the composite stores reflectance × 10,000)",
+    "Tasseled Cap distances and the binary layer's name restored (they had been commented out when the code was extracted)",
+    "Repeated balancing block shown once; trailing list of target classes kept as a comment",
+    "Exports named for 2025 (the composite's year) and written to the training project's primitives folder instead of projects/servir-mekong",
+    "Added explanations, a note on validation versus reported accuracy, a Python sketch, practice and a quiz",
+  ]}
+/>

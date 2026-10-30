@@ -5,7 +5,16 @@
  * Source: EXERCISE D3_ Part 2- Forest Probability Layers-CALCULATING FOREST PRIMITIVES FOR HFLD USING MACHINE LEARNING.docx
  * Original authors: Ate Poortinga & Samuel (Conservation International).
  * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
- * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
+ * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
+ *   - Bands are divided by 10000 before computing covariates (the composite stores reflectance x 10000).
+ *   - Restored as in the exercise: the Tasseled Cap distances and the binary layer's name (both had
+ *     been commented out when the code was extracted).
+ *   - The balancing block, repeated in the exercise, appears once.
+ *   - Export names use 2025, the composite's year (the exercise said 2024), and the asset export goes
+ *     to the training project's primitives folder (the exercise pointed to projects/servir-mekong/...).
+ *   - The list of target classes at the end of the exercise is prose, not code: it is a comment here.
+ *
+ * Inputs: the training labels asset and a 2025 Landsat composite (a participant's export; use your own).
  *
  * Original Code Editor script(s):
  *   https://code.earthengine.google.com/20a6b64518a83c65143487aaf9822564
@@ -29,7 +38,7 @@ Map.centerObject(AOI, 7);
 var targetClass = "Forest"; //replace here
 var targetLabel = "target";
 
-// ---- Part 3: Load forest training samples ----
+// ---- Part 3: Load forest training samples ----
 // ---------------------------------------------------------------------
 // Input data
 // ---------------------------------------------------------------------
@@ -37,7 +46,7 @@ var table = ee.FeatureCollection(
 "projects/bhutan-hfld-readiness-training/assets/trainingData/Bhutan_labels_multiclass"
 );
 
-// ---- Part 4: Load Images ----
+// ---- Part 4: Load Images ----
 // ---------------------------------------------------------------------
 // Load image
 // ---------------------------------------------------------------------
@@ -73,17 +82,18 @@ Map.addLayer(
   false
 );
 
-// ---- Full code for part 5: ----
+// ---- Part 5: Build the covariate stack ----
 // ---------------------------------------------------------------------
 // Helper function for seasonal covariates
 // ---------------------------------------------------------------------
 function addSeasonCovariates(img, suffix) {
-  var blue  = img.select("B2_" + suffix);
-  var green = img.select("B3_" + suffix);
-  var red   = img.select("B4_" + suffix);
-  var nir   = img.select("B5_" + suffix);
-  var swir1 = img.select("B6_" + suffix);
-  var swir2 = img.select("B7_" + suffix);
+  // The composite stores reflectance x 10000; convert to 0-1 reflectance.
+  var blue  = img.select("B2_" + suffix).divide(10000);
+  var green = img.select("B3_" + suffix).divide(10000);
+  var red   = img.select("B4_" + suffix).divide(10000);
+  var nir   = img.select("B5_" + suffix).divide(10000);
+  var swir1 = img.select("B6_" + suffix).divide(10000);
+  var swir2 = img.select("B7_" + suffix).divide(10000);
   var ndvi = nir.subtract(red).divide(nir.add(red)).rename("NDVI_" + suffix);
   var ndwi = green.subtract(nir).divide(green.add(nir)).rename("NDWI_" + suffix);
   var nbr = nir.subtract(swir2).divide(nir.add(swir2)).rename("NBR_" + suffix);
@@ -162,7 +172,7 @@ function addSeasonCovariates(img, suffix) {
     evi, savi, ndbi, mndwi, ibi,
     tcb, tcg, tcw, tc4, tc5, tc6,
     tcAngleBG, tcAngleGW, tcAngleBW,
-// tcDistBG, tcDistGW, tcDistBW
+    tcDistBG, tcDistGW, tcDistBW
   ]);
 }
 // ---------------------------------------------------------------------
@@ -234,7 +244,7 @@ Map.addLayer(
   "Samples non-" + targetClass
 );
 
-// ---- Part 7: sample covariates at training points ----
+// ---- Part 7: sample covariates at training points ----
 // ---------------------------------------------------------------------
 // Sample covariates at stable points
 // ---------------------------------------------------------------------
@@ -245,7 +255,7 @@ var sampled = covariates.sampleRegions({
   geometries: true
 });
 
-// ---- Key Functions ----
+// ---- Part 7b: check the samples ----
 print("Stable samples", samplesBinary.size());
 print("Class histogram", samplesBinary.aggregate_histogram("class"));
 print("Binary histogram", samplesBinary.aggregate_histogram(targetLabel));
@@ -257,11 +267,11 @@ var sampledRandom = sampled.randomColumn({
   seed: 42
 });
 
-// ---- Key Functions ----
+// ---- Part 7c: training / validation split ----
 var trainingRaw = sampledRandom.filter(ee.Filter.lt("random", 0.9));
 var validation = sampledRandom.filter(ee.Filter.gte("random", 0.9));
 
-// ---- Full code for part 8: ----
+// ---- Part 8: balance the training set ----
 // ---------------------------------------------------------------------
 // Balance training set only
 // Keeps validation unbalanced for honest assessment
@@ -281,27 +291,7 @@ print("Balanced training target histogram", training.aggregate_histogram(targetL
 print("Validation count", validation.size());
 print("Validation target histogram", validation.aggregate_histogram(targetLabel));
 
-// ---- Non-target class (Non-forest) ----
-// ---------------------------------------------------------------------
-// Balance training set only
-// Keeps validation unbalanced for honest assessment
-// ---------------------------------------------------------------------
-var trainingTarget = trainingRaw.filter(ee.Filter.eq(targetLabel, 1));
-var trainingNonTarget = trainingRaw.filter(ee.Filter.eq(targetLabel, 0));
-var nTarget = trainingTarget.size();
-var trainingNonTargetBalanced = trainingNonTarget
-  .randomColumn("balance_random", 99)
-  .sort("balance_random")
-  .limit(nTarget);
-var training = trainingTarget.merge(trainingNonTargetBalanced);
-print("Training raw count", trainingRaw.size());
-print("Training raw target histogram", trainingRaw.aggregate_histogram(targetLabel));
-print("Balanced training count", training.size());
-print("Balanced training target histogram", training.aggregate_histogram(targetLabel));
-print("Validation count", validation.size());
-print("Validation target histogram", validation.aggregate_histogram(targetLabel));
-
-// ---- Part 10: Train Random Forest Classifier ----
+// ---- Part 10: Train Random Forest Classifier ----
 // ---------------------------------------------------------------------
 // Train classifier
 // ---------------------------------------------------------------------
@@ -315,7 +305,7 @@ var classifier = ee.Classifier.smileRandomForest({
   inputProperties: bands
 });
 
-// ---- Parameters ----
+// ---- Parameters ----
 // numberOfTrees: 200: Number of decision trees in the forest.
 // bagFraction: 0.7:  Fraction of training data used for each tree.
 
@@ -331,7 +321,7 @@ print("Training kappa", trainingMatrix.kappa());
 print("Training producer accuracy", trainingMatrix.producersAccuracy());
 print("Training consumer accuracy", trainingMatrix.consumersAccuracy());
 
-// ---- Metrics: ----
+// ---- Part 11b: Validation accuracy ----
 // ---------------------------------------------------------------------
 // Validation accuracy
 // ---------------------------------------------------------------------
@@ -343,11 +333,11 @@ print("Validation kappa", validationMatrix.kappa());
 print("Validation producer accuracy", validationMatrix.producersAccuracy());
 print("Validation consumer accuracy", validationMatrix.consumersAccuracy());
 
-// ---- What this step does: ----
+// ---- Part 12: Variable importance ----
 var explanation = classifier.explain();
 print("Variable importance", explanation.get("importance"));
 
-// ---- 1 = Target ----
+// ---- Part 13: Classify the image (1 = target, 0 = non-target) ----
 // ---------------------------------------------------------------------
 // Classify image
 // ---------------------------------------------------------------------
@@ -364,7 +354,7 @@ Map.addLayer(
     max: 1,
     palette: ["d9d9d9", "1a9850"]
   },
-// targetClass + " / Non-" + targetClass
+  targetClass + " / Non-" + targetClass
 );
 // Target mask only
 var targetMask = targetNonTarget.eq(1).selfMask();
@@ -375,7 +365,7 @@ Map.addLayer(
   false
 );
 
-// ---- What this step does: ----
+// ---- Part 14: Target probability (the primitive) ----
 // ---------------------------------------------------------------------
 // Target probability
 // ---------------------------------------------------------------------
@@ -398,10 +388,10 @@ Map.addLayer(
 // ---- Part 15: Center Map ----
 Map.centerObject(table, 8);
 
-// ---- Classified Map (Binary) ----
+// ---- Part 16: Exports. Classified map (binary) ----
 Export.image.toDrive({
   image: targetNonTarget.toByte(),
-  description: "bhutan_" + targetClass + "_non_" + targetClass + "_2024",
+  description: "bhutan_" + targetClass + "_non_" + targetClass + "_2025",
   region: image.geometry(),
   scale: 30,
   maxPixels: 1e13
@@ -416,29 +406,23 @@ Export.image.toDrive({
   maxPixels: 1e13
 });
 
-// ---- Output Result: ----
+// ---- Validation points (CSV) ----
 Export.table.toDrive({
   collection: validationClassified,
   description: "bhutan_" + targetClass + "_validation_points_2024",
   fileFormat: "CSV"
 });
 
-// ---- 2. Export to GEE Asset (ToAsset) ----
+// ---- Probability to a GEE asset ----
 Export.image.toAsset({
   image: targetProbability.toFloat(),
-  description: "bhutan_" + targetClass + "_2024",
-  assetId: "projects/servir-mekong/bhutan_primitives/_ls_" + targetClass + "_2024",
+  description: "bhutan_" + targetClass + "_2025",
+  assetId: "projects/bhutan-hfld-readiness-training/assets/primitives/ls_" + targetClass + "_2025",
   region: image.geometry(),
   scale: 30,
   maxPixels: 1e13
 });
 
 // ---- Workflow Concept: Primitive-Based Mapping ----
-var targetClass = "Forest";
-var targetLabel = "target";
-var targetClass = "CropLand";
-var targetClass = "Forest";
-var targetClass = "Grassland";
-var targetClass = "Otherland";
-var targetClass = "Settlement";
-var targetClass = "Wetland";
+// Repeat the workflow for each class by changing only targetClass (Part 2):
+// "CropLand", "Forest", "Grassland", "Otherland", "Settlement", "Wetland".
