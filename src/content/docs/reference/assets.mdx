@@ -1,9 +1,56 @@
 ---
 title: "Asset catalogue"
+description: Every dataset and Earth Engine asset the course uses, what it holds, which lesson uses it, and how to make your own copy if you can't read the original.
 sidebar:
   order: 2
 ---
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
+The course reads two kinds of data:
+
+- **Public catalog datasets**, which anyone with Earth Engine access can load;
+- **Project assets** that the trainers and participants created and shared during the training. You can only read these if their owner has shared them with you. If a script stops with "asset not found" or "permission denied", use the last column to make your own.
+
+## Earth Engine catalog datasets
+
+| Dataset | Earth Engine ID | Holds | Used in |
+|---|---|---|---|
+| [Sentinel-2 surface reflectance](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED) | `COPERNICUS/S2_SR_HARMONIZED` | 10–60 m multispectral images, 2017 onwards | [Start here](/bhutan-hfld-training/start-here/), Days 1–2, [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) |
+| [Cloud Score+](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_CLOUD_SCORE_PLUS_V1_S2_HARMONIZED) | `GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED` | per-pixel cloud scores for Sentinel-2 | [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) |
+| [Landsat 8 / 9 surface reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2) | `LANDSAT/LC08/C02/T1_L2`, `LANDSAT/LC09/C02/T1_L2` | 30 m Collection 2 Level-2 images | [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/) |
+| [Landsat 8 TOA](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_TOA) | `LANDSAT/LC08/C02/T1_TOA`, `…/T1_RT_TOA` | top-of-atmosphere reflectance | Day 1 lessons |
+| [Landsat 5 TOA](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LT05_C02_T1_TOA) | `LANDSAT/LT05/C02/T1_TOA` | 1984–2012 images | [Importing and exporting data](/bhutan-hfld-training/day-2/import-and-export/) |
+| [SRTM 30 m](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003) | `USGS/SRTMGL1_003` | elevation | terrain correction, terrain covariates |
+| [JRC Global Surface Water](https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater) | `JRC/GSW1_4/GlobalSurfaceWater` | water occurrence and change since 1984 | [Calculating covariates](/bhutan-hfld-training/day-3/covariates/), [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/), [Collecting training data](/bhutan-hfld-training/day-4/training-data/) |
+| [Satellite Embedding V1](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL) | `GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL` | annual 64-band AlphaEarth embeddings, 10 m | Day 4 embeddings lessons, [Determining sample size](/bhutan-hfld-training/day-5/sample-size/) |
+| [Hansen Global Forest Change](https://developers.google.com/earth-engine/datasets/catalog/UMD_hansen_global_forest_change_2023_v1_11) | `UMD/hansen/global_forest_change_2023_v1_11` | tree cover 2000, loss year 2001–2023 | [Change detection and loss strata](/bhutan-hfld-training/day-3/change-strata/) |
+| [Dynamic World](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_DYNAMICWORLD_V1) | `GOOGLE/DYNAMICWORLD/V1` | near-real-time 10 m land-cover labels | [Importing and exporting data](/bhutan-hfld-training/day-2/import-and-export/) |
+| [Open Buildings](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_Research_open-buildings_v3_polygons) | `GOOGLE/Research/open-buildings/v3/polygons` | building footprints | [Importing and exporting data](/bhutan-hfld-training/day-2/import-and-export/) |
+| [FAO GAUL 2015](https://developers.google.com/earth-engine/datasets/catalog/FAO_GAUL_2015_level1) | `FAO/GAUL/2015/level0`, `…/level1`, `FAO/GAUL_SIMPLIFIED_500m/2015/level2` | country, Dzongkhag and sub-district boundaries | many lessons |
+| [USDOS LSIB](https://developers.google.com/earth-engine/datasets/catalog/USDOS_LSIB_SIMPLE_2017) | `USDOS/LSIB_SIMPLE/2017` | country boundaries | [Custom functions and mapping](/bhutan-hfld-training/day-1/custom-functions/) |
+| FAO GAUL 2024 (community catalog) | `projects/sat-io/open-datasets/FAO/GAUL/GAUL_2024_L0`, `…_L1` | country and first-level boundaries | [Code editor and data catalog](/bhutan-hfld-training/day-1/code-editor-and-data-catalog/), [Importing and exporting data](/bhutan-hfld-training/day-2/import-and-export/) |
+| Planet NICFI basemaps | `projects/planet-nicfi/assets/basemaps/asia` | monthly 4.7 m mosaics (needs NICFI programme access) | [Importing and exporting data](/bhutan-hfld-training/day-2/import-and-export/) |
+
+## Project assets from the training
+
+Paths starting with `…/` are in `projects/bhutan-hfld-readiness-training/assets/`.
+
+| Asset | Holds | Used in | No access? Make your own |
+|---|---|---|---|
+| `…/Bhutan` | Bhutan's national boundary | most exercises | `ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017').filter(ee.Filter.eq('country_na', 'Bhutan'))`, or upload the official boundary |
+| `…/sentinel2Composites/bhutan_s2_<year>_janapr_octdec_int16` | 12-band seasonal Sentinel-2 composite | written by the [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) export | run [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) |
+| `…/landsatComposite/bhutan_ls89_2025_TashiY` | a participant's 12-band Landsat composite for 2025 | [Calculating covariates](/bhutan-hfld-training/day-3/covariates/), [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) | run [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/) |
+| `…/trainingData/Bhutan_labels_multiclass` | labelled points, six classes (`class_name`) | Forest primitives, training data, embeddings | collect your own ([Collecting training data](/bhutan-hfld-training/day-4/training-data/)) |
+| `…/trainingData/Bhutan_stable_classes` | labelled points (`class`) | [Collecting training data](/bhutan-hfld-training/day-4/training-data/) | as above |
+| `…/primitives/ls_<Class>_<year>` | course naming for Landsat primitives | [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/), [Change detection](/bhutan-hfld-training/day-3/change-strata/) | export from Forest primitives |
+| `…/GSEdotProd/GSEdotProd_2425` | embedding similarity 2024 vs 2025 | [Determining sample size](/bhutan-hfld-training/day-5/sample-size/) | compute it (Part 3 of that lesson) |
+| `…/trainingData/bhutan_hfldTraining_samples_<name>`, `stratifiedPlots_<name>` | reference samples and plots | [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) | export your own |
+| `projects/servir-mekong/bhutan_primitives/s2_<Class>_2025` | six Sentinel-2 primitives for 2025 | [Assemblage](/bhutan-hfld-training/day-4/assemblage/) | export from Forest primitives, one per class |
+| `projects/servir-mekong/bhutan_primitives/s2_2025_janapr_octdec_int16` | Sentinel-2 composite 2025 | [Collecting training data](/bhutan-hfld-training/day-4/training-data/) | run Sentinel-2 MRV composite |
+| `projects/servir-mekong/temp/bhutan_ls89_2024_janapr_octdec` | Landsat composite 2024 (used only for its footprint) | [Assemblage](/bhutan-hfld-training/day-4/assemblage/) | use Bhutan's boundary as the area of interest |
+| `projects/carbondevelopmentteam/assets/Bhutan/BT002_Bhutan_HFLD/LULC_2024_20250812_epsg4326_10m` | Bhutan land-cover map 2024 | [Determining sample size](/bhutan-hfld-training/day-5/sample-size/) | your own assembled map ([Assemblage](/bhutan-hfld-training/day-4/assemblage/)) |
+
+:::caution[Export paths]
+Several scripts export to the training project. Change every `assetId` to a folder in your own Cloud project, for example `projects/<your-project>/assets/hfld/`.
 :::
+
+The [script library](/bhutan-hfld-training/reference/script-library/) lists the scripts that use these assets.
