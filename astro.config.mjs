@@ -55,6 +55,7 @@ export default defineConfig({
 						{ slug: 'capstone' },
 					],
 				},
+				{ label: 'Slides', link: '/slides/' },
 				{ label: 'Labs', collapsed: true, items: [{ autogenerate: { directory: 'labs' } }] },
 				{ label: 'How-to guides', collapsed: true, items: [{ autogenerate: { directory: 'how-to' } }] },
 				{ label: 'Explanation', collapsed: true, items: [{ autogenerate: { directory: 'explanation' } }] },

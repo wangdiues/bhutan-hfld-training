@@ -1,0 +1,25 @@
+---
+// One page per slide deck (task M3-10): /slides/<deck>/.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import SlideDeck from '~/components/SlideDeck.astro';
+import { allDecks } from '~/lib/slides';
+
+export function getStaticPaths() {
+	return allDecks().map((d) => ({ params: { deck: d.deck }, props: { deck: d } }));
+}
+
+const { deck } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<StarlightPage
+	frontmatter={{
+		title: deck.title,
+		description: `Slides for Day ${deck.day} of the Bhutan ART-TREES HFLD Readiness Training: ${deck.title}.`,
+	}}
+>
+	<p>
+		Day {deck.day} slides, {deck.slides.length} slides. Lesson: <a href={`${base}/${deck.lesson}/`}>read the lesson for this deck</a>{' · '}<a href={`${base}/slides/`}>all slide decks</a>
+	</p>
+	<SlideDeck deck={deck.deck} />
+</StarlightPage>

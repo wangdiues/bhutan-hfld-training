@@ -1,0 +1,38 @@
+---
+// Index of all slide decks (task M3-10): /slides/.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { allDecks } from '~/lib/slides';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const decks = allDecks();
+const days = [...new Set(decks.map((d) => d.day))];
+---
+
+<StarlightPage
+	frontmatter={{
+		title: 'Slides',
+		description: 'The training slide decks, played on this site, one page per deck.',
+	}}
+>
+	<p>
+		The slides from the May 2026 training, played here in the browser. Each deck has a lesson that explains it in full;
+		the slides are a quick visual summary. Use the arrow keys or swipe to move through a deck, and open "Slide text" for the
+		words on each slide. Third-party pictures have been removed.
+	</p>
+	{
+		days.map((day) => (
+			<>
+				<h2>Day {day}</h2>
+				<ul>
+					{decks
+						.filter((d) => d.day === day)
+						.map((d) => (
+							<li>
+								<a href={`${base}/slides/${d.deck}/`}>{d.title}</a> ({d.slides.length} slides)
+							</li>
+						))}
+				</ul>
+			</>
+		))
+	}
+</StarlightPage>

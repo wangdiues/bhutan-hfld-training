@@ -43,6 +43,22 @@ for (const path of paths) {
 			if (!/You got \d+ of \d+/.test(status)) errors.push(`quiz did not report a score: "${status}"`);
 		}
 
+		// Keyboard slide-deck run: focus the stage, then ArrowRight, End, Home must move the counter.
+		const decks = await page.$$('hfld-slides');
+		for (const deck of decks) {
+			const total = Number(await deck.evaluate((el) => el.dataset.total));
+			const current = () => deck.$eval('[data-current]', (el) => Number(el.textContent));
+			await (await deck.$('.hfld-slides__stage')).focus();
+			const steps = [['ArrowRight', Math.min(2, total)], ['End', total], ['PageUp', Math.max(1, total - 1)], ['Home', 1]];
+			for (const [key, want] of steps) {
+				await page.keyboard.press(key);
+				const got = await current();
+				if (got !== want) errors.push(`slide deck: ${key} gave slide ${got}, expected ${want}`);
+			}
+			const visible = await deck.$$eval('.hfld-slides__slide:not([hidden])', (els) => els.length);
+			if (visible !== 1) errors.push(`slide deck shows ${visible} slides at once`);
+		}
+
 		await page.addScriptTag({ content: axeSource });
 		const result = await page.evaluate(() =>
 			// eslint-disable-next-line no-undef
@@ -51,7 +67,7 @@ for (const path of paths) {
 		const issues = result.violations.flatMap((v) => v.nodes.map((n) => `${v.id}: ${n.target.join(' ')}`));
 		const ok = issues.length === 0 && errors.length === 0;
 		failures += ok ? 0 : 1;
-		console.log(`${ok ? 'ok  ' : 'FAIL'} ${path} [${theme}] axe ${issues.length}, console errors ${errors.length}, quizzes ${quizzes.length}`);
+		console.log(`${ok ? 'ok  ' : 'FAIL'} ${path} [${theme}] axe ${issues.length}, console errors ${errors.length}, quizzes ${quizzes.length}, decks ${decks.length}`);
 		for (const line of [...issues, ...errors]) console.log(`     ${line}`);
 		await page.close();
 	}

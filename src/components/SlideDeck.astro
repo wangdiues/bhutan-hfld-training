@@ -1,0 +1,333 @@
+---
+/**
+ * On-site slide player (task M3-10). Decks are played on the site only: no PDF, no download.
+ *
+ * Server-rendered as an ordered list of slides, each an image followed by its text and
+ * speaker notes as real HTML under a "Slide text" disclosure (searchable, screen-reader
+ * friendly). Without JavaScript every slide shows, one after another, with native lazy
+ * loading. With JavaScript one slide shows at a time: arrow keys, PageUp/PageDown,
+ * Home/End, swipe, a fullscreen button, a counter and #slide-N deep links. Later slides
+ * load only when reached (the next one is prefetched).
+ */
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import { getDeck, slideImage } from '~/lib/slides';
+
+interface Props {
+	/** Deck slug, e.g. "image-collections" (a file in src/data/slides/). */
+	deck: string;
+}
+
+const { deck: slug } = Astro.props;
+const deck = getDeck(slug);
+const md = await createMarkdownProcessor({ syntaxHighlight: false });
+const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const total = deck.slides.length;
+const slides = await Promise.all(
+	deck.slides.map(async (s, i) => ({
+		...s,
+		n: i + 1,
+		img: slideImage(slug, s.image),
+		label: s.title || `Slide ${i + 1}`,
+		textHtml: s.text ? (await md.render(escape(s.text))).code : '',
+		notesHtml: s.notes ? (await md.render(escape(s.notes))).code : '',
+	})),
+);
+const id = `deck-${slug}`;
+---
+
+<hfld-slides class="hfld-slides not-content" data-total={total} id={id}>
+	<div class="hfld-slides__stage" role="region" aria-roledescription="slide deck" aria-label={deck.title} tabindex="0">
+		<ol class="hfld-slides__list">
+			{
+				slides.map((s) => (
+					<li class="hfld-slides__slide" id={`slide-${s.n}`} aria-roledescription="slide" aria-label={`${s.n} of ${total}: ${s.label}`}>
+						<img
+							src={s.img.src}
+							width={s.img.width}
+							height={s.img.height}
+							alt={`Slide ${s.n}: ${s.label}. The slide's text follows.`}
+							loading={s.n === 1 ? 'eager' : 'lazy'}
+							decoding="async"
+							draggable="false"
+						/>
+						{(s.textHtml || s.notesHtml) && (
+							<details class="hfld-slides__text">
+								<summary>Slide text</summary>
+								{s.title && <p class="hfld-slides__title">{s.title}</p>}
+								<Fragment set:html={s.textHtml} />
+								{s.notesHtml && (
+									<div class="hfld-slides__notes">
+										<p class="hfld-slides__notes-label">Speaker notes</p>
+										<Fragment set:html={s.notesHtml} />
+									</div>
+								)}
+							</details>
+						)}
+					</li>
+				))
+			}
+		</ol>
+	</div>
+	<div class="hfld-slides__controls" hidden>
+		<button type="button" data-go="prev" aria-controls={id}>
+			<span aria-hidden="true">←</span> Previous
+		</button>
+		<p class="hfld-slides__counter" aria-live="polite">
+			Slide <span data-current>1</span> of {total}
+		</p>
+		<button type="button" data-go="next" aria-controls={id}>
+			Next <span aria-hidden="true">→</span>
+		</button>
+		<button type="button" data-fullscreen aria-pressed="false" hidden>Full screen</button>
+	</div>
+	<p class="hfld-slides__help" hidden>
+		Use the arrow keys, Page Up / Page Down, Home / End, or swipe to move between slides.
+	</p>
+	<p class="hfld-slides__credit">
+		Slides from <em>{deck.source}</em>. {deck.credit}
+	</p>
+</hfld-slides>
+
+<script>
+	class HfldSlides extends HTMLElement {
+		private index = 0;
+		private slides: HTMLLIElement[] = [];
+
+		connectedCallback() {
+			this.slides = [...this.querySelectorAll<HTMLLIElement>('.hfld-slides__slide')];
+			if (this.slides.length === 0) return;
+			this.classList.add('is-enhanced');
+			this.querySelector<HTMLElement>('.hfld-slides__controls')!.hidden = false;
+			this.querySelector<HTMLElement>('.hfld-slides__help')!.hidden = false;
+			const stage = this.querySelector<HTMLElement>('.hfld-slides__stage')!;
+
+			this.querySelector('[data-go=prev]')!.addEventListener('click', () => this.show(this.index - 1));
+			this.querySelector('[data-go=next]')!.addEventListener('click', () => this.show(this.index + 1));
+
+			this.addEventListener('keydown', (e) => {
+				const target = e.target as HTMLElement;
+				if (target.closest('details, input, textarea, select')) return;
+				const moves: Record<string, number> = {
+					ArrowRight: this.index + 1,
+					ArrowDown: this.index + 1,
+					PageDown: this.index + 1,
+					ArrowLeft: this.index - 1,
+					ArrowUp: this.index - 1,
+					PageUp: this.index - 1,
+					Home: 0,
+					End: this.slides.length - 1,
+				};
+				if (e.key in moves && !e.altKey && !e.ctrlKey && !e.metaKey) {
+					e.preventDefault();
+					this.show(moves[e.key]);
+				}
+			});
+
+			// Swipe: a mostly horizontal drag of 40 px or more.
+			let x0: number | null = null;
+			let y0 = 0;
+			stage.addEventListener('pointerdown', (e) => {
+				x0 = e.clientX;
+				y0 = e.clientY;
+			});
+			stage.addEventListener('pointerup', (e) => {
+				if (x0 === null) return;
+				const dx = e.clientX - x0;
+				const dy = e.clientY - y0;
+				x0 = null;
+				if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy)) this.show(this.index + (dx < 0 ? 1 : -1));
+			});
+			stage.addEventListener('pointercancel', () => (x0 = null));
+
+			const fs = this.querySelector<HTMLButtonElement>('[data-fullscreen]')!;
+			if (document.fullscreenEnabled) {
+				fs.hidden = false;
+				fs.addEventListener('click', () => {
+					if (document.fullscreenElement === this) document.exitFullscreen();
+					else this.requestFullscreen().catch(() => {});
+				});
+				document.addEventListener('fullscreenchange', () => {
+					const on = document.fullscreenElement === this;
+					fs.setAttribute('aria-pressed', String(on));
+					fs.textContent = on ? 'Exit full screen' : 'Full screen';
+				});
+			}
+
+			window.addEventListener('hashchange', () => this.fromHash());
+			if (!this.fromHash()) this.show(0, false);
+		}
+
+		/** Show the slide named by #slide-N, if any. */
+		private fromHash(): boolean {
+			const m = /^#slide-(\d+)$/.exec(location.hash);
+			if (!m) return false;
+			this.show(Number(m[1]) - 1, false);
+			return true;
+		}
+
+		private show(i: number, updateHash = true) {
+			const n = Math.max(0, Math.min(this.slides.length - 1, i));
+			this.index = n;
+			this.slides.forEach((s, k) => (s.hidden = k !== n));
+			// Load the current slide now and prefetch the next one.
+			for (const k of [n, n + 1]) this.slides[k]?.querySelector('img')?.setAttribute('loading', 'eager');
+			this.querySelector('[data-current]')!.textContent = String(n + 1);
+			this.querySelector<HTMLButtonElement>('[data-go=prev]')!.disabled = n === 0;
+			this.querySelector<HTMLButtonElement>('[data-go=next]')!.disabled = n === this.slides.length - 1;
+			if (updateHash) history.replaceState(null, '', `#slide-${n + 1}`);
+		}
+	}
+	customElements.define('hfld-slides', HfldSlides);
+</script>
+
+<style>
+	.hfld-slides {
+		display: block;
+		margin-block: 1.5rem;
+	}
+	.hfld-slides__stage {
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		background: var(--sl-color-gray-7, var(--sl-color-black));
+		padding: 0.5rem;
+		touch-action: pan-y;
+	}
+	.hfld-slides__stage:focus-visible {
+		outline: 3px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+	.hfld-slides__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.hfld-slides__slide + .hfld-slides__slide {
+		margin-top: 1.5rem;
+	}
+	.is-enhanced .hfld-slides__slide + .hfld-slides__slide {
+		margin-top: 0;
+	}
+	.hfld-slides__slide[hidden] {
+		display: none;
+	}
+	/* With scripting on, show only the first slide until the player starts, so later
+	   slides' lazy images are not fetched before they are hidden. */
+	@media (scripting: enabled) {
+		.hfld-slides:not(.is-enhanced) .hfld-slides__slide:not(:first-child) {
+			display: none;
+		}
+	}
+	.hfld-slides__slide img {
+		display: block;
+		width: 100%;
+		height: auto;
+		aspect-ratio: 16 / 9;
+		background: #fff;
+		border-radius: 0.25rem;
+		user-select: none;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.is-enhanced .hfld-slides__slide:not([hidden]) {
+			animation: hfld-slide-in 160ms ease-out;
+		}
+		@keyframes hfld-slide-in {
+			from {
+				opacity: 0.4;
+			}
+		}
+	}
+	.hfld-slides__text {
+		margin-top: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		background: var(--sl-color-bg);
+		border-radius: 0.25rem;
+		color: var(--sl-color-text);
+		font-size: var(--sl-text-sm);
+	}
+	.hfld-slides__text summary {
+		cursor: pointer;
+		font-weight: 600;
+	}
+	.hfld-slides__text :global(pre) {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
+	.hfld-slides__text :global(table) {
+		display: block;
+		overflow-x: auto;
+	}
+	.hfld-slides__title {
+		font-weight: 600;
+		margin-top: 0.5rem;
+	}
+	.hfld-slides__notes {
+		margin-top: 0.75rem;
+		border-top: 1px solid var(--sl-color-gray-5);
+		padding-top: 0.5rem;
+	}
+	.hfld-slides__notes-label {
+		font-weight: 600;
+	}
+	.hfld-slides__controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 0.75rem;
+		margin-top: 0.75rem;
+	}
+	.hfld-slides__controls[hidden],
+	.hfld-slides__help[hidden],
+	.hfld-slides__controls [hidden] {
+		display: none;
+	}
+	.hfld-slides__controls button {
+		min-height: 2.75rem;
+		padding: 0.4rem 0.9rem;
+		border: 1px solid var(--sl-color-gray-4);
+		border-radius: 0.375rem;
+		background: var(--sl-color-gray-6);
+		color: var(--sl-color-white);
+		font: inherit;
+		cursor: pointer;
+	}
+	.hfld-slides__controls button:disabled {
+		opacity: 0.55;
+		cursor: default;
+	}
+	.hfld-slides__controls button:focus-visible {
+		outline: 3px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+	.hfld-slides__counter {
+		margin: 0;
+		font-variant-numeric: tabular-nums;
+	}
+	[data-fullscreen] {
+		margin-inline-start: auto;
+	}
+	.hfld-slides__help,
+	.hfld-slides__credit {
+		margin-top: 0.5rem;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-2);
+	}
+	.hfld-slides:fullscreen {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding: 1rem;
+		background: var(--sl-color-black);
+		overflow: auto;
+	}
+	.hfld-slides:fullscreen .hfld-slides__slide img {
+		max-height: calc(100vh - 7rem);
+		width: auto;
+		max-width: 100%;
+		margin-inline: auto;
+	}
+	.hfld-slides:fullscreen .hfld-slides__text,
+	.hfld-slides:fullscreen .hfld-slides__credit,
+	.hfld-slides:fullscreen .hfld-slides__help {
+		display: none;
+	}
+</style>
