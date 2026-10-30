@@ -5,7 +5,17 @@
  * Source: EXERCISE D3_ Calculating covariates for HFLD.docx
  * Original authors: Ate Poortinga & Samuel (Conservation International).
  * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
- * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
+ * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
+ *   - The bands are divided by 10000 before computing covariates: the composite stores
+ *     reflectance x 10000 (Int16), and EVI, SAVI (so IBI) and the Tasseled Cap assume 0-1 reflectance.
+ *   - Two lists that the M2-02 extraction had commented out are restored as in the exercise:
+ *     the Tasseled Cap distances and the terrain covariates.
+ *   - The probability export is named for forest (the training classes are forest / non-forest);
+ *     the exercise named it "urban_AP" / urbanAP2025.
+ *
+ * Inputs: the 2025 Landsat composite from the Landsat MRV composite lesson (the path below is a
+ * participant's export in the training project; use your own), and two point imports drawn in the
+ * Code Editor, `forest` and `nonForest`, each with a numeric property `class` (forest = 1, other = 0).
  *
  * Original Code Editor script(s):
  *   https://code.earthengine.google.com/c86323c2a144391b5218fb1d5d9e465f
@@ -29,19 +39,20 @@ Map.addLayer(
   "RGB Oct-Dec"
 );
 
-// ---- Description ----
+// ---- Part 2: Compute Seasonal Spectral Covariates ----
 // ---------------------------------------------------------------------
 // Helper to compute covariates for one seasonal suffix
 // Landsat 8/9 bands:
 // B2 = blue, B3 = green, B4 = red, B5 = nir, B6 = swir1, B7 = swir2
 // ---------------------------------------------------------------------
 function addSeasonCovariates(img, suffix) {
-  var blue  = img.select('B2_' + suffix);
-  var green = img.select('B3_' + suffix);
-  var red   = img.select('B4_' + suffix);
-  var nir   = img.select('B5_' + suffix);
-  var swir1 = img.select('B6_' + suffix);
-  var swir2 = img.select('B7_' + suffix);
+  // The composite stores reflectance x 10000; convert to 0-1 reflectance.
+  var blue  = img.select('B2_' + suffix).divide(10000);
+  var green = img.select('B3_' + suffix).divide(10000);
+  var red   = img.select('B4_' + suffix).divide(10000);
+  var nir   = img.select('B5_' + suffix).divide(10000);
+  var swir1 = img.select('B6_' + suffix).divide(10000);
+  var swir2 = img.select('B7_' + suffix).divide(10000);
   // --------------------------
   // Normalized difference indices
   // --------------------------
@@ -170,7 +181,7 @@ function addSeasonCovariates(img, suffix) {
     evi, savi, ndbi, mndwi, ibi,
     tcb, tcg, tcw, tc4, tc5, tc6,
     tcAngleBG, tcAngleGW, tcAngleBW,
-// tcDistBG, tcDistGW, tcDistBW
+    tcDistBG, tcDistGW, tcDistBW
   ]);
 }
 
@@ -181,7 +192,7 @@ function addSeasonCovariates(img, suffix) {
 var covJanApr = addSeasonCovariates(image, 'jan_apr');
 var covOctDec = addSeasonCovariates(image, 'oct_dec');
 
-// ---- Key Functions ----
+// ---- Part 4: Compute Terrain Covariates ----
 // ---------------------------------------------------------------------
 // Terrain covariates from SRTM
 // ---------------------------------------------------------------------
@@ -194,7 +205,7 @@ var aspectRad = aspect.multiply(Math.PI).divide(180);
 var eastness = aspectRad.sin().rename('eastness');
 var northness = aspectRad.cos().rename('northness');
 var terrainCov = ee.Image.cat([
-// elevation, slope, aspect, eastness, northness
+  elevation, slope, aspect, eastness, northness
 ]);
 
 // ---- Part 5: Add Water Covariates (JRC Global Surface Water) ----
@@ -243,7 +254,7 @@ Map.addLayer(
   'Slope'
 );
 
-// ---- Key Learning Points ----
+// ---- Part 7: Train a Random Forest and export a probability layer (preview of the next lesson) ----
 var trainingSample = forest.merge(nonForest)
 var sampled = covariates.sampleRegions({
   collection: trainingSample,
@@ -275,8 +286,8 @@ Map.addLayer(
 //Export to GEE Asset (ToAsset)
 Export.image.toAsset({
   image: targetProbability.multiply(100).toInt(),
-  description: "urban_AP",
-  assetId: "projects/bhutan-hfld-readiness-training/assets/primitives/urbanAP2025",
+  description: "forest_AP",
+  assetId: "projects/bhutan-hfld-readiness-training/assets/primitives/forestAP2025",
   region: image.geometry(),
   // region: aoi, // use this if you draw AOI manually in GEE; no need to use geometry()
   scale: 30,

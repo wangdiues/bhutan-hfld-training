@@ -1,16 +1,230 @@
 ---
 title: "Calculating covariates"
+description: Turn the seasonal Landsat composite into a stack of covariates (spectral indices, Tasseled Cap, terrain and water layers) that a Random Forest can use to separate land-cover classes.
 sidebar:
   order: 2
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["Which inputs help a classifier tell forest from other land cover?", "How do I build them for both seasons at once?"]}
+  objectives={[
+    "Compute spectral, water, terrain and seasonal covariates.",
+    "Explain what each covariate adds to separating classes.",
+  ]}
+  teaching={20} exercises={30}
+  prerequisites={["Landsat MRV composite", "Random Forest theory"]}
+/>
 
-## In this lesson you will
+In machine learning for maps, <Term id="covariate">covariates</Term> are variables derived from the data that describe the land surface. They are the inputs (features) to classifiers such as Random Forest, Gradient Boosted Trees or Support Vector Machines. Raw bands alone often can't separate similar classes; covariates make the differences explicit.
 
-- Compute spectral, water, terrain and seasonal covariates
-- Explain what each one adds to separating classes
+For HFLD mapping, covariates capture:
 
-**Time:** about 20 min teaching + 30 min practice.
+| Property | Examples |
+|---|---|
+| vegetation condition | NDVI, EVI, SAVI, Tasseled Cap greenness |
+| water presence and dynamics | NDWI, MNDWI, JRC surface water |
+| built-up areas and soil | NDBI, IBI, Tasseled Cap brightness |
+| terrain | elevation, slope, aspect, eastness, northness |
+| seasonality | every spectral covariate for both Jan–Apr and Oct–Dec |
+
+Better covariates mean better predictions: they help distinguish similar classes (forest and crops, water and shadow), each describes a different property, and the seasonal pairs capture changes over the year, which matter for crops, deciduous forest and water.
+
+**Inputs:** the Landsat 8/9 (or Sentinel-2) seasonal composite from Day 2, the [SRTM DEM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003), and the [JRC Global Surface Water](https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater) dataset.
+
+<Callout type="mistake" title="Inputs you need">
+The script loads `projects/bhutan-hfld-readiness-training/assets/landsatComposite/bhutan_ls89_2025_TashiY`, one participant's export from the training. Replace it with your own export from the [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/) lesson. Part 7 also needs two point imports drawn in the Code Editor, `forest` and `nonForest`, each with a numeric property `class` (forest = 1, other = 0); [Collecting training data](/bhutan-hfld-training/day-4/training-data/) shows how.
+</Callout>
+
+## Part 1: Load and look at the composite
+
+Load the seasonal composite and display both seasons. Comparing them shows how vegetation, water and soil change between the dry early year and the post-monsoon months.
+
+<CodeBlock script="day-3/covariates.js" lines={[28, 41]} />
+
+## Part 2: A function for seasonal spectral covariates
+
+A reusable function takes the composite and a season suffix (`jan_apr` or `oct_dec`), picks out the six Landsat bands and computes the covariates for that season:
+
+<CodeBlock script="day-3/covariates.js" lines={[42, 186]} />
+
+What the function computes:
+
+| Group | Covariates | What they describe |
+|---|---|---|
+| Normalised differences | NDVI, NDWI, NBR, NDSI, and four more band pairs (red–SWIR1, NIR–SWIR1, NIR–SWIR2, green–SWIR1) | vegetation, water, burn scars and moisture, snow |
+| Ratios | SWIR1 / NIR, red / SWIR1 | moisture and soil versus vegetation |
+| Vegetation | EVI, SAVI (L = 0.5) | vegetation in dense canopy (EVI) and where soil shows (SAVI) |
+| Built-up | NDBI, MNDWI, IBI (index-based built-up index, Xu 2008) | settlements and bare surfaces versus vegetation and water |
+| Tasseled Cap | brightness (TCB), greenness (TCG), wetness (TCW), and components 4–6 | soil and brightness, green vegetation, moisture |
+| Tasseled Cap angles and distances | angles and distances in the brightness–greenness, greenness–wetness and brightness–wetness planes | forest structure and disturbance |
+
+<Callout type="mistake" title="Corrected: scale the composite first">
+The Day 2 composite stores reflectance × 10,000 as Int16. The training script used those values directly, which gives wrong EVI, SAVI and IBI (their constants assume 0–1 reflectance) and Tasseled Cap values 10,000 times too large. The course script divides each band by 10,000 first. The normalised differences and ratios are not affected.
+</Callout>
+
+<Theory title="Tasseled Cap">
+The Tasseled Cap transformation rotates the six reflective bands into new axes with physical meaning: **brightness** (overall reflectance, mostly soil and bare ground), **greenness** (NIR against visible: green vegetation) and **wetness** (visible and NIR against SWIR: moisture in soil and canopy). The coefficients here are those commonly used for Landsat 8/9 OLI. Angles and distances between pairs of components summarise where a pixel sits in that space, which helps separate forest from shrubs, crops and disturbed land.
+</Theory>
+
+The function also builds a `tc` image with a matrix of coefficients and then, as its comment says, computes the same components explicitly because the matrix approach is awkward in Earth Engine. The unused `tc` variable does no harm: Earth Engine only computes what is used.
+
+## Part 3: Apply the function to both seasons
+
+<CodeBlock script="day-3/covariates.js" lines={[188, 193]} />
+
+The result has two sets of covariates with the season in the name, such as `NDVI_jan_apr` and `NDVI_oct_dec`.
+
+## Part 4: Terrain covariates
+
+Terrain shapes where vegetation grows, especially in Bhutan. From SRTM, compute elevation, slope and aspect. Aspect is an angle (0° and 360° are both north), so it is also turned into **eastness** (sine of aspect) and **northness** (cosine of aspect), which a classifier can use as smooth values from −1 to 1.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-3/covariates.js" lines={[195, 209]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import math
+
+import ee
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+dem = ee.Image("USGS/SRTMGL1_003").rename("elevation")
+terrain = ee.Terrain.products(dem)
+aspect_rad = terrain.select("aspect").multiply(math.pi / 180)
+terrain_cov = ee.Image.cat([
+    dem,
+    terrain.select("slope"),
+    terrain.select("aspect"),
+    aspect_rad.sin().rename("eastness"),
+    aspect_rad.cos().rename("northness"),
+])
+print(terrain_cov.bandNames().getInfo())
+```
+  </TabItem>
+</Tabs>
+
+## Part 5: Water covariates (optional)
+
+The [JRC Global Surface Water](https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater) dataset describes where surface water occurred from 1984 onwards: how often (occurrence), how that changed (change_abs, change_norm), for how many months a year (seasonality), the kind of transition (transition) and the maximum extent ever seen (max_extent). These help separate rivers and lakes from shadows.
+
+<CodeBlock script="day-3/covariates.js" lines={[211, 223]} />
+
+In the exercise, adding these to the stack is left commented out (`//.addBands(jrcCov)`): add them if water or shadow confusion is a problem. Some bands, such as `transition`, are categories rather than measurements; Random Forest can still use them, but treat their importance with care.
+
+## Part 6: Build the stack and check it
+
+Combine the composite's bands, both seasons' covariates and the terrain covariates into one image. Print its band names and look at a few layers before using it:
+
+<CodeBlock script="day-3/covariates.js" lines={[225, 255]} />
+
+<Callout type="why">
+Why this matters: the quality of this stack directly limits the classification. A covariate with a mistake (wrong band, wrong scale, all masked) silently weakens every model trained on it, so always visualise covariates before training.
+</Callout>
+
+## Part 7: A first Random Forest (preview)
+
+The exercise ends by sampling the covariates at forest and non-forest training points, training a 100-tree Random Forest, and mapping the probability of forest. The next lesson, [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/), covers this step in full.
+
+<CodeBlock script="day-3/covariates.js" lines={[257, 295]} />
+
+- `sampleRegions` reads the covariate values at each training point (at 30 m).
+- `bagFraction: 0.7` trains each tree on 70% of the samples; `seed: 42` makes the result repeatable.
+- `setOutputMode('PROBABILITY')` returns the share of trees voting for class 1 (forest), from 0 to 1. The export stores it as 0–100 integers, the format used for primitives.
+
+## The full script
+
+<CodeBlock script="day-3/covariates.js" />
+
+<OpenInGEE script="day-3/covariates.js" hash="c86323c2a144391b5218fb1d5d9e465f" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `ee.Image.cat([...])` | Stacks images into one multi-band image |
+| `a.subtract(b).divide(a.add(b))` | Normalised difference |
+| `x.atan2(y)`, `x.pow(2).add(y.pow(2)).sqrt()` | Angle and distance between two components |
+| `ee.Terrain.products(dem)` | Slope, aspect and hillshade from a DEM |
+| `image.sampleRegions({collection, properties, scale})` | Reads band values at points |
+| `ee.Classifier.smileRandomForest({...}).train({...})` | Trains a Random Forest |
+
+## Common mistakes
+
+- **Using scaled integers in formulas with constants.** Divide by 10,000 first (see above).
+- **Raw aspect as a covariate only.** 359° and 1° look far apart; add eastness and northness.
+- **Too many near-identical covariates.** Dozens of strongly correlated indices add little and slow training; check variable importance (next lesson).
+- **Mixing seasons by name.** Keep the `_jan_apr` and `_oct_dec` suffixes on everything.
+- **Training points without a numeric `class` property.** `train()` needs it.
+
+<Callout type="bhutan">
+Bhutan context: terrain covariates matter more here than in flat countries. Elevation separates subtropical, temperate and alpine vegetation; northness separates moist north-facing forest from drier south-facing slopes; and the Oct–Dec season shows deciduous forest and harvested fields differently from Jan–Apr.
+</Callout>
+
+## Practice
+
+<Challenge level="blanks" time={20} hints={["Slope is already computed in Part 4 as `slope`.", "NDBI = (SWIR1 − NIR) / (SWIR1 + NIR).", "Add the new band with addBands."]}>
+Add **NDBI** for the Oct–Dec season and **slope** to a small covariate stack, and display NDBI. (NDBI is also inside the function; computing it yourself checks you understand the formula.)
+
+```js
+var swir1 = image.select('B6_oct_dec').divide(10000);
+var nir = image.select('B5_oct_dec').divide(10000);
+var ndbi = swir1.___(nir).divide(swir1.___(nir)).rename('NDBI_check');
+var small = ndbi.addBands(___);
+Map.addLayer(small.select('NDBI_check'), {min: -0.5, max: 0.5, palette: ['green', 'white', 'red']}, 'NDBI Oct-Dec');
+print(small.bandNames());
+```
+
+<Fragment slot="solution">
+```js
+var swir1 = image.select('B6_oct_dec').divide(10000);
+var nir = image.select('B5_oct_dec').divide(10000);
+var ndbi = swir1.subtract(nir).divide(swir1.add(nir)).rename('NDBI_check');
+var small = ndbi.addBands(slope);
+Map.addLayer(small.select('NDBI_check'), {min: -0.5, max: 0.5, palette: ['green', 'white', 'red']}, 'NDBI Oct-Dec');
+print(small.bandNames());
+```
+Built-up areas and bare ground appear red (NDBI above 0), vegetation green.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-3-covariates" questions={[
+  { q: "Why compute every spectral covariate for both Jan–Apr and Oct–Dec?", options: ["To double the file size", "Seasonal differences help separate classes such as crops, deciduous forest and water", "Random Forest needs an even number of bands", "Landsat records them separately"], answer: 1, explain: "A pair of seasonal values captures change over the year, which single-date values miss." },
+  { q: "Why add eastness and northness instead of using only aspect?", options: ["Aspect is not available from SRTM", "Aspect is circular (359° is next to 1°); sine and cosine give smooth values", "They are faster to compute", "They replace slope"], answer: 1, explain: "Sine and cosine turn the circular angle into two smooth variables between −1 and 1." },
+  { q: "What do Tasseled Cap brightness, greenness and wetness describe?", options: ["Elevation, slope and aspect", "Soil/brightness, green vegetation and moisture", "Cloud, shadow and snow", "Three seasons"], answer: 1, explain: "They are rotations of the reflective bands with physical meaning." },
+  { q: "Normalised differences such as NDVI give the same result whether reflectance is stored as 0–1 or × 10,000.", answer: true, explain: "The scale factor cancels in a ratio; it does not cancel in EVI or SAVI, which add constants." },
+]} />
+
+<KeyPoints points={[
+  "Covariates turn raw bands into features that separate classes: indices, Tasseled Cap, terrain and water layers.",
+  "Compute spectral covariates per season and keep the season in every name.",
+  "Scale reflectance to 0–1 before formulas with constants.",
+  "Check the stack visually before training a model on it.",
+]} />
+
+<Credit
+  source="EXERCISE D3: Calculating Covariates for HFLD"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; code copied from the exercise",
+    "Bands divided by 10,000 before computing covariates (EVI, SAVI, IBI and Tasseled Cap assume 0–1 reflectance)",
+    "Tasseled Cap distances and terrain covariates restored (they had been commented out when the code was extracted)",
+    "Probability export renamed from urban to forest, to match the forest / non-forest training classes",
+    "Added covariate tables, a Python version of the terrain covariates, practice and a quiz",
+  ]}
+/>
