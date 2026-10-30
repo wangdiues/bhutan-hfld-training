@@ -1,17 +1,347 @@
 ---
-title: "Image collections, filters and reducers"
+title: "Image collections, filtering and reducers"
+description: Filter an image collection by place, date and cloud cover, display images with band combinations and palettes, and reduce a collection to one image and an image to statistics for a region.
 sidebar:
   order: 5
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import { Image } from 'astro:assets';
+import workspace from '~/assets/day-1/image-collections/s03-838dcfd2d4.webp';
+import temporal from '~/assets/day-1/image-collections/s13-869ece2f01.webp';
+import rectangle from '~/assets/day-1/image-collections/s15-5e7aae6233.webp';
+import median from '~/assets/day-1/image-collections/s20-14e3d405fa.webp';
+import syntaxError from '~/assets/day-1/image-collections/s21-ee64893bb9.webp';
+import clientError from '~/assets/day-1/image-collections/s21-23c9ebb69e.webp';
+import serverError from '~/assets/day-1/image-collections/s21-7e019329a1.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I get from thousands of images to the ones I need?", "How do I turn a stack of images into one image, or into numbers for an area?"]}
+  objectives={[
+    "Filter a collection by bounds, date and metadata.",
+    "Visualise images with min, max and a palette.",
+    "Reduce a collection to an image, and an image to a statistic for a region.",
+  ]}
+  teaching={20} exercises={25}
+  prerequisites={["JavaScript basics in Earth Engine"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/image-collections/) give a visual summary.
 
-- Filter a collection by bounds, date and metadata
-- Visualise with min/max/palette
-- Reduce a collection to an image and an image to a region statistic
+## Set up your workspace
 
-**Time:** about 20 min teaching + 25 min practice.
+Store your scripts in a logical place and save them at each stage, because **scripts do not save automatically**. In the **Scripts** tab, click **NEW** to create a repository (for example `bhutan-hfld`) and a folder for each day, then save this lesson's script there.
+
+<Image src={workspace} alt="Code Editor dialogs for creating a new repository, a folder and saving a file, labelled a to e." />
+
+## Image collections
+
+An <Term id="image-collection" /> is an organised set of images, such as every Landsat 8 scene or every Sentinel-2 image. Earth Engine holds collections from Landsat, Sentinel, MODIS, Planet and many other sensors. This course mostly uses two optical satellites:
+
+| Satellite | Operator | Since | Resolution | Revisit |
+|---|---|---|---|---|
+| Landsat | USGS / NASA | 1972 | 30 m (15 m panchromatic) | 16 days per satellite; 8 days with Landsat 8 and 9 together |
+| Sentinel-2 | ESA (Copernicus) | 2015 | 10 m, 20 m and 60 m bands | 10 days per satellite; 5 days with two satellites |
+
+The Landsat missions so far:
+
+| Satellite | Years | Instruments | Resolution (m) |
+|---|---|---|---|
+| Landsat 1 | 1972–1978 | MSS | 60 |
+| Landsat 2 | 1975–1982 | MSS | 60 |
+| Landsat 3 | 1978–1983 | MSS | 60 |
+| Landsat 4 | 1982–1993 | MSS / TM | 60 / 30 |
+| Landsat 5 | 1984–2012 | MSS / TM | 60 / 30 |
+| Landsat 7 | 1999–2022 (nominal orbit) | ETM+ | 30 / 15 (pan) |
+| Landsat 8 | 2013–present | OLI / TIRS | 30 / 15 (pan) |
+| Landsat 9 | 2021–present | OLI-2 / TIRS-2 | 30 / 15 (pan) |
+
+### Bands and band combinations
+
+Each sensor records several **bands**, ranges of wavelength. Landsat 8 and 9 have 11:
+
+| Landsat 8/9 band | Name | Sentinel-2 equivalent |
+|---|---|---|
+| B1 | Coastal aerosol | B1 |
+| B2, B3, B4 | Blue, green, red | B2, B3, B4 |
+| B5 | Near infrared (NIR) | B8 |
+| B6, B7 | Shortwave infrared 1 and 2 (SWIR) | B11, B12 |
+| B8 | Panchromatic (15 m) | — |
+| B9 | Cirrus | B10 (Level-1C only) |
+| B10, B11 | Thermal infrared 1 and 2 | — |
+
+Plus a QA band for clouds and other quality flags. Sentinel-2 also has three "red-edge" bands (B5, B6, B7) and a narrow NIR band (B8A) that Landsat lacks.
+
+Choosing three bands for red, green and blue gives different views:
+
+- **True colour** (Sentinel-2: B4, B3, B2) looks like a photograph.
+- **False colour** (NIR, red, green; Sentinel-2: B8, B4, B3) shows healthy vegetation in bright red. It is often used for plant health.
+- **Agriculture** (SWIR-1, NIR, blue; Sentinel-2: B11, B8, B2) separates crops, bare soil and forest.
+
+## Step 1: Filter the collection
+
+Filter by **location**, **date** and **metadata** (here, the cloud cover the data provider recorded for each image). Change the dates to the period you want, and the area and zoom to your own area of interest. The example uses Paro valley and the 2025 dry season.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+```js
+var paro = ee.Geometry.Rectangle([89.25, 27.30, 89.50, 27.55]);
+Map.centerObject(paro, 11);
+
+var imageCollection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+    .filterBounds(paro)
+    .filterDate('2025-01-01', '2025-05-01')
+    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30));
+print('Images, Jan-Apr 2025:', imageCollection.size());
+```
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+paro = ee.Geometry.Rectangle([89.25, 27.30, 89.50, 27.55])
+image_collection = (
+    ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+    .filterBounds(paro)
+    .filterDate("2025-01-01", "2025-05-01")
+    .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 30))
+)
+print("Images, Jan-Apr 2025:", image_collection.size().getInfo())
+```
+  </TabItem>
+</Tabs>
+
+<Image src={temporal} alt="Code Editor script that filters an image collection by date, with the resulting composite shown on the map." />
+
+You can draw the area instead: use the rectangle tool and Earth Engine adds a `geometry` import, as in the screenshot below.
+
+<Image src={rectangle} alt="Code Editor with a rectangle drawn over Bhutan and the geometry printed in the Console." />
+
+<Callout type="why">
+Why this matters: filtering first keeps the computation small and fast. A collection filtered to Paro and four months has a few dozen images; the whole Sentinel-2 archive has millions.
+</Callout>
+
+## Step 2: Visualise images
+
+Screens show 8-bit images: three channels (red, green, blue), each with values from 0 to 255. Visualisation parameters say how to turn your data into those values:
+
+| Parameter | Meaning |
+|---|---|
+| `bands` | one band (shown in grey or with a palette) or three bands (red, green, blue) |
+| `min` | the data value shown as 0 (dark) |
+| `max` | the data value shown as 255 (bright) |
+| `palette` | colours to stretch linearly between `min` and `max`, for one band |
+| `opacity` | from 0 (transparent) to 1 (opaque) |
+
+Use them in `Map.addLayer()`, or bake them into an RGB image with `visualize()`:
+
+```js
+var img = imageCollection.sort('CLOUDY_PIXEL_PERCENTAGE').first();
+var trueColor = img.visualize({
+  bands: ['B4', 'B3', 'B2'],
+  min: 100,
+  max: 2000
+});
+var falseColor = img.visualize({
+  bands: ['B11', 'B8', 'B2'],
+  min: [100, 75, 50],
+  max: [3500, 3400, 3300]
+});
+Map.addLayer(trueColor, {}, 'True colour');
+Map.addLayer(falseColor, {}, 'Agriculture (SWIR-1, NIR, blue)', false);
+```
+
+`min` and `max` can be one value for all bands, or one per band. With a **palette**, a single band is stretched across colours. Here elevation from 200 m to 2,500 m runs from yellow through red to blue; anything higher than 2,500 m is shown in the last colour. Data: [SRTM 30 m](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003).
+
+```js
+var elevation = ee.Image('USGS/SRTMGL1_003');
+Map.addLayer(elevation.clip(paro), {
+  min: 200,
+  max: 2500,
+  palette: ['#ffe74c', '#ff5964', '#38618c']
+}, 'Elevation (m)', false);
+```
+
+## Step 3: Reduce a collection to one image
+
+A <Term id="reducer" /> combines many values into fewer. Reducers answer two questions: **where do the values come from and where do the results go** (`ImageCollection.reduce`, `Image.reduceRegion`, `Image.reduceNeighborhood` and others), and **how are the values combined** (`mean`, `median`, `min`, `max`, `percentile`, `linearRegression` and others).
+
+An **image-collection reducer** reduces a stack of images to one image, pixel by pixel. The median of a few months of images removes most clouds and shadows, because they are rarely in the same place twice:
+
+```js
+var median = imageCollection
+    .reduce(ee.Reducer.median(), 2);
+print('Band names after reduce():', median.bandNames());
+Map.addLayer(median.clip(paro), {bands: ['B4_median', 'B3_median', 'B2_median'], min: 100, max: 2000},
+    'Median, Jan-Apr 2025');
+```
+
+<Image src={median} alt="Code Editor map with a median Sentinel-2 composite over part of Bhutan; snow and cloud appear white." />
+
+`reduce()` adds the reducer's name to each band (`B4` becomes `B4_median`). The shortcut `imageCollection.median()` keeps the original names. The second argument, `2`, is the *parallel scale*: it lets Earth Engine use less memory per tile, which helps with large areas.
+
+## Step 4: Reduce an image over a region
+
+An **image reducer** over a region turns the pixels inside a geometry into numbers, such as the mean of each band:
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+```js
+var mean = median.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: paro,
+  scale: 30,
+  maxPixels: 1e9,
+});
+print('Mean band values over Paro valley:', mean);
+```
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+median = image_collection.reduce(ee.Reducer.median(), 2)
+mean = median.reduceRegion(reducer=ee.Reducer.mean(), geometry=paro, scale=30, maxPixels=1e9)
+print("Mean band values over Paro valley:", mean.getInfo())
+
+m = geemap.Map()
+m.centerObject(paro, 11)
+m.addLayer(median.clip(paro), {"bands": ["B4_median", "B3_median", "B2_median"], "min": 100, "max": 2000}, "Median")
+m
+```
+  </TabItem>
+</Tabs>
+
+- `scale` is the pixel size in metres used for the calculation. Use the data's native resolution (10 m for most Sentinel-2 bands) for accuracy, or larger to run faster.
+- `maxPixels` raises the default limit on how many pixels may be read. Set it high for large areas.
+
+<Theory title="Image vs. collection vs. feature">
+An **image** has any number of bands, each with a name and properties, plus metadata. A **geometry** is a point, line or polygon; a **feature** is a geometry plus attributes. A **collection** is a set of images or features. Reducers move between them: collection → image (`reduce`), image → numbers (`reduceRegion`), image → features (`reduceToVectors`).
+</Theory>
+
+## Three kinds of errors
+
+When something goes wrong, the error is one of three kinds. [Debugging Earth Engine](/bhutan-hfld-training/how-to/debug-earth-engine/) covers them in detail.
+
+1. **Syntax errors**: the code isn't valid JavaScript, for example an unclosed quote. The editor marks the line before you run it.
+
+<Image src={syntaxError} alt="Code Editor showing a syntax error: a red marker flags an unclosed string." />
+
+2. **Client errors**: the JavaScript is valid, but the browser can't run it, for example a variable that was never defined.
+
+<Image src={clientError} alt="Code Editor showing the error 's2Bands is not defined in this scope' in the Console." />
+
+3. **Server errors**: Earth Engine runs the request and fails, for example asking for a band name that doesn't exist.
+
+<Image src={serverError} alt="Code Editor showing a layer error in the Console: the band pattern 'red' did not match any bands." />
+
+## The full script
+
+<CodeBlock script="day-1/image-collections.js" />
+
+<OpenInGEE script="day-1/image-collections.js" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `.filterBounds(geometry)` | Keeps images that intersect the geometry |
+| `.filterDate(start, end)` | Keeps images from start (included) to end (excluded) |
+| `.filter(ee.Filter.lt(property, value))` | Keeps images whose property is below a value |
+| `image.visualize({bands, min, max, palette})` | Makes an 8-bit RGB image for display |
+| `collection.reduce(ee.Reducer.median())` | Reduces a collection to one image, pixel by pixel |
+| `image.reduceRegion({reducer, geometry, scale})` | Computes statistics of an image within a region |
+
+## Common mistakes
+
+- **Mixing up band names between sensors.** Near infrared is `B5` in Landsat 8 but `B8` in Sentinel-2.
+- **Forgetting the `_median` suffix.** After `reduce(ee.Reducer.median())`, ask for `B4_median`, not `B4`.
+- **`reduceRegion` without `scale`.** Earth Engine then uses a coarse default and the numbers change with the map zoom. Always set `scale`.
+- **"Too many pixels" errors.** Raise `maxPixels`, use a larger `scale`, or a smaller region.
+- **An end date that is included.** `filterDate('2025-01-01', '2025-04-30')` leaves out 30 April. Use `'2025-05-01'` as the end.
+
+<Callout type="bhutan">
+Bhutan context: the monsoon (roughly June to September) leaves few clear images, so this course builds composites from the drier months, January to April and October to December. Snow on the high peaks also stays white in a median composite: it is not cloud.
+</Callout>
+
+## Practice
+
+<Challenge level="blanks" time={20} hints={["Filter by place, then date, then cloud cover.", "The dry season used in the course runs from January to April.", "reduceRegion needs a reducer, a geometry and a scale."]}>
+Make the 2025 dry-season (January to April) median composite for Paro, show it in **false colour** (NIR, red, green), and print the mean NIR value over the valley.
+
+```js
+var paro = ee.Geometry.Rectangle([89.25, 27.30, 89.50, 27.55]);
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+    .filterBounds(___)
+    .filterDate('___', '___')
+    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30));
+var composite = s2.median();
+Map.centerObject(paro, 11);
+Map.addLayer(composite.clip(paro), {bands: ['___', '___', '___'], min: 100, max: 3000}, 'False colour');
+var stats = composite.select('B8').reduceRegion({
+  reducer: ee.Reducer.___(),
+  geometry: paro,
+  scale: ___,
+});
+print('Mean NIR:', stats);
+```
+
+<Fragment slot="solution">
+```js
+var paro = ee.Geometry.Rectangle([89.25, 27.30, 89.50, 27.55]);
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+    .filterBounds(paro)
+    .filterDate('2025-01-01', '2025-05-01')
+    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30));
+var composite = s2.median();
+Map.centerObject(paro, 11);
+Map.addLayer(composite.clip(paro), {bands: ['B8', 'B4', 'B3'], min: 100, max: 3000}, 'False colour');
+var stats = composite.select('B8').reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: paro,
+  scale: 10,
+});
+print('Mean NIR:', stats);
+```
+`median()` keeps the original band names, so `B8` works here, unlike after `reduce(ee.Reducer.median())`.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-1-image-collections" questions={[
+  { q: "You run collection.reduce(ee.Reducer.median()) on Sentinel-2. What is the red band called in the result?", options: ["B4", "B4_median", "red_median", "median"], answer: 1, explain: "reduce() appends the reducer name to each band. collection.median() would keep the name B4." },
+  { q: "Which kind of reducer turns a stack of images into a single image?", options: ["An ImageCollection reducer (N → 1)", "Image.reduceRegion (image → numbers)", "Image.reduceToVectors (image → features)", "A Map.addLayer() call"], answer: 0, explain: "ImageCollection.reduce combines the images pixel by pixel into one image. reduceRegion summarises one image over a region." },
+  { q: "With {min: 200, max: 2500, palette: ['yellow', 'red', 'blue']}, how is a pixel at 3,000 m shown?", options: ["Yellow", "Red", "Blue, the last colour", "Transparent"], answer: 2, explain: "Values above max are clamped to the last colour of the palette; values below min get the first." },
+  { q: "filterDate('2025-01-01', '2025-05-01') includes images from 1 May 2025.", answer: false, explain: "The end date is exclusive, so the filter ends at the last moment of 30 April 2025." },
+]} />
+
+<KeyPoints points={[
+  "Filter collections by place (filterBounds), time (filterDate) and metadata (filter) before doing anything else.",
+  "Visualisation parameters (bands, min, max, palette) turn data into 8-bit colours for display.",
+  "Reducers combine values: a collection to an image (reduce, median), or an image to numbers for a region (reduceRegion with a scale).",
+  "Errors are syntax, client or server errors; each needs a different fix.",
+]} />
+
+<Credit
+  source="D1 Working with Time-Series of Images and Image Stacks, Filtering Image Collections (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson; the code snippets joined into one runnable script for Paro",
+    "The region reduction uses Paro valley instead of santaCruz (undefined and not in Bhutan)",
+    "Code shown as images on slide 10 transcribed as text",
+    "Revisit times corrected (Landsat 8 days with two satellites; Sentinel-2 5 days with two satellites) and the Landsat 5 MSS resolution given as 60 m",
+    "Third-party figures (NASA, JAXA, Google) not reused",
+  ]}
+/>
