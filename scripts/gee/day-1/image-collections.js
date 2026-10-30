@@ -15,7 +15,7 @@
 var paro = ee.Geometry.Rectangle([89.25, 27.30, 89.50, 27.55]);
 Map.centerObject(paro, 11);
 
-// 1. Filter a collection by place, date and metadata (slide 13).
+// 1. Filter a collection by place, date and metadata (slide 13 used Landsat 8 SR over Utah, May 2021).
 // https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED
 var imageCollection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
     .filterBounds(paro)

@@ -17,7 +17,6 @@ import CodeBlock from '~/components/CodeBlock.astro';
 import Term from '~/components/Term.astro';
 import { Image } from 'astro:assets';
 import workspace from '~/assets/day-1/image-collections/s03-838dcfd2d4.webp';
-import temporal from '~/assets/day-1/image-collections/s13-869ece2f01.webp';
 import rectangle from '~/assets/day-1/image-collections/s15-5e7aae6233.webp';
 import median from '~/assets/day-1/image-collections/s20-14e3d405fa.webp';
 import syntaxError from '~/assets/day-1/image-collections/s21-ee64893bb9.webp';
@@ -122,8 +121,6 @@ print("Images, Jan-Apr 2025:", image_collection.size().getInfo())
 ```
   </TabItem>
 </Tabs>
-
-<Image src={temporal} alt="Code Editor script that filters an image collection by date, with the resulting composite shown on the map." />
 
 You can draw the area instead: use the rectangle tool and Earth Engine adds a `geometry` import, as in the screenshot below.
 
@@ -266,7 +263,7 @@ When something goes wrong, the error is one of three kinds. [Debugging Earth Eng
 
 - **Mixing up band names between sensors.** Near infrared is `B5` in Landsat 8 but `B8` in Sentinel-2.
 - **Forgetting the `_median` suffix.** After `reduce(ee.Reducer.median())`, ask for `B4_median`, not `B4`.
-- **`reduceRegion` without `scale`.** Earth Engine then uses a coarse default and the numbers change with the map zoom. Always set `scale`.
+- **`reduceRegion` without `scale`.** Earth Engine then uses the image's default projection, which for a composite is 1 degree (about 100 km), so the results are badly wrong. Always set `scale`.
 - **"Too many pixels" errors.** Raise `maxPixels`, use a larger `scale`, or a smaller region.
 - **An end date that is included.** `filterDate('2025-01-01', '2025-04-30')` leaves out 30 April. Use `'2025-05-01'` as the end.
 
@@ -340,7 +337,9 @@ print('Mean NIR:', stats);
   changes={[
     "Slides rewritten as a web lesson; the code snippets joined into one runnable script for Paro",
     "The region reduction uses Paro valley instead of santaCruz (undefined and not in Bhutan)",
-    "Code shown as images on slide 10 transcribed as text",
+    "Code shown as images on slide 10 transcribed as text; `img` (undefined on the slide) is the least cloudy image of the filtered collection",
+    "Slide 13's temporal-filter example (Landsat 8 surface reflectance over Utah, May 2021) replaced by Sentinel-2 over Paro for the 2025 dry season, with a cloud filter",
+    "The slide 12 palette is applied to SRTM elevation",
     "Revisit times corrected (Landsat 8 days with two satellites; Sentinel-2 5 days with two satellites) and the Landsat 5 MSS resolution given as 60 m",
     "Third-party figures (NASA, JAXA, Google) not reused",
   ]}
