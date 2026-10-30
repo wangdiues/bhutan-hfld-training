@@ -1,17 +1,147 @@
 ---
 title: "Collect Earth Online"
+description: Set up a Collect Earth Online project from your Earth Engine sample plots, write a response design with clear decision rules, interpret the plots consistently, and export the results for accuracy and area estimation.
+newContent: true
 sidebar:
   order: 6
 ---
+import { Steps } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Quiz from '~/components/Quiz.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
+<LessonHeader
+  questions={["How do I label my reference sample consistently?", "What goes into a response design?"]}
+  objectives={[
+    "Create a CEO project from Earth Engine sample plots.",
+    "Write a response design with decision rules for mixed plots.",
+    "Interpret plots and export the results.",
+  ]}
+  teaching={20} exercises={40}
+  prerequisites={["Stratified sampling in GEE"]}
+/>
+
+:::note[New content]
+This lesson was written for the website; the May 2026 training demonstrated Collect Earth Online live. The trainers will review it. Menus in CEO change from time to time: if a button has moved, look for the same step nearby.
 :::
 
-## In this lesson you will
+<Term id="ceo" /> ([collect.earth](https://collect.earth)) is a free, web-based tool for interpreting sample plots on high-resolution imagery. Several interpreters can work on the same project, and the results are exported as tables. Here it turns the stratified sample from [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) into **reference data**: the "true" class of each sample, which is compared with the map on Day 5.
 
-- Create a CEO project from GEE sample plots
-- Write a response design with decision rules for mixed plots
-- Interpret plots and export results
+## The response design
 
-**Time:** about 20 min teaching + 40 min practice.
+Before anyone interprets a plot, write down the **response design**: the rules that decide what the reference label of a sample is <Cite id="olofsson2014" />. It has three parts:
+
+1. **The assessment unit.** What is labelled: here a 30 m × 30 m plot matching one map pixel (or the sample point at its centre).
+2. **The sources of reference data.** Which imagery and dates are used: for example high-resolution imagery in CEO, Sentinel-2 and Landsat time series for the reporting years, and field knowledge.
+3. **The labelling protocol.** The class definitions and the rules for hard cases.
+
+For Bhutan's HFLD work, the protocol should include:
+
+| Rule | Example |
+|---|---|
+| **Use the same class definitions as the map**, including the forest definition | minimum canopy cover, tree height and area as in Bhutan's forest definition |
+| **Decide mixed plots by a fixed rule** | the class covering more than half the plot; or forest if canopy cover in the plot meets the forest definition |
+| **Define change** with dates | deforestation = forest at the start of the period and not forest at the end, with the loss visible in imagery between those dates |
+| **Say what to do when you can't tell** | no imagery for the date, cloud or shadow: mark the sample *uninterpretable* with a reason, never guess |
+| **Record confidence** | high / medium / low, so doubtful samples can be reviewed |
+
+<Callout type="why">
+Why this matters: the reference labels are treated as truth. If two interpreters would label the same plot differently, the accuracy and area estimates absorb that disagreement. Clear written rules and a second interpreter for a share of the plots keep the reference data consistent and defensible to a verifier.
+</Callout>
+
+## Set up a project
+
+<Steps>
+
+1. **Sign in** at [collect.earth](https://collect.earth) and create (or join) an **institution** for your team.
+
+2. **Create a project** in the institution. Give it a clear name, for example *Bhutan HFLD reference sample 2020–2025*, and a description of the period and the map being assessed.
+
+3. **Choose the imagery.** Add the basemaps interpreters will use: high-resolution imagery, plus Sentinel-2 or Landsat imagery for the start and end of the reporting period, so change can be seen.
+
+4. **Upload the plots and samples.** Use the shapefiles exported in [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/): the plot file (each feature with a `plotID`) and the sample file (each point with a `plotID` and a `sampleID`). Zip each shapefile's parts (.shp, .shx, .dbf, .prj) before uploading. CEO also accepts CSV files with coordinates.
+
+5. **Write the survey questions** from the response design. For example:
+   - *Land cover at the end of the period?* Forest, Cropland, Grassland, Settlement, Wetland, Other land.
+   - *Land cover at the start of the period?* (the same classes)
+   - *Is the plot interpretable?* Yes / No, with a reason.
+   - *Confidence?* High / Medium / Low.
+
+   Use exactly the class names of the map, so the results can be compared directly.
+
+6. **Review and publish** the project, and assign interpreters.
+
+</Steps>
+
+<Callout type="mistake" title="Keep the sample unchanged">
+Don't move, add or delete plots after the sample is drawn: that breaks the probability design. If a plot can't be interpreted, record that; the analysis handles it.
+</Callout>
+
+## Interpret the plots
+
+- Look at the **whole plot**, and at its surroundings for context.
+- Use the **most recent high-resolution image** for the end of the period, and older imagery or the Sentinel-2/Landsat time series for the start.
+- Compare with the **map class only after** labelling, or better, hide it: knowing the map's answer biases interpreters.
+- On steep slopes, high-resolution imagery can be shifted by relief; check the plot against the Sentinel-2 view.
+- Mark uncertain plots and **review them together** at the end.
+- If possible, have a **second interpreter** label 10–20% of the plots, and resolve disagreements by discussion.
+
+## Export the results
+
+When the plots are interpreted, export the **plot** (or sample) data as CSV from the project's data menu. Each row holds the plot and sample IDs, the coordinates, the answers and the interpreter.
+
+To analyse them, you need, for each sample, its **map class** (the stratum from Earth Engine) and its **reference class** (from CEO):
+
+1. Join the CEO export with the exported samples on `plotID` (in a spreadsheet, or in Earth Engine after uploading the CSV as an asset).
+2. Make a table with two columns, `map` and `reference`, using the same class names.
+3. Paste it into the [accuracy and area calculator](/bhutan-hfld-training/labs/accuracy-area-estimator/), with the mapped area of each stratum.
+
+The trainers' Code Editor script for the CEO demonstration is [code.earthengine.google.com/0cbd5b45585eaf7252becc41c417ae6e](https://code.earthengine.google.com/0cbd5b45585eaf7252becc41c417ae6e).
+
+<Callout type="bhutan">
+Bhutan context: high-resolution imagery over Bhutan is often from winter, with long shadows on north-facing slopes, and cloud is common in the monsoon. Plan to use several dates, and keep a record of which image decided each label.
+</Callout>
+
+## Common mistakes
+
+- **Labelling from the map** rather than from the imagery.
+- **Class names that differ** between the map and the survey (Otherland vs Other land): the comparison then fails.
+- **Guessing** on cloudy or shadowed plots instead of marking them uninterpretable.
+- **No written rules for mixed plots**, so interpreters decide differently.
+
+## Practice
+
+<Challenge level="complete" time={40} hints={["Export a 10-point sample from Stratified sampling in GEE (the Dzongkhag practice).", "Write the response design first, then the survey questions."]}>
+Set up a **10-plot** CEO project from your practice sample, with a written response design (assessment unit, imagery, class definitions and rules for mixed and uninterpretable plots). Interpret the 10 plots and export the results as CSV.
+
+<Fragment slot="solution">
+A complete answer has: a short response design document; a CEO project with your 10 plots and samples uploaded and survey questions matching the map's class names; all 10 plots interpreted (or marked uninterpretable with a reason); and a CSV export. Join it with the samples on plotID to get `map` and `reference` columns for the calculator.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-4-collect-earth-online" questions={[
+  { q: "What does a response design define?", options: ["The sample size", "The assessment unit, the reference data sources and the labelling rules", "The map's colour palette", "The number of interpreters"], answer: 1, explain: "It sets how each sample's reference label is decided." },
+  { q: "An interpreter can't see a plot because of cloud in every image. What should they do?", options: ["Guess the most likely class", "Use the map's class", "Mark it uninterpretable with a reason", "Move the plot to a clear area"], answer: 2, explain: "Never guess or move plots; record it and handle it in the analysis." },
+  { q: "Why should interpreters not see the map class while labelling?", options: ["It slows them down", "Knowing the map's answer biases their labels", "CEO cannot show it", "It is confidential"], answer: 1, explain: "Reference labels must be independent of the map being assessed." },
+  { q: "CEO plots need a plotID, and samples need a plotID and a sampleID.", answer: true, explain: "Plots and samples are linked by plotID; sampleID is unique within a plot." },
+]} />
+
+<KeyPoints points={[
+  "Write the response design first: assessment unit, reference sources, and rules for mixed and uninterpretable plots.",
+  "Upload the exported plots and samples to a CEO project, with survey questions using the map's class names.",
+  "Interpret independently of the map, record confidence, and double-check a share of the plots.",
+  "Export the results and join them with the samples to get map and reference classes for the calculator.",
+]} />
+
+<References />
+
+---
+
+*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*
