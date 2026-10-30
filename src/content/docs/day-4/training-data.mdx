@@ -28,14 +28,16 @@ import Term from '~/components/Term.astro';
 
 A classifier learns from **training samples**: labelled locations of each land-cover class. The quality of the samples limits the quality of the map. In this exercise you collect samples with the Geometry Tool, prepare them for Random Forest, and train a supervised classification of six classes. Save your script as *Supervised Classification - Random Forest Model* in your own repository.
 
-| Code | Class |
-|---|---|
-| 1 | CropLand |
-| 2 | Forest |
-| 3 | Grassland |
-| 4 | Otherland |
-| 5 | Settlement |
-| 6 | Wetland |
+| Code | Class | Colour |
+|---|---|---|
+| 1 | CropLand | #AAFF00 |
+| 2 | Forest | #267300 |
+| 3 | Grassland | #D7C29E |
+| 4 | Otherland | #FFFFBE |
+| 5 | Settlement | #E600A9 |
+| 6 | Wetland | #004DA8 |
+
+The exercise's table numbered Forest 1 and CropLand 2, but its code (used here) numbers CropLand 1 and Forest 2; use the codes above so your points match the scripts.
 
 ## Part 1: Set up geometry imports
 
@@ -46,7 +48,8 @@ A classifier learns from **training samples**: labelled locations of each land-c
 2. **Set its properties.** Hover over the layer under *Geometry Imports*, click the ⚙️ gear icon, and set:
    - **Name:** the class, for example `forest`;
    - **Import as:** `FeatureCollection`;
-   - **Add property:** name `class`, value the class code from the table (Forest = 2).
+   - **Add property:** name `class`, value the class code from the table (Forest = 2);
+   - **Colour:** the hex code from the table, so the layers match the map legend.
 
 3. **Add the other classes.** Under *Geometry Imports*, click **+ new layer** and repeat for each class, each with its own `class` value.
 
@@ -130,7 +133,14 @@ Machine learning needs numeric labels, so the class names are converted to codes
 
 <CodeBlock script="day-4/training-data.js" lines={[153, 171]} />
 
-When you load samples from the asset `trainingData/Bhutan_stable_classes`, note that the exercise's path ends with a space (`"…/Bhutan_stable_classes "`), which makes the load fail: remove it. That asset stores the name in `class`; `Bhutan_labels_multiclass`, used in the script, stores it in `class_name`.
+The exercise also shows loading samples from another asset, which stores the class name in `class` (the script's `Bhutan_labels_multiclass` stores it in `class_name`). Its path ended with a space, which makes the load fail; here it is removed:
+
+```js
+var table = ee.FeatureCollection(
+"projects/bhutan-hfld-readiness-training/assets/trainingData/Bhutan_stable_classes"
+);
+// then recode with f.get("class") instead of f.get("class_name")
+```
 
 ### Sample, split, train
 
@@ -240,6 +250,8 @@ After drawing six layers with `class` 1–6: `var sample = cropland.merge(forest
     "Property name for drawn points given as class (the text said land_class, the code reads class)",
     "EVI, SAVI, NDBI, MNDWI and IBI restored in the covariate stack (commented out when extracted) and computed from reflectance scaled to 0–1",
     "alphaEarth defined from the 2024 Satellite Embedding dataset; trailing space removed from an asset path",
+    "Class codes follow the exercise's code (CropLand = 1, Forest = 2); its table said Forest = 1",
+    "Part 2's separate Landsat and Sentinel-2 display snippets replaced by the full script's display lines",
     "Added a merge example, a comparison table, a Python version, practice and a quiz",
   ]}
 />

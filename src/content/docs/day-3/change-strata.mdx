@@ -1,6 +1,7 @@
 ---
 title: "Change detection and loss strata"
 description: Combine forest maps from two dates into stable forest, loss, gain and stable non-forest strata, measure their mapped areas, and see why rare change needs a stratum of its own.
+newContent: true
 sidebar:
   order: 4
 ---
@@ -102,7 +103,7 @@ m
   </TabItem>
 </Tabs>
 
-The map uses green for stable forest, red for loss, grey for stable non-forest and blue for gain; the Inspector shows the stratum code of any pixel, and the Console lists the area of each.
+The map uses green for stable forest, red for loss and grey for stable non-forest; the Inspector shows the stratum code of any pixel, and the Console lists the area of each. Part A has no gain stratum: forest at the end can only be forest at the start minus losses, so code 4 never occurs. Part B, with two independent maps, can show gain (in blue).
 
 <Callout type="mistake" title="Hansen is not Bhutan's forest map">
 Hansen's "tree cover" is not a forest definition: it includes plantations and orchards, its loss year can lag the real event, and gain is only mapped for 2000–2012. It is useful for practice and for comparison, but Bhutan's activity data should come from its own maps, made with its forest definition (Part B). The 10% canopy threshold here is only an example; set it from the forest definition you report.
@@ -122,7 +123,7 @@ Why this matters: comparing two independently classified maps adds the errors of
 
 ## Why loss needs its own stratum
 
-In Bhutan, forest loss covers a tiny share of the country: far less than 1% over a few years. If you drew a simple random sample of, say, 1,000 points across the country, only a handful would fall in places where loss really happened, too few to estimate the loss area or its accuracy with any confidence.
+In Bhutan, forest loss covers a small share of the country over a few years (compare the area of stratum 2 with the total in the Console). If you drew a simple random sample of, say, 1,000 points across the country, only a handful would fall in places where loss really happened, too few to estimate the loss area or its accuracy with any confidence.
 
 **Stratified sampling** fixes this. Because loss is its own stratum, you can put many more samples there than its area alone would give, for example 100 or more, while the large stable strata get fewer than their share. Each stratum's samples are later weighted by its mapped area, so the estimate stays unbiased <Cite id="olofsson2014" />.
 
@@ -195,3 +196,7 @@ Run the grouped area sum on `strata2123`. Its loss stratum (code 2) covers one y
 ]} />
 
 <References />
+
+---
+
+*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0; code MIT. See [Credits](/bhutan-hfld-training/about/credits/).*

@@ -72,7 +72,7 @@ Assessed by: **the capstone** (M6-03). Each group makes a 6-class 2025 map for o
 | M4-15 | Random Forest theory | (1) explain decision trees, entropy and information gain; (2) explain bagging and random feature selection; (3) name RF's strengths and weaknesses for remote sensing | L: Lab 4 (build a tree); Q×4 | 30+10 |
 | M4-16 | Calculating covariates | (1) compute spectral, water, terrain and seasonal covariates; (2) explain what each one adds to separating classes | C(fill-in): add slope and NDBI; Q×3 | 20+30 |
 | M4-17 | Forest primitives with ML | (1) sample covariates at training points; (2) train RF in probability mode; (3) read out-of-bag accuracy and variable importance; (4) export a primitive with the naming convention | C(complete): a forest primitive; C(scratch): a grassland primitive; Q×3 | 30+45 |
-| M4-18 | Change detection & loss strata *(new)* | (1) build stable forest / loss / non-forest strata from two dates; (2) explain why rare change classes need their own stratum | C(fill-in): 2020–2025 loss strata; Q×3 | 20+25 |
+| M4-18 | Change detection & loss strata *(new)* | (1) build stable forest / loss / non-forest strata from two dates; (2) explain why rare change classes need their own stratum | C(fill-in): 2021–2023 loss strata from Hansen GFC (runs without assets; Part B shows 2020–2025 from own primitives); Q×4 | 20+25 |
 | M4-19 | Day 3 recap & quiz | retrieval of M4-15..18, plus 2 earlier items | Q×8 | 0+15 |
 
 ### Day 4 — RLCMS, assemblage & embeddings
