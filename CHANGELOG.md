@@ -30,3 +30,4 @@ Each correction made to the original Bhutan ART-TREES HFLD Readiness Training ma
 | D1 EXPLORING DATA ARCHIVE IN GEE | `'coordinates': [83.63, 27.47]`, `'population': 114,551` | `[89.64, 27.47]`, `114551` | Code editor and data catalog |
 | D1 EXPLORING DATA ARCHIVE IN GEE | `aoi` drawn on the map; GAUL loaded but not used | `aoi` = 10 km around Thimphu in code; GAUL filtered to Bhutan and displayed | Code editor and data catalog |
 | D1 EXPLORING DATA ARCHIVE IN GEE | Sentinel-2 IDs `COPERNICUS/S2`, `COPERNICUS/S2_SR` (deprecated); ID table showing tile T47NQD | `COPERNICUS/S2_HARMONIZED`, `COPERNICUS/S2_SR_HARMONIZED`; ID table for the image used in the code (T45RYL) | Code editor and data catalog |
+| EXERCISE D1_ JAVASCRIPT BASICS IN GOOGLE EARTH ENGINE | `cityData` for Thimphu: `'population': 787000, 'land_area': 1748.59` | `'population': 114551` (2017 census), `'coordinates': [89.64, 27.47]` | JavaScript basics |

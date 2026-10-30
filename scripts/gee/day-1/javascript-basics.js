@@ -18,8 +18,8 @@ print(cities);
 // 3. Dictionary
 var cityData = {
   'city': city,
-  'population': 787000,
-  'land_area': 1748.59
+  'population': 114551, // 2017 census (the source had 787000, close to Bhutan's national population)
+  'coordinates': [89.64, 27.47]
 };
 print(cityData);
 // 4. Function

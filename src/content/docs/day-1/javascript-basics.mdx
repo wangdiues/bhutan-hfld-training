@@ -1,17 +1,279 @@
 ---
-title: "JavaScript basics"
+title: "JavaScript basics in Earth Engine"
+description: Store data in variables, lists and objects, write a function, load a Landsat collection and filter a feature collection to Bhutan.
 sidebar:
   order: 4
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["Which bits of JavaScript do I need for Earth Engine?", "How do I load imagery and boundaries and filter them?"]}
+  objectives={[
+    "Declare variables, lists and objects.",
+    "Write and call a function.",
+    "Print results to the Console.",
+  ]}
+  teaching={15} exercises={20}
+  prerequisites={["Code Editor and data catalog"]}
+/>
 
-## In this lesson you will
+In this exercise you use Bhutan's main towns to practise the JavaScript you need for Earth Engine. Then you load Landsat 8 imagery for an area of interest, and filter the FAO GAUL boundaries to Bhutan. For each part, copy the script into the Code Editor, click **Run**, and look at the output in the Console and on the map.
 
-- Declare variables, lists and objects
-- Write and call a function
-- Print to the Console
+## Part 1: Variables, lists, objects and functions
 
-**Time:** about 15 min teaching + 20 min practice.
+You will be able to:
+
+- store data in a **variable**;
+- hold several values in a **list** (an array);
+- organise related information in an **object** (a dictionary of key–value pairs);
+- define a **function** that takes an input and returns an output.
+
+```js
+// 1. Variables
+var city = 'Thimphu';
+print(city);
+// 2. List
+var cities = ['Thimphu', 'Paro', 'Punakha', 'Phuentsholing', 'Gelephu'];
+print(cities);
+// 3. Dictionary
+var cityData = {
+  'city': city,
+  'population': 114551, // 2017 census (the source had 787000, close to Bhutan's national population)
+  'coordinates': [89.64, 27.47]
+};
+print(cityData);
+// 4. Function
+var greet = function(name) {
+  return 'Hello ' + name;
+};
+print(greet('World'));
+print(greet('Thank you'));
+```
+
+What each part does:
+
+- `var city = 'Thimphu';` stores the text (a *string*) `'Thimphu'` under the name `city`. A semicolon ends each statement.
+- `['Thimphu', 'Paro', …]` is a **list**. Lists are numbered from 0, so `cities[0]` is `'Thimphu'` and `cities[1]` is `'Paro'`.
+- `{ 'city': city, … }` is an **object**. Read a value by its key: `cityData.population` or `cityData['population']`. Values can be text, numbers, lists or other objects.
+- `function(name) { return 'Hello ' + name; }` takes one input, `name`, and returns a new string. Calling `greet('World')` gives `'Hello World'`.
+
+<Callout type="why">
+Why this matters: Earth Engine scripts are built from these four pieces. Visualisation parameters are objects (`{bands: […], min: 0, max: 0.3}`), band names are lists, and every cloud mask or index you write on Day 2 is a function.
+</Callout>
+
+## Part 2: Working with a single image
+
+You will be able to:
+
+- define an area of interest (AOI);
+- import an image collection;
+- filter it by location;
+- select the least cloudy image;
+- display it with visualisation parameters.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+```js
+// Step 1: Define Area of Interest (AOI)
+var aoi = ee.Geometry.Point([90.4336, 27.5142]); // Example: Bhutan
+// Step 2: Import Landsat 8 Image Collection
+var l8col = ee.ImageCollection("LANDSAT/LC08/C02/T1_TOA");
+// Step 3: Filter by Location (AOI)
+// filterBounds keeps only images that intersect the defined AOI
+l8col = l8col.filterBounds(aoi);
+// Step 4: Display collection information
+print('Number of images in collection:', l8col.size());
+print('First image in collection:', l8col.first());
+// Step 5: Select the least cloudy image
+var cloudfreeImg = l8col.sort("CLOUD_COVER").first();
+print('Cloud-free image:', cloudfreeImg);
+// Step 6: Define visualization parameters
+var imageVisParam = {
+  bands: ['B4', 'B3', 'B2'], // True color (RGB)
+  min: 0,
+  max: 0.3,
+  gamma: [0.95, 1.1, 1]
+};
+// Step 7: Display the image on the map
+Map.addLayer(cloudfreeImg, imageVisParam, 'Cloud-free Image');
+// Step 8: Center the map on the AOI
+Map.centerObject(aoi, 8);
+```
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+aoi = ee.Geometry.Point([90.4336, 27.5142])  # central Bhutan
+l8col = ee.ImageCollection("LANDSAT/LC08/C02/T1_TOA").filterBounds(aoi)
+print("Number of images in collection:", l8col.size().getInfo())
+
+cloudfree_img = l8col.sort("CLOUD_COVER").first()
+print("Cloud-free image:", cloudfree_img.get("system:index").getInfo())
+
+image_vis_param = {"bands": ["B4", "B3", "B2"], "min": 0, "max": 0.3, "gamma": [0.95, 1.1, 1]}
+m = geemap.Map()
+m.addLayer(cloudfree_img, image_vis_param, "Cloud-free Image")
+m.centerObject(aoi, 8)
+m
+```
+  </TabItem>
+</Tabs>
+
+The point at 90.43° E, 27.51° N is in central Bhutan. `sort("CLOUD_COVER")` orders the images from least to most cloud, and `first()` takes the least cloudy. The visualisation parameters show bands 4, 3 and 2 (red, green, blue) as a true-colour image, stretched from 0 to 0.3 reflectance, with a slightly different `gamma` per band to balance the colours. Data: [Landsat 8 Collection 2 Tier 1 TOA](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_TOA).
+
+<Theory title="Client and server">
+`l8col` is not the images themselves. It is a *description* of a computation that runs on Google's servers. `print()` and `Map.addLayer()` ask the server for a result. This is why Earth Engine objects use methods such as `.size()` and `.first()` instead of plain JavaScript loops. [Custom functions](/bhutan-hfld-training/day-1/custom-functions/) covers this in more detail.
+</Theory>
+
+## Part 3: Filtering a feature collection
+
+You will be able to:
+
+- import a feature collection;
+- explore its structure in the Console;
+- summarise it by an attribute;
+- filter it by a property;
+- display the result.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+```js
+// Step 1: Import the GAUL level 2 feature collection
+var countries = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level2");
+// Step 2: Inspect the dataset
+print('First feature:', countries.first());
+// Step 3: Summarize by country name
+var countryHistogram = countries.aggregate_histogram("ADM0_NAME");
+print('Country distribution:', countryHistogram);
+// Step 4: Filter Bhutan (replace with your country of interest if needed)
+var bhutan = countries.filter(ee.Filter.eq("ADM0_NAME", "Bhutan"));
+print('First Bhutan feature:', bhutan.first());
+// Step 5: Display the filtered features
+Map.addLayer(bhutan, {}, 'Bhutan');
+```
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+countries = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level2")
+print("First feature:", countries.first().getInfo()["properties"])
+
+bhutan = countries.filter(ee.Filter.eq("ADM0_NAME", "Bhutan"))
+print("Level-2 units in Bhutan:", bhutan.size().getInfo())
+
+m = geemap.Map()
+m.addLayer(bhutan, {}, "Bhutan")
+m.centerObject(bhutan, 8)
+m
+```
+  </TabItem>
+</Tabs>
+
+`aggregate_histogram("ADM0_NAME")` counts the features per country, which shows how many level-2 units each country has. Filtering on `ADM0_NAME` keeps only Bhutan's. Data: [FAO GAUL simplified 500 m, 2015, level 2](https://developers.google.com/earth-engine/datasets/catalog/FAO_GAUL_SIMPLIFIED_500m_2015_level2).
+
+<Callout type="bhutan">
+Bhutan context: GAUL 2015 boundaries are old and simplified. For reporting, use the official Dzongkhag boundaries from the National Land Commission, uploaded as an asset (Day 2, [Importing and exporting](/bhutan-hfld-training/day-2/import-and-export/)), or the newer GAUL 2024 used in [Code editor and data catalog](/bhutan-hfld-training/day-1/code-editor-and-data-catalog/).
+</Callout>
+
+## The full script
+
+<CodeBlock script="day-1/javascript-basics.js" />
+
+<OpenInGEE script="day-1/javascript-basics.js" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `var name = value;` | Stores a value in a variable |
+| `[a, b, c]`, `{key: value}` | Create a list; create an object |
+| `function(x) { return …; }` | Defines a function |
+| `print()` | Writes to the Console |
+| `ee.FeatureCollection.aggregate_histogram(property)` | Counts features for each value of a property |
+| `ee.Filter.eq(property, value)` | Keeps features whose property equals a value |
+
+## Common mistakes
+
+- **Missing quotes or brackets.** `var city = Thimphu;` fails: without quotes, `Thimphu` is read as a variable that doesn't exist. Text needs quotes.
+- **Commas inside numbers.** `114,551` is a syntax error; write `114551`.
+- **Wrong case.** JavaScript is case-sensitive: `Print()`, `map.addLayer()` and `ADM0_name` all fail.
+- **Forgetting `return`.** A function without `return` gives `undefined`.
+- **Missing commas.** Items in a list or an object must be separated by commas.
+
+## Practice
+
+<Challenge level="blanks" time={15} hints={["Paro is at about 89.41° E, 27.43° N. Earth Engine takes longitude first.", "Lists are numbered from 0, so the first item is [0].", "ee.Geometry.Point() accepts a list of two numbers."]} solution="day-1/javascript-basics-solution.js">
+Create an object for **Paro** with its name and coordinates, print its longitude, write a function that describes any place object, and put a point on the map.
+
+```js
+var paroData = {
+  'city': 'Paro',
+  'coordinates': [___, ___],
+  'dzongkhag': 'Paro'
+};
+print(paroData);
+print('Longitude:', paroData.coordinates[___]);
+
+var describe = function(place) {
+  return place.city + ' is at ' + place.coordinates[1] + ' N, ' + place.coordinates[0] + ' E';
+};
+print(describe(___));
+
+var paroPoint = ee.Geometry.Point(___);
+Map.centerObject(paroPoint, 11);
+Map.addLayer(paroPoint, {color: 'red'}, 'Paro');
+```
+</Challenge>
+
+<Challenge level="scratch" time={10} hints={["Use the cities list from Part 1.", "A list's length is cities.length."]}>
+Without looking at the examples, write a function `countCities` that takes a list of town names and returns a sentence such as `"Bhutan list: 5 towns"`. Call it with the `cities` list and print the result.
+
+<Fragment slot="solution">
+```js
+var cities = ['Thimphu', 'Paro', 'Punakha', 'Phuentsholing', 'Gelephu'];
+var countCities = function(list) {
+  return 'Bhutan list: ' + list.length + ' towns';
+};
+print(countCities(cities));
+```
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-1-javascript-basics" questions={[
+  { q: "What does print(cities[1]) show for var cities = ['Thimphu', 'Paro', 'Punakha'];?", options: ["Thimphu", "Paro", "Punakha", "An error"], answer: 1, explain: "Lists are numbered from 0, so index 1 is the second item, 'Paro'." },
+  { q: "Which line is a valid JavaScript object?", options: ["{'city': 'Thimphu', 'population': 114,551}", "{'city': 'Thimphu', 'population': 114551}", "['city': 'Thimphu']", "('city' = 'Thimphu')"], answer: 1, explain: "Objects use curly braces and key: value pairs separated by commas. A comma inside a number (114,551) breaks the syntax." },
+  { q: "var greet = function(name) { return 'Hello ' + name; }; What does greet('Paro') return?", options: ["'Hello Paro'", "'Hello name'", "undefined", "'Paro'"], answer: 0, explain: "The function joins 'Hello ' with the value passed in as name." },
+  { q: "countries.filter(ee.Filter.eq('ADM0_NAME', 'Bhutan')) keeps only the features whose ADM0_NAME property is 'Bhutan'.", answer: true, explain: "ee.Filter.eq compares a property with a value; filter() keeps the features that pass." },
+]} />
+
+<KeyPoints points={[
+  "Variables store values; lists hold several values numbered from 0; objects hold key–value pairs.",
+  "Functions take inputs and return outputs; Earth Engine uses them everywhere, for example in map().",
+  "print() writes to the Console; Map.addLayer() and Map.centerObject() show results on the map.",
+  "Filter feature collections by a property with ee.Filter.eq().",
+]} />
+
+<Credit
+  source="EXERCISE D1: JavaScript Basics in Google Earth Engine"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; code copied from the exercise",
+    "Thimphu's population corrected from 787000 to 114551 (2017 census) and the unexplained land_area replaced by coordinates",
+    "Added explanations, Python (geemap) versions, practice exercises and a quiz",
+  ]}
+/>
