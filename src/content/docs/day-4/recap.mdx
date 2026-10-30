@@ -1,15 +1,53 @@
 ---
 title: "Day 4 recap quiz"
+description: Check what you remember from Day 4 (RLCMS, training data, assemblage, satellite embeddings and Collect Earth Online), plus two questions from earlier days.
 sidebar:
   order: 7
 ---
+import Quiz from '~/components/Quiz.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import Callout from '~/components/Callout.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["What do I remember from Day 4, without looking back?"]}
+  objectives={["Recall the main ideas of Day 4 and two from earlier days (spaced retrieval)."]}
+  teaching={0} exercises={15}
+  prerequisites={["All Day 4 lessons"]}
+/>
 
-## In this lesson you will
+Answer from memory first, then check. If you miss a question, follow the link to the lesson.
 
-- Retrieval of M4-20..25, plus 2 earlier items
+## What Day 4 covered
 
-**Time:** about 0 min teaching + 15 min practice.
+- [RLCMS overview and terms](/bhutan-hfld-training/day-4/rlcms-overview/): composites, training data, primitives, assemblage.
+- [Collecting training data](/bhutan-hfld-training/day-4/training-data/): geometry tools, sampling, a six-class Random Forest.
+- [Assemblage](/bhutan-hfld-training/day-4/assemblage/): decision-tree rules, priorities and thresholds.
+- [Satellite embeddings](/bhutan-hfld-training/day-4/satellite-embeddings/) and [land cover and similarity with embeddings](/bhutan-hfld-training/day-4/embeddings-classification-similarity/).
+- [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/): response design, interpretation, export.
+
+## Recap quiz
+
+<Quiz id="day-4-recap" title="Day 4 recap" questions={[
+  { q: "What is the order of the four RLCMS stages?", options: ["Primitives → composites → assemblage → training data", "Composites → training data → primitives → assemblage", "Training data → composites → assemblage → primitives", "Assemblage → primitives → composites → training data"], answer: 1, explain: "See RLCMS overview and terms." },
+  { q: "What property must drawn training points carry for the course scripts?", options: ["class, with numeric codes", "land_class, with text", "name", "None"], answer: 0, explain: "sampleRegions keeps 'class', and classifiers need numbers. See Collecting training data." },
+  { q: "A pixel has forest = 0.62 and crop = 0.70; forest is first in the rules (threshold 0.50). What class does it get?", options: ["Cropland", "Unclassified", "Forest", "Both"], answer: 2, explain: "The first rule passed sets the class. See Assemblage." },
+  { q: "In the assemblage, why do rare classes such as wetland get lower thresholds?", options: ["They are unimportant", "Their models are less confident even where they are right", "To make them larger", "Thresholds must decrease"], answer: 1, explain: "Rare classes tend to have lower probabilities." },
+  { q: "What is the dot product of two Satellite Embedding vectors?", options: ["Their cosine similarity, from −1 to 1", "Their NDVI", "Their distance in metres", "A class label"], answer: 0, explain: "The vectors have unit length, so the dot product is the cosine of the angle between them." },
+  { q: "Low similarity between a pixel's embeddings in two years…", options: ["always means deforestation", "flags possible change, to be checked", "means the data are missing", "means the pixel is water"], answer: 1, explain: "It can also come from wet versus dry years. See Land cover and similarity with embeddings." },
+  { q: "A plot is cloudy in every image. What should the interpreter do in Collect Earth Online?", options: ["Use the map's class", "Move the plot", "Guess", "Mark it uninterpretable with a reason"], answer: 3, explain: "Never guess or move plots. See Collect Earth Online." },
+  { q: "Why should interpreters not see the map class while labelling?", options: ["Knowing it biases their labels", "It is slower", "CEO can't show it", "It's confidential"], answer: 0, explain: "Reference labels must be independent of the map being assessed." },
+  { q: "Day 3: what does a forest primitive contain?", options: ["Forest training points", "A per-pixel probability of forest", "A binary map", "A covariate"], answer: 1, explain: "See Forest primitives." },
+  { q: "Day 2: the end date in filterDate is included in the results.", answer: false, explain: "The end date is excluded. See Image collections, filtering and reducers." },
+]} />
+
+<Callout type="why">
+Why this matters: Day 5 samples the Day 4 map and interprets the sample in Collect Earth Online; the reference labels decide the accuracy and area estimates.
+</Callout>
+
+<KeyPoints points={[
+  "RLCMS: composites → training data → primitives → assemblage.",
+  "Assemblage rules set priorities: the first rule passed wins.",
+  "Embeddings: 64-band unit vectors; dot product = cosine similarity, for search and change.",
+  "Reference labels in CEO follow a written response design, independent of the map.",
+]} />
