@@ -1,0 +1,30 @@
+---
+title: "Fix \"User memory limit exceeded\""
+description: Five changes that make a job small enough to run, in the order to try them.
+newContent: true
+sidebar:
+  order: 6
+---
+
+**When:** printing, mapping or reducing a result stops with `User memory limit exceeded` (or `Computation timed out`).
+
+Try these in order, and rerun after each.
+
+1. **Export instead of printing.** Interactive requests have tighter limits than batch tasks. Replace `print(result)` with `Export.table.toDrive` or `Export.image.toAsset` and run it from the **Tasks** tab.
+2. **Add `tileScale`.** In `reduceRegion`, `reduceRegions`, `sampleRegions` and `stratifiedSample`, set `tileScale: 4`, and raise it to 8 or 16 if needed. It splits the work into smaller pieces.
+
+   ```js
+   var stats = ndvi.reduceRegion({
+     reducer: ee.Reducer.mean(),
+     geometry: bhutan.geometry(),
+     scale: 30,
+     maxPixels: 1e13,
+     tileScale: 4
+   });
+   ```
+
+3. **Select only the bands you need** before sampling or classifying, for example `image.select(['B4_jan_apr', 'B8_jan_apr'])`.
+4. **Test on a coarser `scale` or a smaller region**, such as one Dzongkhag at 100 m, then go back to the full run once it works.
+5. **Save intermediate results.** Export the composite, then the covariates, then the primitives as assets, and start each step from the saved asset. The course follows this pattern.
+
+Other messages and their fixes are in [Debug Earth Engine errors](/bhutan-hfld-training/how-to/debug-earth-engine/#4-memory-and-timeout-limits).

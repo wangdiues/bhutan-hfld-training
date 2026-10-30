@@ -1,0 +1,20 @@
+---
+title: "Share an asset with a colleague"
+description: Give a colleague read or write access to an Earth Engine asset or folder.
+newContent: true
+sidebar:
+  order: 4
+---
+
+**When:** a colleague's script says an asset "does not exist or caller does not have access".
+
+1. In the Code Editor **Assets** tab, hover over the asset (or the folder) and click the **share** icon.
+2. Type your colleague's Google account email, choose **Reader** (can use it) or **Writer** (can also change or delete it) and add them.
+3. To let everyone read it, for example for a published dataset, tick **Anyone can read**.
+4. Click **Done**. Your colleague can now load it by its full path, such as `projects/<your-project>/assets/hfld/bhutan_s2_2025_janapr_octdec_int16`.
+
+Share a **folder** to give access to everything in it, including assets you add later. Assets in a Cloud project can also be shared through the project's IAM roles, which suits a whole team; ask your project administrator.
+
+:::caution
+Give **Writer** access only to people who need to change the asset: a writer can delete it. Keep the national reference sample read-only.
+:::

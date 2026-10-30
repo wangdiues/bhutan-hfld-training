@@ -1,0 +1,29 @@
+---
+title: "Export a composite to an asset"
+description: Save a composite (or any image) as an Earth Engine asset so that later scripts load it in seconds instead of recomputing it.
+newContent: true
+sidebar:
+  order: 2
+---
+
+**When:** you have built a composite, covariate stack or primitive and the next lesson needs it.
+
+1. Create a folder for the course in the **Assets** tab: **NEW → Folder**, for example `projects/<your-project>/assets/hfld`.
+2. Cast the image to one data type and add the export at the end of your script:
+
+   ```js
+   Export.image.toAsset({
+     image: composite.toInt16(),          // reflectance x 10000 fits in Int16
+     description: 'bhutan_s2_2025_janapr_octdec_int16',
+     assetId: 'projects/<your-project>/assets/hfld/bhutan_s2_2025_janapr_octdec_int16',
+     region: bhutan.geometry(),
+     scale: 10,
+     crs: 'EPSG:32645',
+     maxPixels: 1e13
+   });
+   ```
+
+3. Click **Run**, open the **Tasks** tab and click **Run** next to the task. A national 10 m composite can take an hour or more.
+4. When the task finishes, load the result: `var composite = ee.Image('projects/<your-project>/assets/hfld/bhutan_s2_2025_janapr_octdec_int16');`
+
+Use `toFloat()` instead of `toInt16()` for indices and for values between 0 and 1. If the task fails, see [Debug Earth Engine errors](/bhutan-hfld-training/how-to/debug-earth-engine/#5-export-failures). The full example is in [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/).

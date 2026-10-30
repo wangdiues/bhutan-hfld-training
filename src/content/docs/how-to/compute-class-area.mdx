@@ -1,0 +1,46 @@
+---
+title: "Compute the area of a class"
+description: Calculate the mapped area of each class in hectares with ee.Image.pixelArea().
+newContent: true
+sidebar:
+  order: 7
+---
+
+**When:** you need the mapped area of each class, for example the strata areas for [Determining sample size](/bhutan-hfld-training/day-5/sample-size/).
+
+1. Multiply a class mask by the area of each pixel (in m²) and convert to hectares:
+
+   ```js
+   var forestHa = landCover.eq(1)                // 1 = forest in this map
+     .multiply(ee.Image.pixelArea()).divide(10000)
+     .reduceRegion({
+       reducer: ee.Reducer.sum(),
+       geometry: bhutan.geometry(),
+       scale: 30,
+       maxPixels: 1e13,
+       tileScale: 4
+     });
+   print('Forest (ha)', forestHa);
+   ```
+
+2. For every class at once, add the class as a group band:
+
+   ```js
+   var areas = ee.Image.pixelArea().divide(10000).addBands(landCover)
+     .reduceRegion({
+       reducer: ee.Reducer.sum().group({groupField: 1, groupName: 'class'}),
+       geometry: bhutan.geometry(),
+       scale: 30,
+       maxPixels: 1e13,
+       tileScale: 4
+     });
+   print('Area (ha) by class', areas.get('groups'));
+   ```
+
+3. Set `scale` to the map's own pixel size, so that each pixel is counted once.
+
+`ee.Image.pixelArea()` gives each pixel's area on the ground, so the result is correct whatever the map's projection.
+
+:::caution[Mapped area is not the reported area]
+This gives the **mapped** area, which includes the map's errors. For reporting, use it for the stratum weights and estimate the area from the reference sample: see [Accuracy assessment and area adjustment](/bhutan-hfld-training/day-5/accuracy-and-area/).
+:::

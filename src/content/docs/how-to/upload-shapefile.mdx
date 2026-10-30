@@ -1,0 +1,23 @@
+---
+title: "Upload a shapefile"
+description: Upload a boundary or a set of points as an Earth Engine table asset.
+newContent: true
+sidebar:
+  order: 3
+---
+
+**When:** you have a boundary (for example a Dzongkhag or a protected area) or field points in a shapefile and want to use them in Earth Engine.
+
+1. Check that you have all the parts of the shapefile, with the same name: `.shp`, `.shx`, `.dbf` and `.prj`. Without the `.prj` file, Earth Engine can't tell the coordinate system.
+2. In the Code Editor, open the **Assets** tab and click **NEW → Shape files**.
+3. Click **Select** and choose all the parts together, or one `.zip` file that contains them.
+4. Set the **Asset ID**, for example `projects/<your-project>/assets/hfld/dzongkhag_boundaries`, and click **Upload**.
+5. The upload appears in the **Tasks** tab. When it finishes, load it:
+
+   ```js
+   var dzongkhags = ee.FeatureCollection('projects/<your-project>/assets/hfld/dzongkhag_boundaries');
+   print(dzongkhags.first());
+   Map.addLayer(dzongkhags, {color: 'yellow'}, 'Dzongkhags');
+   ```
+
+CSV files with latitude and longitude columns upload the same way (**NEW → CSV file**). Simplify very detailed boundaries first (for example in QGIS) so that maps draw quickly. More in [Importing and exporting data](/bhutan-hfld-training/day-2/import-and-export/).
