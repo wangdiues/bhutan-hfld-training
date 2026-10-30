@@ -1,16 +1,226 @@
 ---
 title: "Introduction to Earth Engine"
+description: Name the four parts of Google Earth Engine, see the five things it does with images, and decide when it is the right tool.
 sidebar:
   order: 2
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import { Image } from 'astro:assets';
+import adminMap from '~/assets/day-1/introduction-to-earth-engine/s09-ec30f015fb.webp';
+import drawnPolygon from '~/assets/day-1/introduction-to-earth-engine/s10-3f7e570f2c.webp';
+import importsCode from '~/assets/day-1/introduction-to-earth-engine/s10-85465aa70d.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["What is Google Earth Engine, and what makes it different from desktop GIS?", "When should I use it, and when not?"]}
+  objectives={[
+    "Name the four parts of Earth Engine: the data catalog, the computation engine, the development environment, and saving and sharing.",
+    "Choose when Earth Engine is the right tool and when it isn't.",
+  ]}
+  teaching={20} exercises={5}
+  prerequisites={["Start here (an Earth Engine account)"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/introduction-to-earth-engine/) give a visual summary.
 
-- Name the four parts of Earth Engine (catalog, compute, IDE, sharing)
-- Choose when EE is the right tool and when it isn't
+## What is Earth Engine?
 
-**Time:** about 20 min teaching + 0 min practice.
+Google Earth Engine is two things in one place <Cite id="gorelick2017" />:
+
+- a **remote-sensing archive** of several petabytes, with decades of satellite imagery and other geospatial data, ready to use;
+- a **cloud-based processing platform** that runs large analyses on Google's computers, so you don't need to download or store the data.
+
+A national example: the Regional Land Cover Monitoring System (<Term id="rlcms" />), which produces annual land-cover maps and change maps for the Mekong region, runs on Earth Engine. Its results can be viewed at [landcovermapping.org](https://landcovermapping.org/en/landcover/). Day 4 uses the same approach for Bhutan.
+
+## The four parts of Earth Engine
+
+Earth Engine is a powerful image-analysis tool because four parts work together.
+
+### 1. The public data catalog
+
+The [Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets) holds hundreds of public datasets, and thousands of new images are added every day. You don't need to store any of it yourself. The datasets fall into five groups:
+
+| Group | Examples used in this course |
+|---|---|
+| Imagery | [Landsat](https://developers.google.com/earth-engine/datasets/catalog/landsat), [Sentinel-2](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED), [MODIS](https://developers.google.com/earth-engine/datasets/catalog/modis), [Satellite Embedding](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL) |
+| Climate and weather | daily temperature and rainfall, for example ERA5-Land |
+| Geophysical | elevation, for example SRTM and Copernicus DEM |
+| Demographic | population grids |
+| Vector data | administrative and country boundaries, protected areas |
+
+You can also **load your own data**: upload a shapefile or a CSV from your computer as an asset (Day 2, [Importing and exporting](/bhutan-hfld-training/day-2/import-and-export/)), or use the vector datasets in the catalog. The map below shows Bhutan's administrative boundaries loaded this way.
+
+<Image src={adminMap} alt="Code Editor map with Bhutan's administrative boundaries shown in dark grey." />
+
+You can also **draw your own data on the map** with the geometry tools. Earth Engine turns the drawing into code under *Imports*.
+
+<Image src={drawnPolygon} alt="Code Editor map with a polygon drawn over Bhutan using the geometry tools." />
+
+<Image src={importsCode} alt="The Imports 'generated code' dialog showing the polygon coordinates as JavaScript." />
+
+### 2. The computation engine
+
+Earth Engine splits each job into tiles and runs them in parallel on many computers in Google's data centres, then merges the results. It computes only what you ask to see, at the scale you are viewing, when you ask for it <Cite id="gorelick2017" />. This is why an analysis that would take days on a laptop can finish in seconds or minutes, and why the platform is easy to start using: the data, the algorithms and the computing power are all online.
+
+### 3. The interactive development environment
+
+The [Code Editor](https://code.earthengine.google.com/) is a web-based development environment for the Earth Engine JavaScript API, with many ready-made geospatial functions. You work in a loop:
+
+1. edit the script;
+2. run it;
+3. look at the results on the map and in the Console;
+4. repeat, refining it until it is right.
+
+The next lesson, [Code Editor and data catalog](/bhutan-hfld-training/day-1/code-editor-and-data-catalog/), tours the Code Editor. There is also a Python API, which this course uses through the geemap package.
+
+### 4. Saving and sharing
+
+Scripts are saved in Git repositories in your account and can be shared with a link or with named colleagues. Assets (your uploaded and exported data) can be shared the same way. Finished analyses can be published as Earth Engine apps.
+
+## What Earth Engine does with images
+
+Almost every script in this course combines five operations. The script below does all five for the Thimphu valley:
+
+1. **Filter a collection** by place, time and metadata (here, cloud cover).
+2. **Get an image** (here, the least cloudy one).
+3. **Apply an algorithm to an image**, using a library function or your own (here, NDVI).
+4. **Map an algorithm over a collection**: N images in, N images out.
+5. **Reduce**: a collection to one image (N → 1, here a median), or an image to a number for a region.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-1/introduction-to-earth-engine.js" />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+thimphu = ee.Geometry.Point([89.64, 27.47])
+
+# 1. Filter a collection.
+s2 = (
+    ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+    .filterBounds(thimphu)
+    .filterDate("2025-01-01", "2025-05-01")
+    .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 20))
+)
+print("Images in the collection:", s2.size().getInfo())
+
+# 2. Get an image.
+image = s2.sort("CLOUDY_PIXEL_PERCENTAGE").first()
+
+
+# 3. Apply an algorithm to an image.
+def add_ndvi(img):
+    return img.addBands(img.normalizedDifference(["B8", "B4"]).rename("NDVI"))
+
+
+# 4. Map it over the collection; 5. reduce the collection, then a region.
+median_ndvi = s2.map(add_ndvi).select("NDVI").median()
+mean_ndvi = median_ndvi.reduceRegion(reducer=ee.Reducer.mean(), geometry=thimphu.buffer(5000), scale=10)
+print("Mean NDVI within 5 km of Thimphu:", mean_ndvi.get("NDVI").getInfo())
+
+m = geemap.Map()
+m.centerObject(thimphu, 10)
+m.addLayer(image, {"bands": ["B4", "B3", "B2"], "min": 0, "max": 3000}, "Least cloudy image")
+m.addLayer(median_ndvi, {"min": 0, "max": 0.8, "palette": ["white", "green"]}, "Median NDVI, Jan-Apr 2025")
+m
+```
+  </TabItem>
+</Tabs>
+
+<OpenInGEE script="day-1/introduction-to-earth-engine.js" />
+
+Don't worry about every line yet. Day 1 explains filters, functions, `map()` and reducers one at a time. Data: [Sentinel-2 surface reflectance (harmonized)](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED).
+
+<Theory title="Why reducers matter">
+A reducer turns many values into fewer: a stack of images into one composite, or the pixels of a region into one number. Cloud-free composites (Day 2) are reducers over time; area statistics (Day 5) are reducers over space.
+</Theory>
+
+## When to use Earth Engine
+
+Earth Engine suits projects that need:
+
+- data for a large region, such as all of Bhutan, or long time series;
+- a large data library without downloading it;
+- fast, heavy processing;
+- advanced raster tools, such as classification and compositing.
+
+It is less suited to:
+
+- **vector-heavy work**, such as editing topology or detailed cartography. Use QGIS or ArcGIS for that.
+- **analyses that depend on spatial relations between pixels across large areas**, such as image segmentation or hydrological modelling. Because the work is split across many computers, these options are limited or experimental.
+- **very large exports or long-running jobs**, which can hit memory and time limits. The [Debugging GEE](/bhutan-hfld-training/reference/debugging-gee/) page covers the common errors.
+
+<Callout type="bhutan">
+Bhutan context: for HFLD activity data, Earth Engine does the heavy part, which is composites, covariates, classification and sampling across the whole country. Desktop GIS is still useful for preparing boundaries and for final map layouts.
+</Callout>
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `ee.ImageCollection(id)` | Loads a collection from the catalog |
+| `.filterBounds()`, `.filterDate()`, `.filter()` | Filter a collection by place, time and metadata |
+| `.map(fn)` | Applies a function to every image in a collection |
+| `.median()`, `.reduceRegion()` | Reduce a collection to an image, or an image to numbers for a region |
+| `Map.addLayer()` | Displays a layer on the map |
+
+## Common mistakes
+
+- **Expecting a download before you can analyse.** In Earth Engine, the data stays in the cloud. You export only results.
+- **Using Earth Engine for vector editing or map layout.** Do those in desktop GIS and bring the result in as an asset.
+- **Not registering a Cloud project.** Scripts won't run without one. See [Start here](/bhutan-hfld-training/start-here/).
+
+## Practice
+
+<Challenge level="complete" time={5} hints={["Change only the filterDate line.", "October to December is Bhutan's other dry season."]} solution="day-1/introduction-to-earth-engine.js">
+Run the script, then change it to use **October to December 2025** instead of January to April. Compare the number of images and the mean NDVI. Which season has more cloud-free images near Thimphu?
+
+```js
+    .filterDate('2025-10-01', '___')
+```
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-1-introduction-to-earth-engine" questions={[
+  { q: "Which of these is NOT one of the four parts of Earth Engine described in this lesson?", options: ["A public data catalog", "A computation engine that runs analyses in parallel in the cloud", "A desktop program you install to edit vector topology", "An interactive development environment (the Code Editor)"], answer: 2, explain: "The four parts are the data catalog, the computation engine, the development environment, and saving and sharing. Earth Engine runs in the browser and is weak at vector editing." },
+  { q: "Why can Earth Engine process all of Bhutan quickly?", options: ["It downloads the data to your laptop first", "It splits the work into tiles and runs them in parallel on many computers", "It only uses low-resolution data", "It caches every possible result in advance"], answer: 1, explain: "The computation engine divides the job into tiles, runs them in parallel across Google's data centres, and merges the results." },
+  { q: "Which task is Earth Engine least suited to?", options: ["A national Sentinel-2 composite for 2025", "Classifying land cover for every Dzongkhag", "Image segmentation and hydrological modelling that depend on pixel neighbours across large areas", "Counting cloud-free images over Paro"], answer: 2, explain: "Analyses that rely on spatial relations between pixels across large areas are limited, because the work is split across many machines." },
+  { q: "Reducing an image collection to a single median image is an N → 1 operation.", answer: true, explain: "A reducer such as median() turns N images into one image. map() is N → N." },
+]} />
+
+<KeyPoints points={[
+  "Earth Engine is a multi-petabyte data catalog plus a cloud computation engine, used through the Code Editor (JavaScript) or Python.",
+  "Most scripts filter a collection, get images, apply algorithms, map them over the collection, and reduce.",
+  "Use Earth Engine for large-area, raster-heavy and time-series analysis; use desktop GIS for vector editing and map layout.",
+]} />
+
+<References />
+
+<Credit
+  source="D1 Introduction to GEE: Features, Capabilities, and Access (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson",
+    "Third-party figures (Google, SERVIR) replaced with text and the trainers' own screenshots",
+    "New: a Bhutan script showing the five Earth Engine operations, with a geemap version",
+    "Sign-up link updated to Cloud project registration (see Start here)",
+  ]}
+/>
