@@ -1,17 +1,341 @@
 ---
 title: "Importing and exporting data"
+description: Work with feature collections (buffer, clip, merge, union), upload shapefiles and CSV files as assets, and export images, tables and videos to Google Drive and to assets.
 sidebar:
   order: 6
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import { Image } from 'astro:assets';
+import shpFiles from '~/assets/day-2/import-and-export/s09-4281f5a77f.webp';
+import newMenu from '~/assets/day-2/import-and-export/s09-e7f1bf4f63.webp';
+import shpDialog from '~/assets/day-2/import-and-export/s10-6cabc97baf.webp';
+import csvMenu from '~/assets/day-2/import-and-export/s11-1461348c47.webp';
+import csvDialog from '~/assets/day-2/import-and-export/s11-a6f0c8f29b.webp';
+import tasks from '~/assets/day-2/import-and-export/s12-cdbbed5ac4.webp';
+import bhutanRed from '~/assets/day-2/import-and-export/s14-c7fc8f5bf5.webp';
+import drive from '~/assets/day-2/import-and-export/s24-ca6c694d1f.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I bring my own boundaries and points into Earth Engine?", "How do I get results out, as files or as assets?"]}
+  objectives={[
+    "Upload a shapefile and a CSV file as assets.",
+    "Export images and tables to Google Drive and to assets.",
+    "Export a video.",
+  ]}
+  teaching={20} exercises={25}
+  prerequisites={["Landsat MRV composite"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/import-and-export/) give a visual summary.
 
-- Upload a shapefile and a CSV as assets
-- Export images and tables to Drive and to assets
-- Export a video
+## Feature collections
 
-**Time:** about 20 min teaching + 25 min practice.
+**Feature collections** are like image collections, but they hold **features** instead of images: a geometry (point, line or polygon) plus attributes. They are the Earth Engine equivalent of vector layers in GIS: each feature is a row, and each attribute is a column.
+
+Load Bhutan's national boundary from the FAO GAUL 2024 dataset in the community catalog, and draw it in red:
+
+<CodeBlock script="day-2/feature-basics.js" lines={[12, 21]} />
+
+<Image src={bhutanRed} alt="Code Editor map with Bhutan's national boundary imported from an asset and shown in red." />
+
+### Basic vector analysis
+
+The four classic GIS operations all exist in Earth Engine:
+
+| Operation | What it does | Earth Engine |
+|---|---|---|
+| **Buffer** | a zone of a set width around a point, line or polygon | `geometry.buffer(metres)`, `feature.buffer()` |
+| **Clip** | keeps only the part of a dataset inside a boundary, such as land cover within a study area | `image.clip(boundary)`; for vectors `geometry.intersection(boundary)` |
+| **Merge** | combines several feature collections into one | `collection.merge(other)` |
+| **Union** | dissolves overlapping features into one | `collection.union()`, `geometry.union(other)` |
+
+<CodeBlock script="day-2/feature-basics.js" lines={[23, 50]} />
+
+<Callout type="mistake" title="Vector work is not Earth Engine's strength">
+Earth Engine handles these operations, but complex vector editing (snapping, topology, digitising boundaries) is easier in QGIS or ArcGIS. Prepare clean vector data there, then upload it.
+</Callout>
+
+## Importing your own data as assets
+
+Uploaded files become **assets**, stored in your Cloud project (or in older "legacy" asset folders) and listed in the **Assets** tab. Click **NEW** to choose the type.
+
+<Image src={newMenu} alt="The Assets tab NEW menu with options for GeoTIFF, shapefile and CSV uploads, image collections and folders." />
+
+### Shapefiles
+
+A shapefile is several files with the same name. You need at least **.shp**, **.shx**, **.dbf** and **.prj**, or a **.zip** of them. The other files (.cpg, .sbn, .sbx, .shp.xml) are optional.
+
+<Image src={shpFiles} alt="The files that make up one shapefile: .cpg, .dbf, .prj, .sbn, .sbx, .shp, .shp.xml and .shx." />
+
+1. **NEW → Shape files (.shp, .shx, .dbf, .prj or .zip)**.
+2. Select the files, choose an **Asset ID** (its name and folder), and click **Upload**.
+3. Follow the upload in the **Tasks** tab. When it finishes, the asset appears in the Assets tab; click it to import it into your script.
+
+<Image src={shpDialog} alt="The 'Upload a new shapefile asset' dialog with the selected files, asset ID and advanced options." />
+
+### CSV files
+
+A CSV file needs columns for the coordinates, longitude (X) and latitude (Y). The coordinate system defaults to WGS84 (EPSG:4326). Use **Advanced options** to name the X and Y columns or set another CRS.
+
+<Image src={csvMenu} alt="The Assets tab NEW menu with the CSV file option highlighted." />
+
+<Image src={csvDialog} alt="The 'Upload a new CSV asset' dialog with the source file, asset ID and advanced options." />
+
+For example, a CSV of field plots in Bhutan:
+
+```
+X,Y,plot,dzongkhag,forest_type
+89.64,27.47,1,Thimphu,Blue pine
+89.41,27.43,2,Paro,Blue pine
+90.73,27.55,3,Bumthang,Mixed conifer
+```
+
+<Image src={tasks} alt="Code Editor showing the Tasks tab with a list of completed asset uploads." />
+
+<Callout type="why">
+Why this matters: the course reads Bhutan's official boundary, training points and reference samples as assets. An asset is stored once and can be shared with colleagues (see [How-to guides](/bhutan-hfld-training/how-to/)), so everyone works from the same data.
+</Callout>
+
+## Exporting data
+
+Earth Engine computes in the cloud; to keep a result, you **export** it. Exports run as tasks: click **Run** in the **Tasks** tab to start each one.
+
+| Export | `toAsset()` | `toDrive()` | `toCloudStorage()` |
+|---|---|---|---|
+| `Export.image` | yes | GeoTIFF, TFRecord | GeoTIFF, TFRecord |
+| `Export.table` | yes | CSV, GeoJSON, KML, KMZ, SHP, TFRecord | same as Drive |
+| `Export.video` | no | MP4 | MP4 |
+| `Export.map` (map tiles) | no | no | PNG, JPG |
+
+Tables can also go to `toFeatureView()` (for fast display in apps) and `toBigQuery()`.
+
+### Raster to Google Drive
+
+```js
+Export.image.toDrive({
+  image: image,
+  description: 'image',
+  region: region,
+  scale: 30,
+  crs: 'EPSG:4326',
+  maxPixels: 1e13,
+  folder: 'GEE'
+});
+```
+
+- `image`: the image to export;
+- `description`: the task's name (and the default file name);
+- `region`: the area to export;
+- `scale`: the pixel size in metres;
+- `crs`: the coordinate system of the output;
+- `maxPixels`: the maximum number of pixels allowed; raise it for large areas;
+- `folder`: the Google Drive folder, created if it doesn't exist.
+
+### Raster to an asset
+
+```js
+Export.image.toAsset({
+  image: medianImage,
+  description: "Bhutan",
+  assetId: "Bhutan",
+  region: studyArea.bounds(),
+  scale:10,
+  maxPixels:1e13
+});
+```
+
+`assetId` is the asset's name and path in your project. There is no `folder`: use a path such as `projects/<your-project>/assets/composites/bhutan_2025`.
+
+### Vector data to Google Drive
+
+Use `Export.table.toDrive()` to download **vector data** (features) as a file:
+
+```js
+Export.table.toDrive({
+  collection: features,
+  description:'features',
+  folder: 'GEE_',
+  fileFormat: 'SHP'
+});
+```
+
+`fileFormat` can be `'CSV'`, `'GeoJSON'`, `'KML'`, `'KMZ'`, `'SHP'` or `'TFRecord'`.
+
+### Vector data to an asset
+
+```js
+// Export an ee.FeatureCollection
+Export.table.toAsset({
+  collection: features,
+  description: 'exportToTableAssetExample',
+  assetId: 'exampleAssetId',
+});
+```
+
+<Image src={drive} alt="Google Drive folder containing a file exported from Earth Engine." />
+
+## Exercise: exporting data
+
+The exercise has four parts. Run them one at a time.
+
+### 1. Planet NICFI basemap of Bhutan
+
+The NICFI programme's Planet basemaps have about 4.7 m pixels (monthly mosaics over the tropics). Filter Bhutan from GAUL, take the March 2023 monthly mosaic, display it and export it:
+
+<CodeBlock script="day-2/import-and-export.js" lines={[16, 43]} />
+
+<Callout type="mistake" title="Planet NICFI access and size">
+The collection `projects/planet-nicfi/assets/basemaps/asia` is only visible to accounts that signed up for Planet's NICFI programme. If you get "not found", skip this part. A national 4.7 m export is very large (tens of gigabytes): try it on a single Dzongkhag first. The exercise text asks for an export to your **asset**; the code exports to **Drive**. Either works: change `toDrive` to `toAsset` (with an `assetId` instead of `folder`) for an asset.
+</Callout>
+
+### 2. Dynamic World land cover for 2023
+
+[Dynamic World](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_DYNAMICWORLD_V1) gives a near-real-time 10 m land-cover label for every Sentinel-2 image. Filter it to 2023, display the labels and export them:
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-2/import-and-export.js" lines={[45, 72]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+aoi = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level2").filter(ee.Filter.eq("ADM0_NAME", "Bhutan"))
+dw = ee.ImageCollection("GOOGLE/DYNAMICWORLD/V1").filterDate("2023-01-01", "2024-01-01")
+classification = dw.mosaic().clip(aoi).select("label")
+
+palette = ["419BDF", "397D49", "88B053", "7A87C6", "E49635", "DFC35A", "C4281B", "A59B8F", "B39FE1"]
+m = geemap.Map()
+m.centerObject(aoi, 8)
+m.addLayer(classification, {"min": 0, "max": 8, "palette": palette}, "Dynamic World Classification")
+m
+
+task = ee.batch.Export.image.toDrive(
+    image=classification, description="DynamicWorld_2023", region=aoi.geometry(),
+    folder="GEE_exports", scale=10, maxPixels=1e13,
+)
+# task.start()
+```
+  </TabItem>
+</Tabs>
+
+The nine classes, in order 0–8: water, trees, grass, flooded vegetation, crops, shrub and scrub, built, bare, snow and ice.
+
+<Callout type="mistake" title="mosaic() keeps the latest label">
+`dw.mosaic()` keeps, for each pixel, the label of the **most recent** image of 2023, which may be cloudy or from the monsoon. For an annual map, the most frequent label is usually better: `dw.select('label').mode()`.
+</Callout>
+
+### 3. Google Open Buildings as GeoJSON
+
+[Open Buildings](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_Research_open-buildings_v3_polygons) has building outlines detected from high-resolution imagery. Keep those in the area and export them as GeoJSON:
+
+<CodeBlock script="day-2/import-and-export.js" lines={[74, 87]} />
+
+### 4. A video from Landsat 5
+
+Export a time-lapse of Landsat 5 images (1984–2011, cloud cover below 10%) for path 137, row 41 in central Bhutan. Videos need 8-bit, three-band images, hence `multiply(512).uint8()` on bands 7, 4 and 3:
+
+<CodeBlock script="day-2/import-and-export.js" lines={[89, 127]} />
+
+`dimensions: '720'` sets the longer side of the video to 720 pixels; `framesPerSecond: 15` sets the speed. Data: [Landsat 5 TOA](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LT05_C02_T1_TOA).
+
+## The full exercise script
+
+<OpenInGEE script="day-2/import-and-export.js" hash="0769e2dbd6752d9dbf8ed8c2da1743fe" />
+
+<OpenInGEE script="day-2/feature-basics.js" />
+
+## Common mistakes
+
+- **Uploading a shapefile without the .prj.** Earth Engine can't place it. Include .shp, .shx, .dbf and .prj (or a .zip).
+- **CSV with latitude and longitude swapped,** or in a projected CRS without setting it in Advanced options.
+- **Forgetting to click Run** in the Tasks tab: scripts only create tasks.
+- **"Too many pixels in the region"**: raise `maxPixels`, use a coarser `scale`, or a smaller region.
+- **Exporting a huge high-resolution area to Drive.** Start with one Dzongkhag, or export to an asset.
+
+<Callout type="bhutan">
+Bhutan context: for HFLD reporting, keep the official national and Dzongkhag boundaries, training points and reference samples as shared assets in one project, and export every map and composite to that project as well. That keeps a clear record of what was used.
+</Callout>
+
+## Practice
+
+<Challenge level="complete" time={20} hints={["Change the filter to one Dzongkhag: the GAUL 2015 level 2 property for districts is ADM2_NAME.", "Use mode() for an annual label.", "Start the task in the Tasks tab."]}>
+Export the **2023 Dynamic World** land cover for **one Dzongkhag** (for example Paro) to your Google Drive, using the most frequent label of the year.
+
+```js
+var countries = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level2");
+var AOI = countries.filter(ee.Filter.eq('ADM2_NAME', '___'));
+var dw = ee.ImageCollection('GOOGLE/DYNAMICWORLD/V1')
+  .filterDate('2023-01-01', '2024-01-01')
+  .filterBounds(AOI);
+var classification = dw.select('label').___().clip(AOI);
+Export.image.toDrive({
+  image: classification,
+  description: 'DynamicWorld_2023_Paro',
+  region: AOI,
+  folder: 'GEE_exports',
+  scale: ___,
+  maxPixels: 1e13
+});
+```
+
+<Fragment slot="solution">
+```js
+var countries = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level2");
+var AOI = countries.filter(ee.Filter.eq('ADM2_NAME', 'Paro'));
+var dw = ee.ImageCollection('GOOGLE/DYNAMICWORLD/V1')
+  .filterDate('2023-01-01', '2024-01-01')
+  .filterBounds(AOI);
+var classification = dw.select('label').mode().clip(AOI);
+Export.image.toDrive({
+  image: classification,
+  description: 'DynamicWorld_2023_Paro',
+  region: AOI,
+  folder: 'GEE_exports',
+  scale: 10,
+  maxPixels: 1e13
+});
+```
+Print `AOI.size()` first: if it is 0, check the spelling of the Dzongkhag in GAUL with `aggregate_array('ADM2_NAME')`.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-2-import-and-export" questions={[
+  { q: "Which files are the minimum for uploading a shapefile?", options: [".shp only", ".shp, .shx, .dbf and .prj (or a .zip of them)", ".shp and .xml", ".dbf and .prj"], answer: 1, explain: "Geometry (.shp, .shx), attributes (.dbf) and the projection (.prj) are all needed." },
+  { q: "You want to keep a composite inside Earth Engine for later scripts. Which export?", options: ["Export.image.toDrive", "Export.image.toAsset", "Export.table.toDrive", "Export.video.toDrive"], answer: 1, explain: "toAsset stores the image in your project, where other scripts can load it." },
+  { q: "What must the images in Export.video be?", options: ["Single-band float images", "8-bit, three-band (RGB) images", "Any image collection", "Images in EPSG:4326"], answer: 1, explain: "Videos are made of 8-bit RGB frames, which is why the script uses multiply(512).uint8() on three bands." },
+  { q: "Running a script with Export.image.toDrive() starts the download straight away.", answer: false, explain: "It creates a task; click Run in the Tasks tab to start it." },
+]} />
+
+<KeyPoints points={[
+  "Feature collections are vector layers; buffer, clip, merge and union work on them.",
+  "Upload shapefiles (.shp, .shx, .dbf, .prj) and CSV files (with X and Y columns) as assets.",
+  "Export images, tables and videos to Drive, assets or Cloud Storage; each export is a task you start in the Tasks tab.",
+  "Use mode() rather than mosaic() for an annual Dynamic World map.",
+]} />
+
+<Credit
+  source="D2 Importing and Exporting Datasets with Google Earth Engine (slides) and D2 Exercise: Exporting Data"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides and exercise combined into one web lesson; code copied from both",
+    "\"toDrive … your imagery data sets\" on the vector-export slides corrected to vector data",
+    "Exercise blanks filled with a worked Bhutan solution (logged in M2-02)",
+    "New: buffer, clip, merge and union examples (the slides used Esri figures, not reused)",
+    "Notes added on Planet NICFI access, export size, and mode() instead of mosaic() for an annual Dynamic World map",
+  ]}
+/>
