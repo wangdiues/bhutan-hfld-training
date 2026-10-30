@@ -9,6 +9,7 @@ import {
 	sampleSize,
 	samplingDensity,
 } from '../src/lib/stats/sampleSize';
+import { bhutanDefaults, runSampleSizeLab, type LabInput } from '../src/lib/stats/sampleSizeLab';
 
 const fixture = (name: string) =>
 	JSON.parse(readFileSync(join(import.meta.dirname, 'fixtures', name), 'utf-8'));
@@ -115,5 +116,38 @@ describe('Olofsson variance rule vs the workbook rule', () => {
 		// 17,000 ha mapped as deforestation; 18 of 23 samples confirmed → 13,304 ha.
 		const r = accuracyArea({ mappedAreaHa: [83000, 17000], matrix: [[100, 0], [5, 18]], z: 1.6449 });
 		close(r.cellProportions[1][1] * r.totalAreaHa, 17000 * (18 / 23));
+	});
+});
+
+describe('Lab 1 page — the preloaded Bhutan inputs reproduce the workbook', () => {
+	const { inputs, expected } = fixture('sample-size.workbook.json');
+	const run = (patch: Partial<LabInput> = {}) => {
+		const out = runSampleSizeLab({ ...bhutanDefaults(), ...patch });
+		if (!out.ok) throw new Error(out.error);
+		return out.result;
+	};
+	it('matches every workbook output', () => {
+		const r = run();
+		close(r.totalAreaHa, expected.totalAreaHa);
+		closeAll(r.weights, expected.weight);
+		closeAll(r.weightTimesStdDev, expected.weightTimesStdDev);
+		close(r.targetSE, expected.targetSE90);
+		close(r.n, expected.totalSamples);
+		closeAll(r.equal.samples, expected.equal);
+		closeAll(r.proportional.samples, expected.proportional);
+		closeAll(r.equal.density as number[], expected.densityEqual);
+		closeAll(r.proportional.density as number[], expected.densityProportional);
+		for (const m of inputs.minimumPerStratum) closeAll(run({ minimum: m }).minimum.samples, expected.minimum[String(m)]);
+		close(run({ z: inputs.z95 }).targetSE, expected.targetSE95);
+	});
+	it('reports bad inputs instead of NaN or Infinity', () => {
+		const zeroAreas = bhutanDefaults();
+		zeroAreas.strata.forEach((s) => (s.areaHa = 0));
+		expect(runSampleSizeLab(zeroAreas)).toMatchObject({ ok: false });
+		expect(runSampleSizeLab({ ...bhutanDefaults(), marginOfErrorPercent: 0 })).toMatchObject({ ok: false });
+		const r = run();
+		expect(r.minimum.density[3]).toBeNull();
+		const flat = [r.n, ...r.weights, ...r.equal.samples, ...r.proportional.samples, ...r.minimum.samples];
+		expect(flat.every(Number.isFinite)).toBe(true);
 	});
 });

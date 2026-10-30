@@ -1,0 +1,431 @@
+---
+/**
+ * Lab 1 (task M5-02): stratified sample size and allocation. All maths is in
+ * src/lib/stats/sampleSizeLab.ts (tested against the Day 5 workbook); this file is the form,
+ * the result tables, a bar chart and the CSV export. Inputs are saved in the browser
+ * through the safe storage helper.
+ */
+import { bhutanDefaults } from '~/lib/stats/sampleSizeLab';
+
+const d = bhutanDefaults();
+---
+
+<hfld-sample-size class="hfld-lab not-content">
+	<form class="hfld-lab__form" novalidate>
+		<fieldset>
+			<legend>Strata</legend>
+			<p class="hfld-lab__hint">
+				One row per map stratum. The expected proportion is your best guess of how much of the stratum is really the
+				target class (here, deforestation). Pick the target stratum with the radio button.
+			</p>
+			<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Strata table">
+				<table class="hfld-lab__table" data-strata>
+					<thead>
+						<tr>
+							<th scope="col">Stratum</th>
+							<th scope="col">Area (ha)</th>
+							<th scope="col">Expected proportion, p</th>
+							<th scope="col">Target</th>
+							<th scope="col">In "minimum" allocation</th>
+							<th scope="col"><span class="sr-only">Remove</span></th>
+						</tr>
+					</thead>
+					<tbody data-rows></tbody>
+				</table>
+			</div>
+			<div class="hfld-lab__buttons">
+				<button type="button" data-add>Add a stratum</button>
+				<button type="button" data-reset>Reset to Bhutan's strata</button>
+			</div>
+		</fieldset>
+
+		<fieldset>
+			<legend>Precision</legend>
+			<div class="hfld-lab__grid">
+				<label>
+					Margin of error (% of the target-class area)
+					<input type="number" name="moe" min="0.1" step="any" value={d.marginOfErrorPercent} required />
+				</label>
+				<label>
+					Confidence level
+					<select name="z">
+						<option value="1.6449" selected>90% (z = 1.6449, the ART-TREES default)</option>
+						<option value="1.96">95% (z = 1.96)</option>
+					</select>
+				</label>
+				<label>
+					Minimum samples per stratum
+					<input type="number" name="minimum" min="0" step="1" value={d.minimum} required />
+				</label>
+			</div>
+		</fieldset>
+	</form>
+
+	<div class="hfld-lab__error" role="alert" hidden></div>
+
+	<section class="hfld-lab__results" aria-labelledby="ss-results" aria-live="polite">
+		<h2 id="ss-results">Results</h2>
+		<p class="hfld-lab__headline" data-headline></p>
+		<ul class="hfld-lab__warnings" data-warnings hidden></ul>
+
+		<h3>Sample size</h3>
+		<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Sample size working">
+			<table class="hfld-lab__table" data-working></table>
+		</div>
+
+		<h3>Allocation compared</h3>
+		<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Allocation comparison">
+			<table class="hfld-lab__table" data-allocation></table>
+		</div>
+		<figure class="hfld-lab__figure">
+			<div data-chart></div>
+			<figcaption>Samples per stratum under each allocation. The same numbers are in the table above.</figcaption>
+		</figure>
+		<div class="hfld-lab__buttons">
+			<button type="button" data-csv>Download the results (CSV)</button>
+		</div>
+	</section>
+</hfld-sample-size>
+
+<script>
+	import { bhutanDefaults, runSampleSizeLab, type LabInput, type MinimumRole } from '~/lib/stats/sampleSizeLab';
+	import { loadJSON, saveJSON } from '~/lib/storage';
+
+	const KEY = 'hfld-lab:sample-size';
+	const ROLES: Record<MinimumRole, string> = {
+		share: 'Share the rest',
+		minimum: 'Exactly the minimum',
+		zero: 'No samples',
+	};
+	const fmt = (x: number, digits = 0) =>
+		x.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+	const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+	class HfldSampleSize extends HTMLElement {
+		private rows!: HTMLTableSectionElement;
+		private form!: HTMLFormElement;
+		private last: { input: LabInput; csv: string } | null = null;
+
+		connectedCallback() {
+			this.form = this.querySelector('form')!;
+			this.rows = this.querySelector('[data-rows]')!;
+			const saved = loadJSON<LabInput>(KEY);
+			this.load(saved && Array.isArray(saved.strata) ? saved : bhutanDefaults());
+			this.form.addEventListener('input', () => this.update());
+			this.form.addEventListener('change', () => this.update());
+			this.querySelector('[data-add]')!.addEventListener('click', () => {
+				this.addRow({ name: `Stratum ${this.rows.rows.length + 1}`, areaHa: 0, expectedProportion: 0, role: 'share' }, false);
+				this.rows.rows[this.rows.rows.length - 1].querySelector('input')!.focus();
+				this.update();
+			});
+			this.querySelector('[data-reset]')!.addEventListener('click', () => this.load(bhutanDefaults()));
+			this.querySelector('[data-csv]')!.addEventListener('click', () => this.download());
+		}
+
+		private load(input: LabInput) {
+			this.rows.innerHTML = '';
+			input.strata.forEach((s, i) => this.addRow(s, i === input.targetIndex));
+			(this.form.elements.namedItem('moe') as HTMLInputElement).value = String(input.marginOfErrorPercent);
+			(this.form.elements.namedItem('z') as HTMLSelectElement).value = input.z === 1.96 ? '1.96' : '1.6449';
+			(this.form.elements.namedItem('minimum') as HTMLInputElement).value = String(input.minimum);
+			this.update();
+		}
+
+		private addRow(s: LabInput['strata'][number], target: boolean) {
+			const tr = document.createElement('tr');
+			tr.innerHTML = `
+				<td><input type="text" data-f="name" value="${esc(s.name)}" required></td>
+				<td><input type="number" data-f="area" min="0" step="any" value="${Math.round(s.areaHa * 1000) / 1000}" required></td>
+				<td><input type="number" data-f="p" min="0" max="1" step="any" value="${s.expectedProportion}" required></td>
+				<td class="hfld-lab__center"><input type="radio" name="target" data-f="target" ${target ? 'checked' : ''}></td>
+				<td><select data-f="role">${Object.entries(ROLES)
+					.map(([v, l]) => `<option value="${v}" ${v === s.role ? 'selected' : ''}>${l}</option>`)
+					.join('')}</select></td>
+				<td><button type="button" data-remove>Remove</button></td>`;
+			tr.querySelector('[data-remove]')!.addEventListener('click', () => {
+				const next = (tr.nextElementSibling ?? tr.previousElementSibling) as HTMLElement | null;
+				tr.remove();
+				(next?.querySelector('[data-remove]') as HTMLElement | null ?? this.querySelector<HTMLElement>('[data-add]'))?.focus();
+				this.update();
+			});
+			this.rows.append(tr);
+		}
+
+		private read(): LabInput {
+			const trs = [...this.rows.rows];
+			const num = (el: Element | null) => (el as HTMLInputElement).valueAsNumber;
+			trs.forEach((tr, i) => {
+				const name = (tr.querySelector('[data-f=name]') as HTMLInputElement).value || `stratum ${i + 1}`;
+				const label = (f: string, text: string) => tr.querySelector(`[data-f=${f}]`)!.setAttribute('aria-label', `${text}, ${name}`);
+				label('name', 'Stratum name');
+				label('area', 'Area in hectares');
+				label('p', 'Expected proportion');
+				label('target', 'Target stratum');
+				label('role', 'In minimum allocation');
+				tr.querySelector('[data-remove]')!.setAttribute('aria-label', `Remove ${name}`);
+			});
+			return {
+				strata: trs.map((tr) => ({
+					name: (tr.querySelector('[data-f=name]') as HTMLInputElement).value.trim(),
+					areaHa: num(tr.querySelector('[data-f=area]')),
+					expectedProportion: num(tr.querySelector('[data-f=p]')),
+					role: (tr.querySelector('[data-f=role]') as HTMLSelectElement).value as MinimumRole,
+				})),
+				targetIndex: trs.findIndex((tr) => (tr.querySelector('[data-f=target]') as HTMLInputElement).checked),
+				marginOfErrorPercent: (this.form.elements.namedItem('moe') as HTMLInputElement).valueAsNumber,
+				z: Number((this.form.elements.namedItem('z') as HTMLSelectElement).value),
+				minimum: (this.form.elements.namedItem('minimum') as HTMLInputElement).valueAsNumber,
+			};
+		}
+
+		private update() {
+			const input = this.read();
+			saveJSON(KEY, input);
+			const out = runSampleSizeLab(input);
+			const error = this.querySelector<HTMLElement>('.hfld-lab__error')!;
+			const results = this.querySelector<HTMLElement>('.hfld-lab__results')!;
+			if (!out.ok) {
+				error.textContent = `Cannot compute yet: ${out.error}`;
+				error.hidden = false;
+				results.hidden = true;
+				this.last = null;
+				return;
+			}
+			error.hidden = true;
+			results.hidden = false;
+			const r = out.result;
+			const names = input.strata.map((s, i) => s.name || `Stratum ${i + 1}`);
+			const conf = input.z === 1.96 ? '95%' : '90%';
+
+			this.querySelector('[data-headline]')!.innerHTML =
+				`Total sample size: <strong>${fmt(r.nRounded)}</strong> points (n = ${fmt(r.n, 2)} before rounding), ` +
+				`for a ±${fmt(input.marginOfErrorPercent, 1)}% margin of error on ${esc(names[input.targetIndex])} at ${conf} confidence.`;
+			const warn = this.querySelector<HTMLUListElement>('[data-warnings]')!;
+			warn.hidden = r.warnings.length === 0;
+			warn.innerHTML = r.warnings.map((w) => `<li>${esc(w)}</li>`).join('');
+
+			this.querySelector('[data-working]')!.innerHTML =
+				`<thead><tr><th scope="col">Stratum</th><th scope="col">Area (ha)</th><th scope="col">Weight W</th><th scope="col">Std dev S = √(p(1−p))</th><th scope="col">W × S</th></tr></thead><tbody>` +
+				input.strata
+					.map(
+						(s, i) =>
+							`<tr><th scope="row">${esc(names[i])}</th><td>${fmt(s.areaHa, 1)}</td><td>${fmt(r.weights[i], 6)}</td><td>${fmt(r.stdDevs[i], 6)}</td><td>${fmt(r.weightTimesStdDev[i], 6)}</td></tr>`,
+					)
+					.join('') +
+				`</tbody><tfoot><tr><th scope="row">Total</th><td>${fmt(r.totalAreaHa, 1)}</td><td>1</td><td></td><td>${fmt(r.sumWS, 6)}</td></tr>` +
+				`<tr><th scope="row" colspan="4">Target standard error SE = (MoE / 100) × W<sub>target</sub> / z</th><td>${fmt(r.targetSE, 9)}</td></tr>` +
+				`<tr><th scope="row" colspan="4">Sample size n = (ΣWS / SE)²</th><td>${fmt(r.n, 2)}</td></tr></tfoot>`;
+
+			const whole = (x: number) => Math.abs(x - Math.round(x)) < 1e-9;
+			const cell = (x: number) => fmt(x, whole(x) ? 0 : 1);
+			const dens = (x: number | null) => (x === null ? '<span title="No samples in this stratum">—</span>' : fmt(x, 1));
+			const methods = [
+				['Equal', r.equal],
+				['Proportional', r.proportional],
+				[`Minimum of ${fmt(input.minimum)}`, r.minimum],
+			] as const;
+			this.querySelector('[data-allocation]')!.innerHTML =
+				`<thead><tr><th scope="col" rowspan="2">Stratum</th>${methods.map(([m]) => `<th scope="colgroup" colspan="2">${m}</th>`).join('')}</tr>` +
+				`<tr>${methods.map(() => '<th scope="col">Samples</th><th scope="col">ha per sample</th>').join('')}</tr></thead><tbody>` +
+				names
+					.map(
+						(n, i) =>
+							`<tr><th scope="row">${esc(n)}</th>${methods.map(([, a]) => `<td>${cell(a.samples[i])}</td><td>${dens(a.density[i])}</td>`).join('')}</tr>`,
+					)
+					.join('') +
+				`</tbody><tfoot><tr><th scope="row">Total</th>${methods.map(([, a]) => `<td>${cell(a.total)}</td><td></td>`).join('')}</tr></tfoot>`;
+
+			this.renderChart(names, methods.map(([m, a]) => [m, a.samples] as const));
+
+			const rows = [
+				['stratum', 'area_ha', 'expected_p', 'weight', 'std_dev', 'equal', 'proportional', `minimum_${input.minimum}`, 'ha_per_sample_equal', 'ha_per_sample_proportional', 'ha_per_sample_minimum'],
+				...names.map((n, i) => [
+					n, input.strata[i].areaHa, input.strata[i].expectedProportion, r.weights[i], r.stdDevs[i],
+					r.equal.samples[i], r.proportional.samples[i], r.minimum.samples[i],
+					r.equal.density[i] ?? '', r.proportional.density[i] ?? '', r.minimum.density[i] ?? '',
+				]),
+				[],
+				['total_samples_n', r.n], ['rounded_n', r.nRounded], ['target_se', r.targetSE],
+				['margin_of_error_percent', input.marginOfErrorPercent], ['z', input.z],
+			];
+			this.last = {
+				input,
+				csv: rows.map((row) => row.map((v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v)).join(',')).join('\n'),
+			};
+		}
+
+		private renderChart(names: string[], series: (readonly [string, number[]])[]) {
+			const max = Math.max(1, ...series.flatMap(([, s]) => s));
+			const barH = 16, gap = 4, groupGap = 14, labelW = 130, valueW = 150, width = 680;
+			const plotW = width - labelW - valueW;
+			const groupH = series.length * (barH + gap) + groupGap;
+			const height = names.length * groupH;
+			const fills = ['var(--hfld-chart-1)', 'var(--hfld-chart-2)', 'var(--hfld-chart-3)'];
+			let svg = `<svg viewBox="0 0 ${width} ${height}" width="100%" role="img" aria-label="Bar chart of samples per stratum for equal, proportional and minimum allocation; values are in the table above" font-size="12">`;
+			names.forEach((n, i) => {
+				const y0 = i * groupH;
+				svg += `<text x="0" y="${y0 + barH}" fill="currentColor" font-weight="600">${esc(n.length > 18 ? n.slice(0, 17) + '…' : n)}</text>`;
+				series.forEach(([m, s], k) => {
+					const y = y0 + k * (barH + gap);
+					const w = (s[i] / max) * plotW;
+					svg += `<rect x="${labelW}" y="${y}" width="${Math.max(w, 0)}" height="${barH}" fill="${fills[k]}" rx="2"></rect>`;
+					svg += `<text x="${labelW + w + 4}" y="${y + barH - 4}" fill="currentColor">${esc(m.split(' ')[0])}: ${fmt(s[i], Math.abs(s[i] - Math.round(s[i])) < 1e-9 ? 0 : 1)}</text>`;
+				});
+			});
+			this.querySelector('[data-chart]')!.innerHTML = svg + '</svg>';
+		}
+
+		private download() {
+			if (!this.last) return;
+			const url = URL.createObjectURL(new Blob([this.last.csv + '\n'], { type: 'text/csv' }));
+			const a = Object.assign(document.createElement('a'), { href: url, download: 'sample-size-allocation.csv' });
+			document.body.append(a);
+			a.click();
+			a.remove();
+			URL.revokeObjectURL(url);
+		}
+	}
+	customElements.define('hfld-sample-size', HfldSampleSize);
+</script>
+
+<style is:global>
+	/* Global: rows and result tables are built by the script, so scoped styles would miss them. */
+	.hfld-lab {
+		display: block;
+		--hfld-chart-1: #2f6f4f;
+		--hfld-chart-2: #b7791f;
+		--hfld-chart-3: #4a6fa5;
+	}
+	[data-theme='dark'] .hfld-lab {
+		--hfld-chart-1: #6fbf8f;
+		--hfld-chart-2: #e3a945;
+		--hfld-chart-3: #8fb0e0;
+	}
+	.hfld-lab fieldset {
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		padding: 0.75rem 1rem 1rem;
+		margin-block: 1rem;
+	}
+	.hfld-lab legend {
+		font-weight: 600;
+		padding-inline: 0.25rem;
+	}
+	.hfld-lab__hint {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+		margin-top: 0;
+	}
+	.hfld-lab__scroll {
+		overflow-x: auto;
+	}
+	.hfld-lab__scroll:focus-visible,
+	.hfld-lab button:focus-visible,
+	.hfld-lab input:focus-visible,
+	.hfld-lab select:focus-visible {
+		outline: 3px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+	.hfld-lab__table {
+		border-collapse: collapse;
+		width: 100%;
+		font-size: var(--sl-text-sm);
+		font-variant-numeric: tabular-nums;
+	}
+	.hfld-lab__table :is(th, td) {
+		white-space: nowrap;
+		border: 1px solid var(--sl-color-gray-5);
+		padding: 0.3rem 0.5rem;
+		text-align: right;
+		vertical-align: middle;
+	}
+	.hfld-lab__table :is(th[scope='row'], thead th, td:first-child) {
+		text-align: left;
+	}
+	.hfld-lab__table thead th {
+		background: var(--sl-color-gray-6);
+	}
+	.hfld-lab__table tfoot :is(th, td) {
+		font-weight: 600;
+	}
+	.hfld-lab__center {
+		text-align: center !important;
+	}
+	.hfld-lab input,
+	.hfld-lab select {
+		font: inherit;
+		color: var(--sl-color-white);
+		background: var(--sl-color-bg);
+		border: 1px solid var(--sl-color-gray-4);
+		border-radius: 0.25rem;
+		padding: 0.25rem 0.4rem;
+		min-height: 2.25rem;
+	}
+	.hfld-lab__table input[type='text'] {
+		width: 9rem;
+	}
+	.hfld-lab__table input[type='number'] {
+		width: 9rem;
+	}
+	.hfld-lab__table[data-strata] {
+		min-width: 48rem;
+	}
+	.hfld-lab button {
+		white-space: nowrap;
+	}
+	.hfld-lab__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+		gap: 0.75rem 1rem;
+	}
+	.hfld-lab__grid label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		font-size: var(--sl-text-sm);
+	}
+	.hfld-lab__buttons {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+	}
+	.hfld-lab button {
+		font: inherit;
+		min-height: 2.5rem;
+		padding: 0.3rem 0.8rem;
+		border: 1px solid var(--sl-color-gray-4);
+		border-radius: 0.375rem;
+		background: var(--sl-color-gray-6);
+		color: var(--sl-color-white);
+		cursor: pointer;
+	}
+	.hfld-lab__error {
+		border-left: 4px solid var(--sl-color-red);
+		background: var(--sl-color-red-low);
+		color: var(--sl-color-white);
+		padding: 0.5rem 0.75rem;
+		margin-block: 1rem;
+	}
+	.hfld-lab__error[hidden],
+	.hfld-lab__results[hidden],
+	.hfld-lab__warnings[hidden] {
+		display: none;
+	}
+	.hfld-lab__headline {
+		font-size: var(--sl-text-lg);
+	}
+	.hfld-lab__warnings {
+		border-left: 4px solid var(--sl-color-orange);
+		background: var(--sl-color-orange-low);
+		color: var(--sl-color-white);
+		padding: 0.5rem 0.75rem 0.5rem 2rem;
+	}
+	.hfld-lab__figure {
+		margin: 1rem 0 0;
+	}
+	.hfld-lab__figure figcaption {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+</style>

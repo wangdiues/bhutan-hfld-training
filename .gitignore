@@ -29,3 +29,6 @@ _site/
 
 # Python
 __pycache__/
+
+# Claude Code agent memory (local only)
+.claude/agent-memory/

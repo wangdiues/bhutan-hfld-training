@@ -1,11 +1,49 @@
 ---
 title: "Lab: Sample size calculator"
+description: Work out how many reference samples you need for a stratified accuracy assessment, and compare three ways to share them across strata.
 sidebar:
   order: 1
 ---
+import SampleSizeLab from '~/components/labs/SampleSizeLab.astro';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import Credit from '~/components/Credit.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+This lab does what the Day 5 workbook *Exercise D5-Sample Size Calculator.xlsx* does. It starts with Bhutan's strata from the training: the Forest class split into three strata (70%, 20% and 10% of its area), one Non Forest stratum, and a Deforestation stratum, which is the class whose area you want to estimate. Change any number and the results update. Your inputs are saved in this browser only.
 
-Compute the total sample size and compare equal, proportional and minimum-per-stratum allocation, preloaded with Bhutan's strata.
+<SampleSizeLab />
+
+## How it works
+
+<Theory title="Stratified sample size">
+For strata with weights $W_i = A_i / A$ and expected proportions $p_i$ of the target class, the standard deviation in each stratum is $S_i = \sqrt{p_i(1-p_i)}$. To estimate the target class with standard error $SE$, you need
+$$ n = \left( \frac{\sum_i W_i S_i}{SE} \right)^2 $$
+samples <Cite id="olofsson2014" at="Eq. 13" />. Here $SE = (\text{MoE}/100) \times W_\text{target} / z$, so a ±25% margin of error at 90% confidence ($z = 1.6449$) sets the target.
+</Theory>
+
+- **Equal allocation** gives every stratum the same number of samples. Rare strata are well sampled, but common strata are sampled thinly.
+- **Proportional allocation** follows stratum area. A rare class such as deforestation then gets very few samples (about 6 here), too few to estimate its accuracy.
+- **Minimum of *m*** gives the target stratum exactly *m* samples and shares the rest among the forest strata in proportion to area. As in the workbook, Non Forest gets none by default. Change its setting to "Share the rest" or "Exactly the minimum" if your design needs it.
+
+<Callout type="why">
+Why this matters: the rare change class drives the sample size. Olofsson et al. recommend giving rare strata enough samples (often 50 to 100) for a usable estimate of their accuracy, then sharing the rest across larger strata <Cite id="olofsson2014" />.
+</Callout>
+
+<Callout type="mistake" title="Common mistakes">
+- **Expected proportion of 0 or 1 everywhere.** A stratum with p = 0 or 1 has no variance and adds nothing to the sample size. Use realistic guesses, for example a little deforestation inside the forest strata.
+- **Using map proportions as the margin of error.** The margin of error is a percentage of the target-class area, not of the whole country.
+- **Rounding each stratum separately.** The workbook rounds only the total, so stratum counts can have decimals. Round them when you draw the sample in Earth Engine (see [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/)).
+</Callout>
+
+The lab's maths is in `src/lib/stats/sampleSizeLab.ts`. An automated test checks that, with the preloaded inputs, it reproduces every output of the workbook to within one part in a million.
+
+<References />
+
+<Credit
+  source="Exercise D5-Sample Size Calculator.xlsx"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={["Rebuilt as an interactive web calculator with the same formulas", "Any number of strata; the role of each stratum in the minimum allocation can be changed", "Added input checks, a chart and CSV export"]}
+/>
