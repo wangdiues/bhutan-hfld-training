@@ -1,17 +1,163 @@
 ---
 title: "Determining sample size"
+description: Build a stratification map with a deforestation stratum, tabulate the area of each stratum in Earth Engine, and use the sample size calculator to choose a total sample size and allocate it across strata.
 sidebar:
   order: 2
 ---
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import SampleSizeLab from '~/components/labs/SampleSizeLab.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How many reference samples do I need, and how do I share them between strata?"]}
+  objectives={[
+    "Compute stratum weights from mapped areas.",
+    "Compute the total sample size for a target standard error.",
+    "Compare equal, proportional and minimum-per-stratum allocation.",
+  ]}
+  teaching={15} exercises={25}
+  prerequisites={["Designing a stratified sampling frame"]}
+/>
 
-## In this lesson you will
+This exercise derives the sample size of each stratum of a land-cover map, the step before drawing the sample. In Earth Engine you build the **stratification map** and a table of **stratum areas**; then the **sample size calculator** turns the areas into a total sample size and an allocation. The calculator is built into this page (it reproduces the training's spreadsheet).
 
-- Compute n = (ΣWᵢSᵢ / SE)²
-- Compare equal, proportional and minimum-N allocation
-- Choose an allocation and justify it
+## Part 1: The area of interest
 
-**Time:** about 20 min teaching + 30 min practice.
+Load Bhutan's boundary and use the whole country as the area of interest.
+
+<CodeBlock script="day-5/sample-size.js" lines={[23, 37]} />
+
+## Part 2: The land-cover map
+
+Load the assembled land-cover map you want to assess (the example uses Bhutan's 2024 map) and look at it. Classes 1–6 are cropland, forest, grassland, wetland, settlement and other land; class 10 will be deforestation.
+
+<CodeBlock script="day-5/sample-size.js" lines={[39, 68]} />
+
+<Callout type="mistake" title="Assets you need">
+The land-cover map (`projects/carbondevelopmentteam/…/LULC_2024_…`) and the pre-computed embedding dot product are the trainers' assets. Without access, use your own map from the [assemblage](/bhutan-hfld-training/day-4/assemblage/) and compute the dot product as in Part 3.
+</Callout>
+
+## Part 3: Add a deforestation layer
+
+The map has no deforestation class, so add one. Here deforestation comes from the [satellite embeddings](/bhutan-hfld-training/day-4/satellite-embeddings/): forest pixels whose 2024 and 2025 embeddings have a dot product (similarity) below 0.955 are flagged as likely deforestation. This deforestation layer is what the sample will test.
+
+<CodeBlock script="day-5/sample-size.js" lines={[70, 96]} />
+
+## Part 4: List the values in the stratification map
+
+Get the list of values the map contains, and give them readable names. The **stratification map** puts deforestation (10) on top of the land-cover classes and removes null pixels:
+
+<CodeBlock script="day-5/sample-size.js" lines={[98, 142]} />
+
+## Part 5: A table of stratum areas
+
+For each value, compute its area in hectares (pixel areas summed over the area of interest) and build a table. `iterate` adds one row per stratum:
+
+<CodeBlock script="day-5/sample-size.js" lines={[144, 186]} />
+
+## Part 6: Export the table
+
+<CodeBlock script="day-5/sample-size.js" lines={[188, 193]} />
+
+<OpenInGEE script="day-5/sample-size.js" hash="375a74248c8bb15184ccf2c95c1d6db5" />
+
+## Parts 7 and 8: The sample size calculator
+
+Copy the stratum areas into the calculator. The training used a spreadsheet; the calculator below does the same calculations and is preloaded with Bhutan's strata report from the training. It groups the classes into five strata: three forest strata (the forest area split by expected deforestation pressure), one non-forest stratum and the deforestation stratum.
+
+For each stratum, the calculator computes:
+
+- **W** (weight): the stratum's share of the mapped area, 0–1;
+- **p**: your educated guess of the share of deforestation you expect to find in the stratum, 0–1. For the deforestation stratum this is the expected accuracy of the deforestation layer (typically 0.5–0.8); for forest strata it is the expected rate of deforestation the map missed;
+- **S** = √(p(1 − p)): the standard deviation implied by that guess;
+- **W × S**.
+
+<Theory title="Total sample size">
+With target standard error $SE = (\text{MoE}/100) \times W_\text{defor} / z$, the total sample size is $n = \left(\sum_h W_h S_h / SE\right)^2$ <Cite id="olofsson2014" at="Eq. 13" />. A ±25% margin of error on the deforestation area at 90% confidence ($z = 1.6449$) is the course's example target.
+</Theory>
+
+<SampleSizeLab />
+
+## Part 9: One forest stratum
+
+Set the forest split to 100 / 0 / 0 and the expected deforestation in Forest 1 to 0.003 (0.3%), and watch the total sample size. With the workbook's areas, the calculator gives about **6,700 samples**: far too many to interpret, which could take months.
+
+## Part 10: Three forest strata
+
+Now split forest into three strata, 70% / 20% / 10% of its area, with expected deforestation of 0.0005, 0.001 and 0.003. These are the calculator's defaults. The total drops to **1,800 samples**. Placing more effort where deforestation is likely to be missed (near forest edges, settlements and farmland), and less where it is unlikely, cuts the sample needed.
+
+<Callout type="mistake" title="Numbers in the exercise text">
+The exercise text quotes 3,299 samples for one forest stratum and 908 for three, about half of what the training's own spreadsheet gives for the inputs listed (6,717 and 1,800). It was probably written with an earlier version of the sheet. This page uses the spreadsheet's formulas, which the calculator reproduces exactly; ask your trainer which inputs to use for your own design.
+</Callout>
+
+## Part 11: Allocating the samples
+
+With the total fixed, share it between strata. Non-forest is left out: for HFLD, the accuracy of forest and deforestation matters most. Three strategies:
+
+- **Equal allocation:** the same number in every stratum.
+- **Proportional allocation:** in proportion to area. The rare deforestation stratum then gets very few samples.
+- **Minimum per stratum:** every sampled stratum gets at least *m*; the rest is shared among the forest strata by area.
+
+The "ha per sample" columns show how many hectares each sample represents. Raising the minimum spreads the samples more evenly and lowers the average hectares per sample, up to a point. Try different minimums in the calculator and choose the one that keeps the deforestation stratum well sampled without starving the forest strata.
+
+For Part 2, add up the forest strata into one **forest** sample size and keep the **deforestation** sample size separate.
+
+<Callout type="bhutan">
+Bhutan context: forest covers most of the country and deforestation very little, so the deforestation stratum is tiny by area but critical for HFLD reporting. A minimum per stratum is what gives it enough samples.
+</Callout>
+
+## Common mistakes
+
+- **Unrealistic p values.** p = 0 or 1 gives no variance; guess sensibly from experience or a pilot sample.
+- **Forgetting the deforestation stratum** in the strata report, or leaving its area at 0.
+- **Proportional allocation for a rare stratum.** It gets almost no samples.
+- **Changing the margin of error to make the sample small** without checking the requirement you must meet.
+
+## Practice
+
+<Challenge level="complete" time={15} hints={["Use the calculator above.", "Change the margin of error, then the minimum per stratum."]}>
+In the calculator, find the total sample size for a **±20%** margin of error at 90% confidence with the default strata. Then choose a minimum per stratum and write down the samples for Forest (the sum of the three forest strata) and Deforestation.
+
+<Fragment slot="solution">
+A smaller margin of error needs more samples: n grows with 1/MoE², so going from 25% to 20% multiplies it by about 1.56 (from about 1,800 to about 2,800). With a minimum of, say, 150, the deforestation stratum gets 150 samples and the forest strata share the rest by area; their sum is the Forest sample size for Part 2.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-5-sample-size" questions={[
+  { q: "What does a stratum's weight W mean?", options: ["Its expected accuracy", "Its share of the total mapped area", "Its number of samples", "Its standard deviation"], answer: 1, explain: "W = stratum area / total area." },
+  { q: "Why did splitting forest into three strata reduce the total sample size?", options: ["Forest became smaller", "Expected deforestation is concentrated in a small stratum, lowering the overall variance", "The margin of error changed", "Non-forest was removed"], answer: 1, explain: "Putting the risk where it is lowers ΣW·S and so the sample needed." },
+  { q: "Why is proportional allocation a poor choice for the deforestation stratum?", options: ["It gives it too many samples", "Its tiny area gives it very few samples", "It ignores the margin of error", "It is not allowed"], answer: 1, explain: "Rare strata need a minimum, or their accuracy can't be estimated." },
+  { q: "Halving the margin of error roughly quadruples the sample size.", answer: true, explain: "n is proportional to 1/SE², and SE is proportional to the margin of error." },
+]} />
+
+<KeyPoints points={[
+  "Build a stratification map with a deforestation stratum and tabulate stratum areas in Earth Engine.",
+  "The total sample size follows from the strata weights, the expected proportions and the target standard error.",
+  "Extra forest strata where deforestation is likely cut the sample size sharply.",
+  "Allocate with a minimum per stratum so the rare deforestation stratum is well sampled.",
+]} />
+
+<References />
+
+<Credit
+  source="EXERCISE D5 Part 1: Determining Sample Size"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; code copied from the exercise; the spreadsheet replaced by the built-in calculator (Lab 1), which reproduces it",
+    "proj_area defined as Bhutan's boundary; an unused require() of a private repository disabled; the Deforestation entry restored (commented out when the code was extracted)",
+    "The exercise's sample sizes (3,299 and 908) differ from the spreadsheet's results (6,717 and 1,800) for the stated inputs; the page uses the spreadsheet's",
+    "References to \"Exercise D4\" and a D4 save path corrected to Day 5",
+  ]}
+/>

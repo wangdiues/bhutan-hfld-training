@@ -8,16 +8,20 @@
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
  *
  * Changes: the raster value report example's missing image name is filled in as LULC.
+ *   - `proj_area` (used but not defined in the exercise) is Bhutan's boundary geometry.
+ *   - The unused require() of a private repository (users/yourecoveredinbees/...) is commented out:
+ *     for anyone without access it stops the script.
+ *   - The "10 : 'Deforestation'" entry, commented out when the code was extracted, is restored.
+ *
+ * The land-cover map (projects/carbondevelopmentteam/...) and the embedding dot product are the
+ * trainers' assets; with no access, use your own assembled map and compute the dot product (Part 3).
  *
  * Original Code Editor script(s):
  *   https://code.earthengine.google.com/375a74248c8bb15184ccf2c95c1d6db5
  */
 
-/* global proj_area */
-// proj_area: used but not defined in the source document (TODO M4-28: probably the AOI geometry; confirm with the original script).
-
 // ---- Part 1: load administrative boundaries and define aoi (bhutan) ----
-var utils = require('users/yourecoveredinbees/CarbonDevelopmentTeam:CDT_Utilities/api');
+// var utils = require('users/yourecoveredinbees/CarbonDevelopmentTeam:CDT_Utilities/api');  // not used below
 //Projection parameters
   var scale = 30;
   var proj = "EPSG:4326";
@@ -27,6 +31,7 @@ var utils = require('users/yourecoveredinbees/CarbonDevelopmentTeam:CDT_Utilitie
 var Bhutan = ee.FeatureCollection("projects/bhutan-hfld-readiness-training/assets/Bhutan");
 // Define AOI (entire Bhutan)
 var AOI = Bhutan;
+var proj_area = Bhutan.geometry();  // area used for the strata areas (not defined in the exercise)
 // Display AOI
 Map.addLayer(AOI, {color: 'red'}, 'Bhutan AOI');
 Map.centerObject(AOI, 7);
@@ -112,7 +117,7 @@ var LC_Dict = ee.Dictionary({
       4 : 'Wetland'           ,
       5 : 'Settlement'        ,
       6 : 'Other Land'        ,
-// 10 : 'Deforestation'
+     10 : 'Deforestation'
 });
 //Review the stratification map
 var mapSelect = LULC.updateMask(GSE_defor.unmask(0).neq(1)).unmask(10)
