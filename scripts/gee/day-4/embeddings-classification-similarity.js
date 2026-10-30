@@ -2,17 +2,23 @@
  * Land cover classification and cosine similarity using AlphaEarth Foundations embeddings
  *
  * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D4_ Land Cover Classification and Cosine Simarity Using AFE.docx
+ * Source: EXERCISE D4_ Land Cover Classification and Cosine Simarity Using AFE.docx ("Similarity" in the title)
  * Original authors: Ate Poortinga & Samuel (Conservation International).
  * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
- * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
+ * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
+ *   - The exercise's two scripts run one after the other: Part A (a primitive from embeddings with
+ *     Gradient Tree Boost) and Part B (cosine similarity search). Part C (change between years) was
+ *     written for the website.
+ *   - The binary layer's name is restored (commented out when the code was extracted).
+ *   - The similarity mask is exported to your own project instead of projects/servir-mekong/temp.
  *
  * Original Code Editor script(s):
  *   https://code.earthengine.google.com/6f392726575a952a1060b31390acf071
  *   https://code.earthengine.google.com/7d6d85cb415ba01ec5e4b92a74ff6e04
  */
 
-// ----  ----
+// ==== PART A: A PRIMITIVE FROM EMBEDDINGS (Gradient Tree Boost) ====
+// ---- Part 1: Load boundaries and define the AOI ----
 // Load boundaries
 var Bhutan = ee.FeatureCollection("FAO/GAUL/2015/level1")
   .filter(ee.Filter.eq("ADM0_NAME", "Bhutan"));
@@ -198,7 +204,7 @@ Map.addLayer(
     max: 1,
     palette: ["d9d9d9", "1a9850"]
   },
-// targetClass + " / Non-" + targetClass + " AlphaEarth"
+  targetClass + " / Non-" + targetClass + " AlphaEarth"
 );
 var targetMask = targetNonTarget.eq(1).selfMask();
 Map.addLayer(
@@ -262,6 +268,7 @@ Export.table.toDrive({
   fileFormat: "CSV"
 });
 
+// ==== PART B: COSINE SIMILARITY SEARCH ====
 // ---- Part 1: Import Area of Interest (AOI) or Draw Geometry Directly ----
 AOI =
     /* color: #ffc82d */
@@ -293,7 +300,7 @@ var geometry =
 // ---------------------------------------------------------------------
 Map.centerObject(AOI, 11);
 Map.setOptions('SATELLITE');
-// Smaller AOI for faster visualization
+// AOI plus a 1 km margin (the exercise's comment called it a smaller AOI)
 var smallAOI = AOI.buffer(1000);
 Map.addLayer(AOI, {color: 'red'},'AOI', false);
 
@@ -463,7 +470,7 @@ Export.image.toAsset({
   description:
     'similarity_mask_' + year,
   assetId:
-    'projects/servir-mekong/temp/' +
+    'projects/your-project/assets/' +  // replace with your Cloud project
     'similarity_mask_' + year,
   region: smallAOI,
   scale: scale,
@@ -472,3 +479,25 @@ Export.image.toAsset({
     '.default': 'mode'
   }
 });
+
+// ==== PART C: CHANGE BETWEEN YEARS (written for the website) ====
+// Same pixel, two years: dot product of the two embeddings. Low similarity flags change.
+var embeddingFor = function(y) {
+  return embeddings
+    .filter(ee.Filter.date(ee.Date.fromYMD(y, 1, 1), ee.Date.fromYMD(y + 1, 1, 1)))
+    .filterBounds(AOI)
+    .mosaic()
+    .select('A.*');
+};
+var yearA = 2023;
+var yearB = 2024;
+var change = embeddingFor(yearA).multiply(embeddingFor(yearB))
+  .reduce(ee.Reducer.sum())
+  .rename('similarity_between_years')
+  .clip(smallAOI);
+Map.addLayer(
+  change,
+  {min: 0.5, max: 1, palette: ['d73027', 'fee08b', 'ffffff']},
+  'Similarity ' + yearA + ' vs ' + yearB + ' (red = change)',
+  false
+);

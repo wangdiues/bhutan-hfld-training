@@ -1,17 +1,235 @@
 ---
-title: "Classification and similarity with embeddings"
+title: "Land cover and similarity with embeddings"
+description: Train a Gradient Tree Boost model on AlphaEarth satellite embeddings to map one land-cover class, search for places similar to reference samples with cosine similarity, and map change as low similarity between years.
 sidebar:
   order: 5
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import { Image } from 'astro:assets';
+import trainingPts from '~/assets/day-4/satellite-embeddings/s25-986abc115e.webp';
+import landCover from '~/assets/day-4/satellite-embeddings/s26-8b1b936883.webp';
+import forestProb from '~/assets/day-4/satellite-embeddings/s27-9e2cd8f9d6.webp';
+import settlement from '~/assets/day-4/satellite-embeddings/s24-4f9698177e.webp';
+import settlementSim from '~/assets/day-4/satellite-embeddings/s24-33d8d81c10.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["Can embeddings replace composites and covariates in my classification?", "How do I find all places similar to a few examples?"]}
+  objectives={[
+    "Classify with embedding bands.",
+    "Compute similarity to reference samples.",
+    "Map change as low similarity between years.",
+  ]}
+  teaching={20} exercises={30}
+  prerequisites={["Satellite embeddings (AlphaEarth)", "Forest primitives with machine learning"]}
+/>
 
-## In this lesson you will
+This exercise uses the [Satellite Embedding dataset](/bhutan-hfld-training/day-4/satellite-embeddings/) in two ways. **Part A** trains a classifier on the 64 <Term id="embedding" /> bands, instead of composites and covariates, to make a probability layer (a primitive) for one class. **Part B** searches for places similar to a few reference points using cosine similarity. **Part C** maps change between two years. The script runs top to bottom; switch layers on and off in the Layers menu.
 
-- Classify with embedding bands
-- Compute similarity to reference samples
-- Map change as low similarity between years
+<Callout type="mistake" title="Assets you need">
+Part A reads the trainers' labelled samples (`projects/bhutan-hfld-readiness-training/assets/trainingData/Bhutan_labels_multiclass`). Without access, use your own points with a `class_name` property ([Collecting training data](/bhutan-hfld-training/day-4/training-data/)). Parts B and C need no private assets.
+</Callout>
 
-**Time:** about 20 min teaching + 30 min practice.
+## Part A: a primitive from embeddings
+
+### Setup: area, target class, samples and embeddings
+
+Set the target class, load the labelled samples, and load the 2024 embedding image (a mosaic of the annual tiles covering the samples). Compare this with the [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) workflow: the embedding image takes the place of the whole composite-plus-covariates stack, with no pre-processing.
+
+<CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[20, 67]} />
+
+### Labels, sampling, split and balance
+
+The same steps as for the forest primitive: a binary target label, embeddings sampled at the points (at 10 m), a 90/10 training–validation split, and a balanced training set.
+
+<CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[68, 142]} />
+
+<Image src={trainingPts} alt="Training points for land cover classes (forest, crop, grass, other, built-up, water) placed across Bhutan." />
+
+### Train a Gradient Tree Boost model
+
+This time the classifier is **Gradient Tree Boost** rather than Random Forest. Boosting builds trees one after another, each correcting the errors of the previous ones:
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[143, 191]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+# Assumes `training`, `validation` and `bands` built as in the JavaScript version,
+# and `alpha_earth` the 2024 embedding mosaic.
+classifier = ee.Classifier.smileGradientTreeBoost(
+    numberOfTrees=200, shrinkage=0.05, samplingRate=0.7, loss="LeastSquares", seed=42
+).train(features=training, classProperty="target", inputProperties=bands)
+matrix = validation.classify(classifier).errorMatrix("target", "classification")
+print("Validation overall accuracy:", matrix.accuracy().getInfo())
+probability = alpha_earth.select(bands).classify(classifier.setOutputMode("PROBABILITY"))
+```
+  </TabItem>
+</Tabs>
+
+- `numberOfTrees: 200`: trees added one by one.
+- `shrinkage: 0.05`: the learning rate; each tree's contribution is scaled down, so learning is slow and steady.
+- `samplingRate: 0.7`: each tree sees 70% of the samples (stochastic boosting).
+
+Variable importance is useful as a check, but the embedding axes are learned, so their importance has no physical meaning.
+
+### Classify, probability and export
+
+<CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[192, 270]} />
+
+The trainers' results for Bhutan: a six-class land-cover map and a forest probability layer from embeddings.
+
+<Image src={landCover} alt="Land cover map of Bhutan for 2025 classified from embeddings, with a legend: cropland, forest, grassland, other land, settlement, wetland." />
+
+<Image src={forestProb} alt="Forest probability map of Bhutan for 2025, from 0 to 100 percent, shown in green." />
+
+<Callout type="why">
+Why this matters: embeddings make a strong first map with little effort, and they can be added to the primitive approach as another source (`afe_<Class>_<year>` primitives) to compare with Landsat and Sentinel-2 primitives.
+</Callout>
+
+## Part B: cosine similarity search
+
+### Area and reference samples
+
+Define a search area (a rectangle around western Bhutan, drawn in the training) and a few reference points of the thing you want to find. The training used four points drawn in Thimphu, Paro and further south; check what they show on imagery, and replace them with your own examples:
+
+<CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[271, 333]} />
+
+`smallAOI` adds a 1 km margin to the rectangle (the exercise's comment called it a "smaller AOI", but `buffer(1000)` makes it slightly larger).
+
+### Embeddings at the reference points
+
+<CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[334, 369]} />
+
+### Cosine similarity and the mean of several samples
+
+For each reference point, turn its 64 values into a constant image and take the dot product with every pixel: that is the cosine similarity. Averaging the similarity maps of several points gives a more robust definition of "like these":
+
+<CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[370, 421]} />
+
+### Threshold, polygons and export
+
+Keep pixels with similarity above 0.80, turn them into polygons and their centroids, and export the mask:
+
+<CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[422, 481]} />
+
+<Image src={settlement} alt="Settlement map for 2025 over a Bhutanese town, built-up areas in white over forest and farmland." />
+
+<Image src={settlementSim} alt="Embedding similarity layer for settlements, shown as a blue false-colour image." />
+
+The threshold is a choice: higher finds fewer, closer matches; lower finds more, including false ones. Check matches against high-resolution imagery.
+
+## Part C: change between years
+
+The same dot product, between one pixel's embeddings in two years, measures how much it changed. Low values (red) flag change:
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[483, 503]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+emb = ee.ImageCollection("GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL")
+
+
+def embedding_for(y, aoi):
+    return emb.filterDate(f"{y}-01-01", f"{y + 1}-01-01").filterBounds(aoi).mosaic().select("A.*")
+
+
+change = embedding_for(2023, aoi).multiply(embedding_for(2024, aoi)).reduce(ee.Reducer.sum())
+```
+  </TabItem>
+</Tabs>
+
+Low similarity can also come from a wet year against a dry one, so check flagged places before calling them land-cover change.
+
+## The full script
+
+<CodeBlock script="day-4/embeddings-classification-similarity.js" />
+
+<OpenInGEE script="day-4/embeddings-classification-similarity.js" hash="6f392726575a952a1060b31390acf071" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `ee.ImageCollection('GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL')` | Annual 64-band embeddings |
+| `ee.Classifier.smileGradientTreeBoost({...})` | Gradient-boosted trees |
+| `feature.toArray(bands)`, `ee.Image.constant(...).arrayFlatten([bands])` | A sample's embedding as a constant 64-band image |
+| `a.multiply(b).reduce(ee.Reducer.sum())` | Dot product = cosine similarity |
+| `image.reduceToVectors({...})` | Turns a mask into polygons |
+| `feature.centroid()` | The centre of each polygon |
+
+## Common mistakes
+
+- **Mixing the embedding year and the label year.** Use labels that describe the embedding's year.
+- **Reading low similarity as change without checking.** Seasonal and climatic differences also lower it.
+- **One reference point.** Average several to define the target robustly.
+- **Interpreting the importance of `A16` or any single axis** as a physical variable.
+
+<Callout type="bhutan">
+Bhutan context: built-up areas are small and scattered in Bhutan's valleys, so similarity search with a handful of good examples is a fast way to find candidate settlements, and to check where a settlement primitive may be missing them.
+</Callout>
+
+## Practice
+
+<Challenge level="complete" time={15} hints={["Replace the four MultiPoint coordinates.", "Pick clearly built-up spots in central Thimphu."]}>
+Make a **similarity map of Thimphu's built-up area**: change Part B's reference points to four built-up locations in Thimphu, re-run, and compare the >0.80 mask with the town on high-resolution imagery.
+
+<Fragment slot="solution">
+Replace the `geometry` MultiPoint with four points in central Thimphu, for example near `[89.6419, 27.4661]`, `[89.6370, 27.4720]`, `[89.6450, 27.4600]` and `[89.6320, 27.4800]`, and centre the map on Thimphu. The mask should cover the town and other dense settlements nearby; adjust `threshold` if it picks up bare riverbeds or roads.
+</Fragment>
+</Challenge>
+
+<Challenge level="blanks" time={15} hints={["Only yearA and yearB change.", "Pick the two most recent years available in the catalog."]}>
+Map change between **2022 and 2024** in Part C.
+
+```js
+var yearA = ___;
+var yearB = ___;
+```
+
+<Fragment slot="solution">
+```js
+var yearA = 2022;
+var yearB = 2024;
+```
+Red pixels are places whose embeddings changed most between the two years; check them on imagery for new construction, clearing or landslides.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-4-embeddings-classification-similarity" questions={[
+  { q: "What replaces the composite and covariates in Part A?", options: ["The 64 embedding bands", "A Landsat composite", "NDVI only", "The JRC water layers"], answer: 0, explain: "The embedding image is used directly as the classifier's input, with no pre-processing." },
+  { q: "Why average the similarity maps of several reference points?", options: ["To make the computation faster", "To define what you are looking for more robustly than with one point", "Because one point gives no similarity", "To remove clouds"], answer: 1, explain: "One point may be unusual; several points capture the class better." },
+  { q: "Low similarity between a pixel's 2023 and 2024 embeddings means…", options: ["certain land-cover change", "possible change, to be checked (it can also be seasonal or climatic)", "a classification error", "missing data"], answer: 1, explain: "Similarity in time measures stability; check flagged places on imagery." },
+  { q: "Gradient Tree Boost builds trees one after another, each correcting the previous ones' errors.", answer: true, explain: "Unlike Random Forest's independent trees, boosting is sequential; shrinkage controls each tree's contribution." },
+]} />
+
+<KeyPoints points={[
+  "Embedding bands can be classified directly, giving a primitive with no pre-processing.",
+  "Cosine similarity (dot product) to a few reference samples finds similar places; average several samples for robustness.",
+  "Similarity between years flags change, which must be checked.",
+]} />
+
+<Credit
+  source="EXERCISE D4: Land Cover Classification and Cosine Similarity Using AlphaEarth Foundation Embeddings"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Title typo corrected (\"Simarity\")",
+    "Converted to a web lesson; the exercise's two scripts run as Parts A and B; new Part C maps change between years",
+    "Binary layer name restored (commented out when the code was extracted); the similarity mask exports to your own project instead of projects/servir-mekong/temp",
+    "Added explanations, Python versions, practice and a quiz",
+  ]}
+/>
