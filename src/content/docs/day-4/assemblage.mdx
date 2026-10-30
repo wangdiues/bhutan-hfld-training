@@ -40,13 +40,13 @@ The script loads the trainers' 2025 Sentinel-2 primitives (`projects/servir-meko
 
 Load an image whose footprint defines the area of interest, set the year, and load the six primitives. Each has a `target_probability` band, renamed to a short name, and they are stacked into one image:
 
-<CodeBlock script="day-4/assemblage.js" lines={[24, 55]} />
+<CodeBlock script="day-4/assemblage.js" lines={[26, 57]} />
 
 ## Part 4: Settings
 
 The order of `primitives` is the **priority order** of the rules, and `defaultThresholds` gives the probability each class needs before it is assigned:
 
-<CodeBlock script="day-4/assemblage.js" lines={[57, 92]} />
+<CodeBlock script="day-4/assemblage.js" lines={[59, 95]} />
 
 | Priority | Primitive | Default threshold | Class code |
 |---|---|---|---|
@@ -63,7 +63,7 @@ Rare classes such as built-up and wetland get lower thresholds, because their mo
 
 Two functions support the assemblage: one displays each primitive, and one turns the slider values into a decision tree in the text format that `ee.Classifier.decisionTree()` reads:
 
-<CodeBlock script="day-4/assemblage.js" lines={[93, 153]} />
+<CodeBlock script="day-4/assemblage.js" lines={[96, 156]} />
 
 The tree is a chain of yes/no questions, in priority order:
 
@@ -80,19 +80,19 @@ A pixel can pass more than one threshold: forest 0.62 and crop 0.70, say. The tr
 
 `process()` clears the map, shows each primitive, classifies the stack with the decision tree and displays the land-cover map:
 
-<CodeBlock script="day-4/assemblage.js" lines={[154, 180]} />
+<CodeBlock script="day-4/assemblage.js" lines={[157, 184]} />
 
 ## Parts 7 and 8: Legend and inspector
 
 A legend, and a panel that shows all six probabilities wherever you click on the map, so you can see why a pixel got its class:
 
-<CodeBlock script="day-4/assemblage.js" lines={[181, 262]} />
+<CodeBlock script="day-4/assemblage.js" lines={[185, 268]} />
 
 ## Part 9: Area by class
 
 Multiply each class mask by the pixel area (in hectares) and sum over the area of interest:
 
-<CodeBlock script="day-4/assemblage.js" lines={[263, 310]} />
+<CodeBlock script="day-4/assemblage.js" lines={[269, 316]} />
 
 <Callout type="mistake" title="Corrected: class names in the area table">
 The decision tree gives class 1 to the first primitive (forest), class 2 to the second (crop), and so on. The exercise's area table listed "Cropland" first, so the forest and cropland areas were swapped. The course script names the classes in the same order as `primitives`.
@@ -104,7 +104,7 @@ These are **mapped** areas. They show the map's composition, but they are not th
 
 Export the map to an asset or to Drive. For a categorical map, `pyramidingPolicy: 'mode'` makes the zoomed-out views show the most common class instead of an average of class codes. `init()` builds the control panel; it was called but not defined in the exercise, so the course script adds one: a slider per primitive, a **Run assemblage** button, and export tools.
 
-<CodeBlock script="day-4/assemblage.js" lines={[311, 381]} />
+<CodeBlock script="day-4/assemblage.js" lines={[317, 387]} />
 
 Move a slider, click **Run assemblage**, and watch the map and the areas change.
 
@@ -128,7 +128,7 @@ Move a slider, click **Run assemblage**, and watch the map and the areas change.
 ## Common mistakes
 
 - **Thinking the highest probability always wins.** With a rule chain, the first rule passed wins; order matters.
-- **Thresholds set too high**, leaving many pixels unclassified (class 0). Check the map for holes.
+- **Thresholds set too high**, leaving many pixels unclassified (class 0). The course script masks class 0, so these show as gaps in the map: check for them.
 - **Mismatched class codes and names** in legends and area tables (see the correction above).
 - **Exporting a categorical map with the default (mean) pyramiding.** Zoomed-out views then show meaningless averages.
 
@@ -151,7 +151,7 @@ var defaultThresholds = [0.50, ___, ___, 0.55, 0.60, 0.25];
 var primitives = ['forest', 'bu', 'crop', 'grass', 'other', 'wet'];
 var defaultThresholds = [0.50, 0.30, 0.55, 0.55, 0.60, 0.25];
 ```
-Class 2 is now built-up and class 3 cropland, so reorder `lcVis.palette` (`'267300', 'E600A9', 'AAFF00', …`), the legend and `classNames` the same way. The built-up area rises and cropland falls, mostly in mixed valley pixels.
+Class 2 is now built-up and class 3 cropland, so reorder `lcVis.palette` (`'267300', 'E600A9', 'AAFF00', …`) and `classNames` the same way. (The legend pairs each name with its own colour, so it stays correct.) The built-up area rises and cropland falls, mostly in mixed valley pixels.
 </Fragment>
 </Challenge>
 
@@ -183,5 +183,6 @@ Class 2 is now built-up and class 3 cropland, so reorder `lcVis.palette` (`'2673
     "Primitive stack, default thresholds and panel borders restored (commented out when the code was extracted)",
     "Area table class names put in the decision tree's order (the exercise swapped forest and cropland)",
     "Year set to 2025 to match the primitives",
+    "Unclassified pixels (class 0) masked in the display; the legend is replaced on each run instead of stacked",
   ]}
 />

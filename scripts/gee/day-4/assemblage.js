@@ -13,6 +13,8 @@
  *   - computeArea() labelled class 1 "Cropland" and class 2 "Forest", but the decision tree numbers
  *     classes in the order of `primitives` (forest = 1, crop = 2...); the names now follow that order.
  *   - The year is 2025, matching the primitives (the exercise said 2024).
+ *   - Class 0 (unclassified) is masked in the display, and the legend is replaced on each run
+ *     instead of added again (needed once init() lets you re-run the assemblage).
  *
  * The primitives (s2_<Class>_2025) and the Landsat image used for the area of interest are the
  * trainers' assets; with no access, use your own primitives from the Forest primitives lesson.
@@ -90,6 +92,7 @@ var landClass;             // final classification result
 var stackImageGlobal;      // stacked primitive image
 var valLabels = {};        // store threshold labels
 var assetInput;            // input asset reference
+var legendPanel;           // the legend, so re-runs replace it instead of adding another
 // ============================================================
 // FUNCTIONS
 // ============================================================
@@ -169,8 +172,9 @@ function process(){
     ee.Classifier.decisionTree(buildDecisionTree())
   );
   // 📌 Display classification result
+  // Class 0 (no rule passed) is masked, so unclassified pixels show as gaps.
   Map.addLayer(
-    landClass.clip(aoi),
+    landClass.selfMask().clip(aoi),
     lcVis,
     'Decision Tree LC'
   );
@@ -183,7 +187,8 @@ function process(){
 // LEGEND
 // ============================================================
 function addLegend(){
-  // 📌 Create legend panel
+  // 📌 Create legend panel (remove the previous one first)
+  if (legendPanel) Map.remove(legendPanel);
   var legend = ui.Panel({
     style:{
       position:'bottom-right',
@@ -209,6 +214,7 @@ function addLegend(){
     ], ui.Panel.Layout.Flow('horizontal')));
   });
   // 📌 Add legend to map
+  legendPanel = legend;
   Map.add(legend);
 }
 
