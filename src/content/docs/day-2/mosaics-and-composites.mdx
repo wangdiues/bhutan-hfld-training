@@ -56,14 +56,14 @@ Two products are in Earth Engine: **Level-1C** (top-of-atmosphere reflectance) a
 
 Both turn many images into one, but in different ways:
 
-- A **mosaic** places images side by side or on top of each other. Where they overlap, one image wins: in Earth Engine, `collection.mosaic()` keeps the last image in the collection on top. A mosaic keeps real pixel values from single dates, but it also keeps any cloud in the top image.
+- A **mosaic** places images side by side or on top of each other. Where they overlap, one image wins: in Earth Engine, `collection.mosaic()` keeps the last image in the collection on top, so sort the collection by date first if you want the latest image on top. A mosaic keeps real pixel values from single dates, but it also keeps any cloud in the top image.
 - A <Term id="composite" /> builds each pixel from **all** the images that cover it, using a rule: the median, a percentile, or the "best" pixel by some score (`qualityMosaic`). A composite mixes dates, but it can remove clouds and shadows.
 
 Run the script below to see all three side by side over Thimphu for the 2025 dry season. Switch the layers on and off in the Layers menu.
 
 <Tabs>
   <TabItem label="JavaScript (Code Editor)">
-    <CodeBlock script="day-2/mosaics-and-composites.js" lines={[12, 33]} />
+    <CodeBlock script="day-2/mosaics-and-composites.js" lines={[12, 34]} />
   </TabItem>
   <TabItem label="Python (geemap)">
 ```python
@@ -73,7 +73,12 @@ import geemap
 ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
 
 thimphu = ee.Geometry.Point([89.64, 27.47])
-s2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED").filterBounds(thimphu).filterDate("2025-01-01", "2025-05-01")
+s2 = (
+    ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+    .filterBounds(thimphu)
+    .filterDate("2025-01-01", "2025-05-01")
+    .sort("system:time_start")
+)
 vis = {"bands": ["B4", "B3", "B2"], "min": 0, "max": 3000}
 with_ndvi = s2.map(lambda img: img.addBands(img.normalizedDifference(["B8", "B4"]).rename("NDVI")))
 
@@ -108,7 +113,7 @@ Before classification, three kinds of correction make pixel values comparable ac
 **Topographic (illumination) correction** matters a lot in Bhutan. The same forest on a sunlit south-facing slope and a shaded north-facing slope can look like two different classes. The correction computes how directly each pixel faces the sun, from the slope and aspect of a DEM and the sun position, and adjusts the reflectance. The course's module uses the illumination condition approach credited to Patrick Burns and Matt Macander.
 
 <Callout type="bhutan">
-Bhutan context: Bhutan rises from about 100 m to over 7,000 m within 150 km, and many valleys run north–south, so shadows are long in winter. Without terrain correction, shaded forest is easily mapped as a different class. Persistent cloud also means some places are clear in only a few images per season: always check how many clear observations each pixel had.
+Bhutan context: Bhutan rises from the southern foothills, at a few hundred metres, to Himalayan peaks above 7,000 m (Gangkhar Puensum is about 7,570 m), and in winter the low sun leaves steep north-facing slopes in shadow. Without terrain correction, shaded forest is easily mapped as a different class. Persistent cloud also means some places are clear in only a few images per season: always check how many clear observations each pixel had.
 </Callout>
 
 ## The workflow as modules
@@ -153,6 +158,12 @@ The path has four parts: `users/` + **your account name** + `/` + **your reposit
 <Image src={mainScript} alt="Code Editor script that loads the pre-processing modules with require() and prints the image count after each step." />
 
 The trainers' main script is at [code.earthengine.google.com/2fd4b21119ef4b9c6ff6893f3a7e9c9e](https://code.earthengine.google.com/2fd4b21119ef4b9c6ff6893f3a7e9c9e). The next lesson walks through it.
+
+## Further learning
+
+- *Cloud-Based Remote Sensing with Google Earth Engine: Fundamentals and Applications* (Cardille et al., Springer, 2024), free and open access, at [eefabook.org](https://www.eefabook.org/).
+- [Open Geo Blog](https://mygeoblog.com/), with Earth Engine tutorials.
+- Google's [Earth Engine guides and tutorials](https://developers.google.com/earth-engine/guides).
 
 ## Key functions
 
@@ -205,5 +216,7 @@ The mosaic shows the most recent image on top, cloud and all. The median removes
     "New: a script comparing a mosaic, a median composite and a greenest-pixel mosaic over Thimphu (with geemap)",
     "Sentinel-2 repeat cycle given as 10 days per satellite and 5 with two",
     "The shadow-masking module's description on the slide repeated the import module's; replaced with what the module does",
+    "Spelling of Patrick Burns corrected (slide: Patrik)",
+    "The rendered module diagram cropped to remove the slide title, logo and footer; slide 16 links given as text",
   ]}
 />

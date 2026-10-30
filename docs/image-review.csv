@@ -142,9 +142,9 @@ D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,24,s24-c
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,27,s27-c4e7bff2e5.webp,picture,drop,third-party figure (Google/DeepMind deck),
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,28,s28-dadb2f1599.webp,picture,drop,stock photo,
 D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx,28,s28-f4cd33d0c0.webp,picture,drop,logo,
-D2-Creating Mosaics and Composites from Image Collections.pptx,4,s04-757424412f.webp,picture,redraw,third-party remote sensing diagram; redraw,
+D2-Creating Mosaics and Composites from Image Collections.pptx,4,s04-757424412f.webp,picture,drop,orbit figure replaced by the Sentinel-2 orbit table in the lesson (M4-10),
 D2-Creating Mosaics and Composites from Image Collections.pptx,5,s05-9a7bcc70d7.webp,picture,drop,third-party figure (Google/DeepMind deck),
-D2-Creating Mosaics and Composites from Image Collections.pptx,7,s07-diagram.webp,diagram,keep,screenshot or trainers' own figure,"Flow diagram of the image pre-processing modules: import Sentinel-2, shadow masking, cloud masking, BRDF correction, topographic correction, cloud-free composite, all called from a main script."
+D2-Creating Mosaics and Composites from Image Collections.pptx,7,s07-diagram.webp,diagram,keep,"trainers' own diagram; cropped to remove the slide title, logo and footer","Flow diagram of the image pre-processing modules: import Sentinel-2, shadow masking, cloud masking, BRDF correction, topographic correction, cloud-free composite, all called from a main script."
 D2-Creating Mosaics and Composites from Image Collections.pptx,8,s08-4bf2742978.webp,picture,keep,screenshot or trainers' own figure,The 'New repository' dialog in the Code Editor.
 D2-Creating Mosaics and Composites from Image Collections.pptx,8,s08-22d69a12e5.webp,picture,keep,screenshot or trainers' own figure,"The Scripts tab NEW menu with Repository, Folder and File options."
 D2-Creating Mosaics and Composites from Image Collections.pptx,8,s08-3c0f2f2372.webp,picture,keep,screenshot or trainers' own figure,The 'Create folder' dialog with a folder name entered.

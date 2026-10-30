@@ -16,7 +16,8 @@ Map.centerObject(thimphu, 10);
 // https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED
 var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
     .filterBounds(thimphu)
-    .filterDate('2025-01-01', '2025-05-01');
+    .filterDate('2025-01-01', '2025-05-01')
+    .sort('system:time_start');  // oldest first, so the latest image ends up on top of the mosaic
 print('Images:', s2.size());
 var vis = {bands: ['B4', 'B3', 'B2'], min: 0, max: 3000};
 
