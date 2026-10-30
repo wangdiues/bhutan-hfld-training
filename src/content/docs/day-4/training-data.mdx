@@ -1,17 +1,245 @@
 ---
-title: "Collecting training data"
+title: "Collecting training data and supervised classification"
+description: Collect labelled training points with the geometry tools, combine them with existing samples, sample the covariates, and train a six-class Random Forest land-cover map; then compare it with the primitive approach.
 sidebar:
   order: 2
 ---
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I collect good training points?", "How does one six-class model compare with one model per class?"]}
+  objectives={[
+    "Collect training points with the geometry tools for six classes.",
+    "Merge them with existing samples.",
+    "Compare a single-model classification with the primitive approach.",
+  ]}
+  teaching={20} exercises={30}
+  prerequisites={["Forest primitives with machine learning", "RLCMS overview and terms"]}
+/>
 
-## In this lesson you will
+A classifier learns from **training samples**: labelled locations of each land-cover class. The quality of the samples limits the quality of the map. In this exercise you collect samples with the Geometry Tool, prepare them for Random Forest, and train a supervised classification of six classes. Save your script as *Supervised Classification - Random Forest Model* in your own repository.
 
-- Collect training points with the geometry tools for 6 classes
-- Merge them with existing samples
-- Compare a single-model classification with the primitive approach
+| Code | Class |
+|---|---|
+| 1 | CropLand |
+| 2 | Forest |
+| 3 | Grassland |
+| 4 | Otherland |
+| 5 | Settlement |
+| 6 | Wetland |
 
-**Time:** about 20 min teaching + 30 min practice.
+## Part 1: Set up geometry imports
+
+<Steps>
+
+1. **Create a geometry.** Click the **point** tool at the top left of the map and add points on places that are clearly one class, for example forest.
+
+2. **Set its properties.** Hover over the layer under *Geometry Imports*, click the ⚙️ gear icon, and set:
+   - **Name:** the class, for example `forest`;
+   - **Import as:** `FeatureCollection`;
+   - **Add property:** name `class`, value the class code from the table (Forest = 2).
+
+3. **Add the other classes.** Under *Geometry Imports*, click **+ new layer** and repeat for each class, each with its own `class` value.
+
+4. **Save** the script (Ctrl+S). The geometry layers appear as imports at the top of the script.
+
+</Steps>
+
+<Callout type="mistake" title="Use the property name `class`">
+The exercise text names the property `land_class`, but every script that follows reads `class`. If your points carry `land_class`, `sampleRegions` drops the label and training fails. Call it `class`, with a number (not text) as its value.
+</Callout>
+
+## Part 2: The annual composite
+
+Use the composite from Day 2 as the input. It can be Landsat, Sentinel-2, or the AlphaEarth satellite embeddings ([Satellite embeddings](/bhutan-hfld-training/day-4/satellite-embeddings/)). To use your own export, click **Import** next to the asset in the Assets tab, or change the asset path in the script. The script below uses the trainers' prepared 2025 Sentinel-2 composite, and also shows the 2024 AlphaEarth embedding for comparison.
+
+<CodeBlock script="day-4/training-data.js" lines={[24, 72]} />
+
+<Callout type="mistake" title="Assets you need">
+The composite (`projects/servir-mekong/bhutan_primitives/s2_2025_janapr_octdec_int16`) and the labels (`projects/bhutan-hfld-readiness-training/assets/trainingData/…`) were shared with training participants. Without access, use your own composite from the [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) lesson and the points you collect.
+</Callout>
+
+## Part 3: Collect the samples
+
+You can collect samples with the Geometry Tool, load existing samples from an asset, or both. Assets suit large sample sets collected elsewhere (for example in the field); the Geometry Tool suits a few hundred points and quick updates.
+
+- **Navigate** with the hand tool; scroll to zoom in until you can recognise objects: trees, buildings, roads, field patterns.
+- **Switch the basemap** to *Satellite* (top right of the map) and toggle the composite on and off in *Layers* to compare.
+- **Place points** only where you are confident of the class, in the middle of a uniform area rather than on edges.
+- **Spread them out** across Dzongkhags, elevations and slope directions, not just near roads.
+- Collect **at least 10 per class**. More is better.
+
+To combine your drawn points into one collection, and with samples from an asset:
+
+```js
+// Your drawn layers, each with a numeric `class` property.
+var sample = cropland.merge(forest).merge(grassland)
+    .merge(otherland).merge(settlement).merge(wetland);
+// Add them to existing samples that already have a numeric `class` (see Part 6, step 4).
+var allSamples = samplesMulti.merge(sample);
+print('All samples by class', allSamples.aggregate_histogram('class'));
+```
+
+## Parts 4 and 5: Sample the covariates and export
+
+Extract the covariate values at each sample point. This turns the image into a table: one row per point, one column per covariate (NDVI, elevation, NDWI…). Remove rows with missing values, then export the table so you don't have to recompute it:
+
+```js
+var trainingData = covariates.sampleRegions({
+  collection: sample,        // training samples
+  properties: ['class'],     // class label
+  scale: 10,                 // Sentinel-2 resolution (10 m)
+  geometries: true           // keep geometry (optional)
+});
+trainingData = trainingData.filter(
+  ee.Filter.notNull(covariates.bandNames())
+);
+print("Training Dataset:", trainingData);
+
+Export.table.toAsset({
+  collection: trainingData,                    // dataset to export
+  description: 'bhutan_training_dataset_2025', // task name
+  assetId: 'projects/your_project/bhutan_training_dataset_2025'
+});
+```
+
+Replace `your_project` with your Cloud project ID.
+
+## Part 6: Supervised classification
+
+Now train **one** Random Forest on all six classes at once. Each step of the full workflow:
+
+### Covariates
+
+The covariate function is the one from [Calculating covariates](/bhutan-hfld-training/day-3/covariates/), adapted to Sentinel-2 band names (B8 = NIR, B11 and B12 = SWIR), plus terrain and JRC water layers:
+
+<CodeBlock script="day-4/training-data.js" lines={[73, 152]} />
+
+### Labels as numbers
+
+Machine learning needs numeric labels, so the class names are converted to codes 1–6. `ee.Algorithms.If` is a server-side if/else, nested once per class:
+
+<CodeBlock script="day-4/training-data.js" lines={[153, 171]} />
+
+When you load samples from the asset `trainingData/Bhutan_stable_classes`, note that the exercise's path ends with a space (`"…/Bhutan_stable_classes "`), which makes the load fail: remove it. That asset stores the name in `class`; `Bhutan_labels_multiclass`, used in the script, stores it in `class_name`.
+
+### Sample, split, train
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-4/training-data.js" lines={[172, 203]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+# Assumes `covariates`, `bands` and `samples_multi` built as in the JavaScript version.
+sampled = covariates.sampleRegions(
+    collection=samples_multi, properties=["class"], scale=10, geometries=True
+).filter(ee.Filter.notNull(bands))
+sampled_random = sampled.randomColumn("random", 42)
+training = sampled_random.filter(ee.Filter.lt("random", 0.8))
+validation = sampled_random.filter(ee.Filter.gte("random", 0.8))
+
+classifier = ee.Classifier.smileRandomForest(numberOfTrees=100, bagFraction=0.7, seed=42).train(
+    features=training, classProperty="class", inputProperties=bands
+)
+matrix = validation.classify(classifier).errorMatrix("class", "classification")
+print("Overall accuracy:", matrix.accuracy().getInfo())
+classified = covariates.select(bands).classify(classifier).rename("landcover")
+```
+  </TabItem>
+</Tabs>
+
+80% of the samples train the model and 20% are held back to check it.
+
+### Accuracy, map, importance and export
+
+<CodeBlock script="day-4/training-data.js" lines={[204, 254]} />
+
+The confusion matrix shows which classes the model confuses: often cropland with grassland, and settlement with otherland.
+
+## Supervised classification or primitives?
+
+| | Supervised classification (this lesson) | Primitive approach (Day 3, Day 4) |
+|---|---|---|
+| Models | one model for all classes | one model per class |
+| Output | a class per pixel | a probability per class per pixel |
+| Combining | the model chooses the most voted class | an assemblage decision tree with your priorities and thresholds |
+| Changing a class definition | retrain the model | change the assemblage rules |
+| Uncertainty | hidden in the label | kept in the probabilities |
+
+Supervised classification is quicker to set up; the primitive approach gives more control, keeps uncertainty, and makes it easier to put a national forest definition into practice. The course uses primitives for Bhutan's activity data.
+
+<Callout type="bhutan">
+Bhutan context: settlements and croplands are small and scattered in narrow valleys, so they need deliberate sampling; forest dominates, so a random set of points would be mostly forest. Aim for balanced numbers per class.
+</Callout>
+
+## The full script
+
+<CodeBlock script="day-4/training-data.js" />
+
+<OpenInGEE script="day-4/training-data.js" hash="cca70a27a7d28a5fe8bd1e03b88ec6ba" />
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| Geometry Tool: point, + new layer, ⚙️ | Collects labelled points as FeatureCollections |
+| `collection.merge(other)` | Combines sample collections |
+| `image.sampleRegions({collection, properties, scale})` | Reads covariates at points |
+| `ee.Filter.notNull(bandNames)` | Drops samples with missing values |
+| `ee.Algorithms.If(...)` | Server-side if/else to recode labels |
+| `errorMatrix(actual, predicted)` | Confusion matrix and accuracy |
+
+## Common mistakes
+
+- **Text class values** (`'Forest'`) where a number is needed, or a property name other than `class`.
+- **Points on edges** between classes, or on cloud or shadow in the composite.
+- **Clustered points.** Samples all near one road teach the model only that road's surroundings.
+- **Too few samples for rare classes.** Wetland and settlement need deliberate effort.
+
+## Practice
+
+<Challenge level="complete" time={30} hints={["Use + new layer once per class and set class = 1…6.", "Check aggregate_histogram('class') after merging.", "Run the classification with your merged samples."]}>
+Collect **20 points per class** for the six classes in one Dzongkhag, merge them, and check the class histogram. Then train the classifier with your samples merged with the existing ones and compare the validation accuracy with the script's.
+
+<Fragment slot="solution">
+After drawing six layers with `class` 1–6: `var sample = cropland.merge(forest).merge(grassland).merge(otherland).merge(settlement).merge(wetland);` then `var allSamples = samplesMulti.merge(sample);` and use `allSamples` instead of `samplesMulti` in `sampleRegions`. The histogram should show 20 more points per class. Accuracy may rise or fall: well-placed points in your Dzongkhag usually improve the map there.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-4-training-data" questions={[
+  { q: "What property must your drawn training points carry for the scripts to use them?", options: ["land_class with text values", "class with numeric codes 1–6", "name", "No property is needed"], answer: 1, explain: "sampleRegions keeps the 'class' property, and the classifier needs numeric labels." },
+  { q: "Where should training points be placed?", options: ["On boundaries between classes", "Inside uniform areas you are confident of, spread across the region", "All near the nearest road", "Only in forest"], answer: 1, explain: "Clear, well-spread points teach the model each class across its range of conditions." },
+  { q: "How does the primitive approach differ from a single supervised classification?", options: ["It uses no training data", "It trains one model per class and combines probabilities with rules", "It only works with Landsat", "It produces no map"], answer: 1, explain: "Primitives keep a probability per class; the assemblage turns them into a map with your rules." },
+  { q: "You can combine points drawn with the Geometry Tool with samples loaded from an asset using merge().", answer: true, explain: "Both are FeatureCollections; give them the same numeric class property first." },
+]} />
+
+<KeyPoints points={[
+  "Collect clear, well-spread training points with the Geometry Tool; give each layer a numeric class property.",
+  "Merge drawn points with existing samples, sample the covariates, and drop rows with missing values.",
+  "One Random Forest can classify all six classes; primitives give more control and keep uncertainty.",
+]} />
+
+<Credit
+  source="EXERCISE D3 Part 1: Collecting Training Data — Supervised Classification Method (Random Forest Model)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Converted to a web lesson; code copied from the exercise; the full workflow is the course script",
+    "Property name for drawn points given as class (the text said land_class, the code reads class)",
+    "EVI, SAVI, NDBI, MNDWI and IBI restored in the covariate stack (commented out when extracted) and computed from reflectance scaled to 0–1",
+    "alphaEarth defined from the 2024 Satellite Embedding dataset; trailing space removed from an asset path",
+    "Added a merge example, a comparison table, a Python version, practice and a quiz",
+  ]}
+/>
