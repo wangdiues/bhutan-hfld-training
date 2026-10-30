@@ -21,7 +21,7 @@ import CodeBlock from '~/components/CodeBlock.astro';
     "Index the samples and make plots for interpretation.",
     "Export plots and samples for Collect Earth Online.",
   ]}
-  teaching={10} exercises={25}
+  teaching={15} exercises={25}
   prerequisites={["Determining sample size"]}
 />
 
@@ -69,13 +69,13 @@ Give each sample a number. Collect Earth Online needs two files:
 - **Plots**: points, lines or polygons, each with a unique `plotID`.
 - **Samples**: points, each with a `plotID` and a `sampleID`. Several samples may share a `plotID` (a cluster), but within a plot every `sampleID` must be unique.
 
-Here each plot has one sample, so `plotID` and `sampleID` are the same: simple random sampling.
+Here each plot has one sample, so `plotID` and `sampleID` are the same: simple random sampling. The script lists every sample's `system:index` with `aggregate_array`, numbers them from 0 to n − 1 (0 to 907 for 828 + 80 samples; the exercise text said 0 to 1,760), and sets both IDs; `copyProperties` later carries them onto the plots.
 
 <CodeBlock script="day-5/stratified-sampling-gee.js" lines={[49, 60]} />
 
 ## Part 5: Sampling plots
 
-The minimum mapping unit is one pixel of the land-cover map, so the interpreter must judge the land cover of the whole pixel. The map has 30 m pixels, so each sample point becomes a **30 m × 30 m square plot**: a 15 m buffer, turned into its bounding box.
+The minimum mapping unit is one pixel of the land-cover map, so the interpreter must judge the land cover of the whole pixel. The map has 30 m pixels, so each sample point becomes a square plot of about one pixel: a 15 m buffer, turned into its bounding box (30 m × 30 m; in EPSG:4326 a 30 m pixel near 27.5° N is slightly narrower east–west, about 27 m).
 
 <CodeBlock script="day-5/stratified-sampling-gee.js" lines={[62, 72]} />
 
@@ -113,6 +113,24 @@ Bhutan context: with 30 m plots on steep slopes, high-resolution imagery can be 
 </Callout>
 
 ## Practice
+
+<Challenge level="complete" time={20} hints={["Filter the Dzongkhag boundary and use it as region.", "classPoints [10, 10, 10] gives 10 per stratum."]}>
+Draw a small practice sample for **one Dzongkhag**: 10 points in each of the three strata, and export it.
+
+```js
+var paro = ee.FeatureCollection("FAO/GAUL/2015/level1")
+  .filter(ee.Filter.eq("ADM1_NAME", "Paro"));
+var practiceSample = remapSelect.stratifiedSample({
+  classBand: 'lc_no', region: paro, scale: scale, projection: proj, seed: 42,
+  classValues: [1, 2, 3], classPoints: [10, 10, 10], geometries: true
+});
+print(practiceSample.aggregate_histogram('lc_no'));
+```
+
+<Fragment slot="solution">
+Run the block after Part 2, then index and export `practiceSample` as in Parts 4–6. If the deforestation stratum has fewer than 10 pixels in the Dzongkhag, you get fewer points there.
+</Fragment>
+</Challenge>
 
 <Challenge level="blanks" time={15} hints={["Use the forest and deforestation numbers from your calculator.", "Non-forest stays at 0 in this design."]}>
 Draw a sample with **your own allocation** from the calculator (for example 990 + 390 + 270 = 1,650 forest and 150 deforestation), export it, and check the histogram in the Console.
