@@ -40,7 +40,7 @@ The [slides for this lesson](/bhutan-hfld-training/slides/satellite-embeddings/)
 
 Earth observation now produces far more images than anyone can process by hand, and turning them into maps usually needs a long chain of pre-processing (cloud masking, compositing, covariates) before any modelling. **Satellite embeddings** take a different route: a model learns, once, to summarise everything the satellites saw at each place over a year into a short list of numbers, and those numbers are published as an image collection ready to use.
 
-The model is **AlphaEarth Foundations**, from Google DeepMind <Cite id="brown2025" />. It works like a *virtual satellite*: from sparse, irregular observations (optical, radar, lidar, climate and other sources), it produces a consistent, continuous summary of the surface for any place and year. The outputs are designed for practitioners, rather like an AI-made composite, and many different applications can be built on them.
+The model is **AlphaEarth Foundations**, from Google DeepMind <Cite id="brown2025" />. The model was trained on data from millions of sites worldwide (the trainers' slide cites about 5 million locations, 10 million image sequences and 3 billion images, with land-cover maps among the training targets). It works like a *virtual satellite*: from sparse, irregular observations (optical, radar, lidar, climate and other sources), it produces a consistent, continuous summary of the surface for any place and year. The outputs are designed for practitioners, rather like an AI-made composite, and many different applications can be built on them.
 
 ## The Satellite Embedding dataset
 
@@ -51,7 +51,7 @@ var embeddings = ee.ImageCollection('GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL');
 <Image src={catalog} alt="Earth Engine Data Catalog page for the Satellite Embedding V1 dataset, with its availability, provider and code snippet." />
 
 - **One image per year** per area (annual summaries, from 2017).
-- **64 bands**, named `A00` to `A63`: the **embedding vector** of each pixel. Together they form an *embedding field*.
+- **64 bands**, named `A00` to `A63`: the <Term id="embedding">embedding</Term> vector of each pixel. Together they form an *embedding field*.
 - **10 m** pixels.
 - Each pixel's vector has **unit length**: its 64 values, squared and summed, equal 1.
 
@@ -136,7 +136,25 @@ The trainers' example: built-up areas in Thimphu and in Paro, from one sampled p
 
 Compare the same pixel's embedding in two years. High similarity means the place stayed the same; low similarity flags change:
 
-<CodeBlock script="day-4/satellite-embeddings.js" lines={[37, 41]} />
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-4/satellite-embeddings.js" lines={[37, 41]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+def get_year(year):
+    return (
+        ee.ImageCollection("GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL")
+        .filterDate(f"{year}-01-01", f"{year + 1}-01-01").filterBounds(area).mosaic()
+    )
+
+
+stability = get_year(2017).multiply(get_year(2024)).reduce(ee.Reducer.sum())
+m.addLayer(stability.clip(area), {"min": 0.5, "max": 1, "palette": ["d73027", "fee08b", "ffffff"]},
+           "Similarity 2017 vs 2024 (low = change)")
+```
+  </TabItem>
+</Tabs>
 
 The model was trained to keep embeddings consistent through time, so similarity between years is a meaningful measure of stability. But "change" can mean a change of the **surface** (clearing, new buildings) or of the **environment** (a wet year against a dry one): check what you find.
 
@@ -161,6 +179,16 @@ Explore the 64-dimensional space and cosine similarity in the [embedding similar
 <Callout type="bhutan">
 Bhutan context: cloud cover limits optical composites in the monsoon; embeddings are built from many sensors, including radar, over the whole year, so they can help where Sentinel-2 alone struggles. Check them against your own maps before relying on them for reporting, and document which year's embeddings you used.
 </Callout>
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `ee.ImageCollection('GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL')` | The annual embedding images |
+| `image.sample({region, scale}).first()` | Reads the 64 values at a point |
+| `feature.toDictionary(bands).values(bands)` | Turns them into a list in band order |
+| `ee.Image.constant(list)` | Makes a constant image from that vector |
+| `image.multiply(other).reduce(ee.Reducer.sum())` | Dot product, pixel by pixel = cosine similarity |
 
 ## Learn more
 

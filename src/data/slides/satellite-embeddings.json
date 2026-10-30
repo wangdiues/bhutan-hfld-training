@@ -169,7 +169,7 @@
   {
    "image": "21.webp",
    "source_slide": 24,
-   "title": "Setllement 2025",
+   "title": "Settlement 2025",
    "text": "@Thimphu\n\n@Thimphu\n\nSentinel-2\n\nGoogle's Satellite Embedding dataset",
    "notes": "You can also use dot product similarity to compare embedding vectors for the same location for different years\n\nHere, we can think of “similarity” as a measure of relative stability (or instability)\n\nAnd remember – AlphaEarth Foundations includes a consistency objective that incentivizes stability through time (regardless of inputs / spacing / sensor availability), which means embeddings are comparable from year-to-year\n\nHowever, as we noted for spatial similarity search, embeddings encode a complex combination of spatial, temporal and measurement properties, so it’s best to think of change in terms of both environmental and surface conditions",
    "hidden_pictures": 0
