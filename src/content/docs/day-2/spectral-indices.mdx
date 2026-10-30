@@ -176,7 +176,7 @@ For bands $a$ and $b$, $ND = (a - b)/(a + b)$ always lies between −1 and 1, an
 - **Reading maximum NDVI as "the best image".** It is assembled pixel by pixel from different dates.
 
 <Callout type="bhutan">
-Bhutan context: maximum and minimum NDVI help separate evergreen broadleaf and conifer forest (green all year) from deciduous forest, scrub and farmland (much lower in the dry season). Steep north-facing slopes are in deep shadow in winter, which lowers all indices; Day 2's terrain correction reduces this.
+Bhutan context: maximum and minimum NDVI help separate evergreen broadleaf and conifer forest (green all year) from deciduous forest, scrub and farmland (much lower in the dry season). Steep north-facing slopes are in deep shadow in winter, which distorts indices (especially EVI) and makes NDVI noisy; Day 2's terrain correction reduces this.
 </Callout>
 
 ## Practice
@@ -213,7 +213,7 @@ Map.addLayer(s2.select('EVI').___().clip(paro), {min: 0, max: 0.8, palette: ['wh
 
 <Quiz id="day-2-spectral-indices" questions={[
   { q: "Which Sentinel-2 bands give NDVI?", options: ["B3 and B8", "B8 and B4", "B8 and B11", "B2 and B4"], answer: 1, explain: "NDVI = (NIR − Red) / (NIR + Red) = (B8 − B4) / (B8 + B4)." },
-  { q: "Why divide Sentinel-2 bands by 10,000 before computing EVI?", options: ["To make the image load faster", "EVI's constants (+1, 6, 7.5) assume reflectance between 0 and 1", "To convert to NDVI", "Because B2 is in a different projection"], answer: 1, explain: "Sentinel-2 SR stores reflectance × 10,000. Ratios like NDVI are unaffected, but formulas with added constants are not." },
+  { q: "Why divide Sentinel-2 bands by 10,000 before computing EVI?", options: ["To make the image load faster", "EVI's +1 term assumes reflectance between 0 and 1", "To convert to NDVI", "Because B2 is in a different projection"], answer: 1, explain: "Sentinel-2 SR stores reflectance × 10,000. Ratios like NDVI are unaffected, but formulas with added constants are not." },
   { q: "A pixel has a high maximum NDVI but a low minimum NDVI over the year. What is it most likely to be?", options: ["Evergreen forest", "Open water", "Cropland or deciduous vegetation", "A building"], answer: 2, explain: "A large seasonal range means the vegetation is green part of the year and bare or dry the rest." },
   { q: "(Green − NIR)/(Green + NIR) and (NIR − SWIR-1)/(NIR + SWIR-1) measure the same thing.", answer: false, explain: "The first highlights open water; the second, often called NDMI, tracks water in vegetation and soil." },
 ]} />
