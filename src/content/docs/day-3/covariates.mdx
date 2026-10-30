@@ -15,6 +15,8 @@ import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
 import CodeBlock from '~/components/CodeBlock.astro';
 import Term from '~/components/Term.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
 <LessonHeader
   questions={["Which inputs help a classifier tell forest from other land cover?", "How do I build them for both seasons at once?"]}
@@ -40,7 +42,7 @@ For HFLD mapping, covariates capture:
 
 Better covariates mean better predictions: they help distinguish similar classes (forest and crops, water and shadow), each describes a different property, and the seasonal pairs capture changes over the year, which matter for crops, deciduous forest and water.
 
-**Inputs:** the Landsat 8/9 (or Sentinel-2) seasonal composite from Day 2, the [SRTM DEM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003), and the [JRC Global Surface Water](https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater) dataset.
+**Inputs:** the Landsat 8/9 seasonal composite from Day 2 (the function uses Landsat band names: B5 is NIR, B6 and B7 SWIR; for the Sentinel-2 composite, use B8, B11 and B12 instead, because B5–B7 are red-edge bands there), the [SRTM DEM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003), and the [JRC Global Surface Water](https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater) dataset.
 
 <Callout type="mistake" title="Inputs you need">
 The script loads `projects/bhutan-hfld-readiness-training/assets/landsatComposite/bhutan_ls89_2025_TashiY`, one participant's export from the training. Replace it with your own export from the [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/) lesson. Part 7 also needs two point imports drawn in the Code Editor, `forest` and `nonForest`, each with a numeric property `class` (forest = 1, other = 0); [Collecting training data](/bhutan-hfld-training/day-4/training-data/) shows how.
@@ -62,7 +64,7 @@ What the function computes:
 
 | Group | Covariates | What they describe |
 |---|---|---|
-| Normalised differences | NDVI, NDWI, NBR, NDSI, and four more band pairs (red–SWIR1, NIR–SWIR1, NIR–SWIR2, green–SWIR1) | vegetation, water, burn scars and moisture, snow |
+| Normalised differences | NDVI, NDWI, NBR, NDSI, and four more band pairs (red–SWIR1, NIR–SWIR1, NIR–SWIR2, green–SWIR1) | vegetation, water, burn scars and moisture, snow (NDSI; the exercise calls it a soil/surface index) |
 | Ratios | SWIR1 / NIR, red / SWIR1 | moisture and soil versus vegetation |
 | Vegetation | EVI, SAVI (L = 0.5) | vegetation in dense canopy (EVI) and where soil shows (SAVI) |
 | Built-up | NDBI, MNDWI, IBI (index-based built-up index, Xu 2008) | settlements and bare surfaces versus vegetation and water |
@@ -74,8 +76,10 @@ The Day 2 composite stores reflectance × 10,000 as Int16. The training script u
 </Callout>
 
 <Theory title="Tasseled Cap">
-The Tasseled Cap transformation rotates the six reflective bands into new axes with physical meaning: **brightness** (overall reflectance, mostly soil and bare ground), **greenness** (NIR against visible: green vegetation) and **wetness** (visible and NIR against SWIR: moisture in soil and canopy). The coefficients here are those commonly used for Landsat 8/9 OLI. Angles and distances between pairs of components summarise where a pixel sits in that space, which helps separate forest from shrubs, crops and disturbed land.
+The Tasseled Cap transformation rotates the six reflective bands into new axes with physical meaning: **brightness** (overall reflectance, mostly soil and bare ground), **greenness** (NIR against visible: green vegetation) and **wetness** (visible and NIR against SWIR: moisture in soil and canopy). The coefficients are those of Baig et al. for Landsat 8 OLI, derived for top-of-atmosphere reflectance <Cite id="baig2014" />; applied to surface reflectance they are an approximation, which is fine for covariates. Angles and distances between pairs of components summarise where a pixel sits in that space, which helps separate forest from shrubs, crops and disturbed land.
 </Theory>
+
+Some covariates are exact duplicates: `ND_green_swir1`, `NDSI` and `MNDWI` all compute (green − SWIR1)/(green + SWIR1), and `ND_nir_swir2` is the same as `NBR`. The copies add nothing for the classifier; they are kept to match the exercise, and you can drop them.
 
 The function also builds a `tc` image with a matrix of coefficients and then, as its comment says, computes the same components explicitly because the matrix approach is awkward in Earth Engine. The unused `tc` variable does no harm: Earth Engine only computes what is used.
 
@@ -122,7 +126,7 @@ The [JRC Global Surface Water](https://developers.google.com/earth-engine/datase
 
 <CodeBlock script="day-3/covariates.js" lines={[211, 223]} />
 
-In the exercise, adding these to the stack is left commented out (`//.addBands(jrcCov)`): add them if water or shadow confusion is a problem. Some bands, such as `transition`, are categories rather than measurements; Random Forest can still use them, but treat their importance with care.
+In the exercise, adding these to the stack is left commented out (`//.addBands(jrcCov)`): add them if water or shadow confusion is a problem, but as `jrcCov.unmask(0)`. Most bands are masked wherever water was never seen, and a masked band masks the whole stack there, dropping most training samples. ([Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) uses `unmask(0)`.) Some bands, such as `transition`, are categories rather than measurements; Random Forest can still use them, but treat their importance with care.
 
 ## Part 6: Build the stack and check it
 
@@ -216,6 +220,8 @@ Built-up areas and bare ground appear red (NDBI above 0), vegetation green.
   "Check the stack visually before training a model on it.",
 ]} />
 
+<References />
+
 <Credit
   source="EXERCISE D3: Calculating Covariates for HFLD"
   authors="Ate Poortinga & Samuel (Conservation International)"
@@ -225,6 +231,7 @@ Built-up areas and bare ground appear red (NDBI above 0), vegetation green.
     "Bands divided by 10,000 before computing covariates (EVI, SAVI, IBI and Tasseled Cap assume 0–1 reflectance)",
     "Tasseled Cap distances and terrain covariates restored (they had been commented out when the code was extracted)",
     "Probability export renamed from urban to forest, to match the forest / non-forest training classes",
+    "Tasseled Cap coefficients credited to Baig et al. (2014, top-of-atmosphere); NDSI described as a snow index; duplicate covariates and the JRC masking issue explained",
     "Added covariate tables, a Python version of the terrain covariates, practice and a quiz",
   ]}
 />

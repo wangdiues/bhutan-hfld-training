@@ -109,8 +109,8 @@ function addSeasonCovariates(img, suffix) {
   var ibi = ibi_a.subtract(ibi_b).divide(ibi_a.add(ibi_b))
     .rename('IBI_' + suffix);
   // --------------------------
-  // Tasseled Cap for Landsat 8/9 OLI surface reflectance
-  // coefficients commonly used for OLI
+  // Tasseled Cap for Landsat 8/9 OLI
+  // coefficients of Baig et al. (2014), derived for top-of-atmosphere reflectance
   // --------------------------
   var tc = ee.Image.cat([blue, green, red, nir, swir1, swir2])
     .multiply(ee.Image.constant([
