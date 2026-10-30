@@ -400,7 +400,7 @@ Export.image.toDrive({
 // ---- Probability Map (Continuous) ----
 Export.image.toDrive({
   image: targetProbability,
-  description: "bhutan_" + targetClass + "_probability_2024",
+  description: "bhutan_" + targetClass + "_probability_2025",
   region: image.geometry(),
   scale: 30,
   maxPixels: 1e13
@@ -409,7 +409,7 @@ Export.image.toDrive({
 // ---- Validation points (CSV) ----
 Export.table.toDrive({
   collection: validationClassified,
-  description: "bhutan_" + targetClass + "_validation_points_2024",
+  description: "bhutan_" + targetClass + "_validation_points_2025",
   fileFormat: "CSV"
 });
 

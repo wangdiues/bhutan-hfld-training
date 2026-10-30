@@ -123,7 +123,7 @@ The 10% validation samples come from the same training set, often collected in t
 
 ## Part 11: Variable importance
 
-`classifier.explain()` reports how much each covariate contributed to the forest's splits. Use it to see which inputs separate the target class, and to drop covariates that add nothing.
+`classifier.explain()` reports how much each covariate contributed to the forest's splits. Use it to see which inputs separate the target class, and to drop covariates that add nothing. It also contains `outOfBagErrorEstimate`: with `bagFraction: 0.7`, each tree leaves 30% of the training samples out, and the forest's error on those out-of-bag samples is a quick, built-in estimate of its accuracy (print `explanation.get('outOfBagErrorEstimate')`).
 
 <CodeBlock script="day-3/forest-primitives.js" lines={[336, 339]} />
 
@@ -139,7 +139,7 @@ A binary map hides how sure the model is: a pixel at 0.51 and one at 0.99 both b
 
 ## Part 13: Export
 
-Export the binary map and the probability map to Drive, the validation points as a CSV, and the probability layer to an asset. The asset name follows one convention for every primitive: `ls_<Class>_<year>` in a `primitives` folder, for example `ls_Forest_2025`, so the assemblage script can find all six by name.
+Export the binary map and the probability map to Drive, the validation points as a CSV, and the probability layer to an asset. Primitive assets follow one naming convention: a data-source prefix (`ls_` for Landsat, `s2_` for Sentinel-2, `afe_` for AlphaEarth embeddings), then `<Class>_<year>`, for example `ls_Forest_2025`. Keeping the same pattern for every class and year makes the primitives easy to find and load together in the [assemblage](/bhutan-hfld-training/day-4/assemblage/) (which, in the training, used Sentinel-2 primitives, `s2_<Class>_2025`).
 
 <CodeBlock script="day-3/forest-primitives.js" lines={[388, 428]} />
 
@@ -175,11 +175,11 @@ Bhutan context: the forest primitive is the core of Bhutan's activity data. Chec
 
 ## Practice
 
-<Challenge level="complete" time={25} hints={["Only Part 2 changes.", "Run the script and check the binary histogram in the Console.", "The export name changes automatically."]}>
-Run the script for **Forest** and look at the validation accuracy and the five most important covariates. Which season's covariates matter most?
+<Challenge level="complete" time={25} hints={["targetClass is already \"Forest\".", "Check the binary histogram in the Console first.", "Exports appear in the Tasks tab."]}>
+Run the script for **Forest**, look at the validation accuracy, the out-of-bag error and the five most important covariates, and start the asset export of the forest primitive. Which season's covariates matter most?
 
 <Fragment slot="solution">
-Run the script as it is (`targetClass = "Forest"`). Open "Variable importance" in the Console and sort the values: typically NIR- and SWIR-based indices, Tasseled Cap greenness and wetness, and elevation rank high for forest. The validation accuracy is in "Validation overall accuracy".
+Run the script as it is (`targetClass = "Forest"`) and click **Run** next to the asset export in the Tasks tab. Open "Variable importance" in the Console and sort the values: typically NIR- and SWIR-based indices, Tasseled Cap greenness and wetness, and elevation rank high for forest. The validation accuracy is in "Validation overall accuracy".
 </Fragment>
 </Challenge>
 
