@@ -1,17 +1,209 @@
 ---
 title: "Mosaics and composites"
+description: The difference between a mosaic and a composite, the corrections that make a composite analysis-ready (atmospheric, radiometric/BRDF, topographic), and why the course builds median composites from modules.
 sidebar:
   order: 3
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import OpenInGEE from '~/components/OpenInGEE.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Term from '~/components/Term.astro';
+import { Image } from 'astro:assets';
+import modules from '~/assets/day-2/mosaics-and-composites/s07-diagram.webp';
+import newMenu from '~/assets/day-2/mosaics-and-composites/s08-22d69a12e5.webp';
+import newRepo from '~/assets/day-2/mosaics-and-composites/s08-4bf2742978.webp';
+import newFolder from '~/assets/day-2/mosaics-and-composites/s08-3c0f2f2372.webp';
+import saveFile from '~/assets/day-2/mosaics-and-composites/s08-090be84f19.webp';
+import mainScript from '~/assets/day-2/mosaics-and-composites/s15-9733f2be5a.webp';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How do I get one clear image of Bhutan from many cloudy ones?", "What corrections does a composite need before I can classify it?"]}
+  objectives={[
+    "Tell a mosaic from a composite.",
+    "Explain atmospheric, BRDF and topographic correction.",
+    "Explain why median compositing is used.",
+  ]}
+  teaching={20} exercises={10}
+  prerequisites={["Spectral indices and functions"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/mosaics-and-composites/) give a visual summary. The next lesson, [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/), builds the full composite step by step.
 
-- Tell a mosaic from a composite
-- Explain atmospheric, BRDF and topographic correction
-- Explain why median compositing is used
+## Sentinel-2 in brief
 
-**Time:** about 20 min teaching + 0 min practice.
+Sentinel-2 is part of the European Commission's Copernicus programme. The first satellite, Sentinel-2A, was launched on 23 June 2015. Each satellite carries the **MultiSpectral Instrument (MSI)**: a wide-swath, high-resolution imager (10 to 60 m) designed for monitoring vegetation, soil and water, inland waterways and coasts.
+
+| Characteristic | Value |
+|---|---|
+| Orbit | sun-synchronous, near-polar, 786 km altitude, 98.62° inclination |
+| Orbit period | 100.6 minutes |
+| Repeat cycle | 10 days per satellite; 5 days with two |
+| Swath width | 290 km |
+| Local solar time at the descending node | 10:30 a.m. |
+| Launch mass | 1,140 kg |
+| Design life | 7 years (nominal), up to 12 years |
+
+Two products are in Earth Engine: **Level-1C** (top-of-atmosphere reflectance) and **Level-2A** (surface reflectance). Google's **Cloud Score+** cloud mask can be applied to either.
+
+## Mosaic or composite?
+
+Both turn many images into one, but in different ways:
+
+- A **mosaic** places images side by side or on top of each other. Where they overlap, one image wins: in Earth Engine, `collection.mosaic()` keeps the last image in the collection on top. A mosaic keeps real pixel values from single dates, but it also keeps any cloud in the top image.
+- A <Term id="composite" /> builds each pixel from **all** the images that cover it, using a rule: the median, a percentile, or the "best" pixel by some score (`qualityMosaic`). A composite mixes dates, but it can remove clouds and shadows.
+
+Run the script below to see all three side by side over Thimphu for the 2025 dry season. Switch the layers on and off in the Layers menu.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+    <CodeBlock script="day-2/mosaics-and-composites.js" lines={[12, 33]} />
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+import ee
+import geemap
+
+ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
+
+thimphu = ee.Geometry.Point([89.64, 27.47])
+s2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED").filterBounds(thimphu).filterDate("2025-01-01", "2025-05-01")
+vis = {"bands": ["B4", "B3", "B2"], "min": 0, "max": 3000}
+with_ndvi = s2.map(lambda img: img.addBands(img.normalizedDifference(["B8", "B4"]).rename("NDVI")))
+
+m = geemap.Map()
+m.centerObject(thimphu, 10)
+m.addLayer(s2.mosaic(), vis, "1. Mosaic (latest on top)")
+m.addLayer(s2.median(), vis, "2. Median composite")
+m.addLayer(with_ndvi.qualityMosaic("NDVI"), vis, "3. Greenest-pixel mosaic")
+m
+```
+  </TabItem>
+</Tabs>
+
+<OpenInGEE script="day-2/mosaics-and-composites.js" />
+
+<Theory title="Why the median">
+Clouds are bright and shadows are dark, so in a stack of images they sit at the extremes of each pixel's values. The median, the middle value, ignores them as long as the pixel is clear in more than half the images. It also keeps a value that really occurred, roughly, rather than averaging cloud into it, as the mean would. Masking clouds first (next lesson) means fewer images need to be clear.
+</Theory>
+
+## Pre-processing: making a composite analysis-ready
+
+Before classification, three kinds of correction make pixel values comparable across a country and between years:
+
+| Correction | What it removes | How |
+|---|---|---|
+| **Atmospheric** | the effect of gases, dust and water vapour, to retrieve surface reflectance | use Level-2A surface reflectance (Sen2Cor), as `COPERNICUS/S2_SR_HARMONIZED` does |
+| **Radiometric** | sensor errors and brightness differences, so values reflect surface energy; includes **BRDF** correction | calibration in the product; BRDF normalisation in the composite |
+| **Topographic** | brightness differences caused by slope and aspect: sunlit slopes look bright, shaded slopes dark | an illumination model from a digital elevation model |
+
+**BRDF** (bidirectional reflectance distribution function) describes how a surface reflects light differently depending on the angles of the sun and the sensor. Sentinel-2 views across a 290 km swath, so the same forest looks brighter or darker at the edge of a scene than at its centre. BRDF correction normalises every pixel to a standard sun and view angle.
+
+**Topographic (illumination) correction** matters a lot in Bhutan. The same forest on a sunlit south-facing slope and a shaded north-facing slope can look like two different classes. The correction computes how directly each pixel faces the sun, from the slope and aspect of a DEM and the sun position, and adjusts the reflectance. The course's module uses the illumination condition approach credited to Patrick Burns and Matt Macander.
+
+<Callout type="bhutan">
+Bhutan context: Bhutan rises from about 100 m to over 7,000 m within 150 km, and many valleys run north–south, so shadows are long in winter. Without terrain correction, shaded forest is easily mapped as a different class. Persistent cloud also means some places are clear in only a few images per season: always check how many clear observations each pixel had.
+</Callout>
+
+## The workflow as modules
+
+The course builds a cloud-free composite in five steps, each in its own script (a **module**), called from one main script:
+
+<Image src={modules} alt="Flow diagram of the image pre-processing modules: import Sentinel-2, shadow masking, cloud masking, BRDF correction, topographic correction, cloud-free composite, all called from a main script." />
+
+1. **Import Sentinel-2** (`importS2_module`): set the input and output band names, filter by geometry, by date and by maximum cloud cover, and scale the values.
+2. **Shadow masking** (`shadowMask_module`): remove cloud shadows.
+3. **Cloud masking** (`cloud_module`): set thresholds and remove clouds, using a cloud score built on the idea of the Landsat cloud score, and the Sentinel-2 QA band.
+4. **BRDF correction** (`brdf_module`).
+5. **Topographic correction** (`topographic_module`): compute the illumination condition from a DEM and apply an illumination-correction function.
+
+Then the **main** script calls them in order and exports the composite.
+
+### Setting up the repository
+
+Modules live in a repository so that other scripts can load them with `require()`. In the **Scripts** tab:
+
+1. Click **NEW → Repository** and create a repository for the training.
+2. Click **NEW → Folder** and name it `S2Composite` (in the training, the folder was first called `Day-1`).
+3. Click **NEW → File** for each module, and save it with the module's name.
+
+<Image src={newMenu} alt="The Scripts tab NEW menu with Repository, Folder and File options." />
+
+<Image src={newRepo} alt="The 'New repository' dialog in the Code Editor." />
+
+<Image src={newFolder} alt="The 'Create folder' dialog with a folder name entered." />
+
+<Image src={saveFile} alt="The 'Save file' dialog with a file name and an optional commit message." />
+
+Each module is then loaded by its path:
+
+```js
+// import required modules
+var importS2 = require("users/vteck_sig/Bhutan_training/S2Composite:importS2_module");
+```
+
+The path has four parts: `users/` + **your account name** + `/` + **your repository** + `/` + **your folder** + `:` + **your script**. Replace `vteck_sig` and `Bhutan_training` with your own account and repository.
+
+<Image src={mainScript} alt="Code Editor script that loads the pre-processing modules with require() and prints the image count after each step." />
+
+The trainers' main script is at [code.earthengine.google.com/2fd4b21119ef4b9c6ff6893f3a7e9c9e](https://code.earthengine.google.com/2fd4b21119ef4b9c6ff6893f3a7e9c9e). The next lesson walks through it.
+
+## Key functions
+
+| Function | What it does |
+|---|---|
+| `collection.mosaic()` | Stacks images; the last one in the collection is on top |
+| `collection.median()` | Median of each pixel over all images |
+| `collection.qualityMosaic(band)` | Takes each pixel from the image where `band` is highest |
+| `require('users/…:script')` | Loads a module (another script's `exports`) |
+
+## Common mistakes
+
+- **Calling a mosaic a composite.** A plain mosaic keeps the clouds of its top image.
+- **Using the mean.** The mean mixes cloud and shadow into every pixel; the median ignores them.
+- **Skipping terrain correction in the mountains.** Shaded slopes then look like a different land cover.
+- **A wrong `require()` path.** "Cannot find required repo" usually means the account, repository or folder name is wrong, or the repository isn't shared with you.
+
+## Practice
+
+<Challenge level="complete" time={10} hints={["Use the Inspector on the same pixel in each layer.", "Look for a place that is cloudy in the mosaic."]}>
+Run the script above. Find a pixel that is cloudy in the **mosaic** but clear in the **median composite**. Then compare the median composite with the **greenest-pixel mosaic** over farmland near Thimphu: which one looks more like the dry season, and why?
+
+<Fragment slot="solution">
+The mosaic shows the most recent image on top, cloud and all. The median removes cloud wherever most images were clear. The greenest-pixel mosaic picks each pixel from its greenest date, so farmland and deciduous forest look greener than a typical dry-season day: good for mapping where vegetation grows, but not a picture of one season.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-2-mosaics-and-composites" questions={[
+  { q: "What does collection.mosaic() do where images overlap?", options: ["Takes the median", "Keeps the last image in the collection on top", "Averages the images", "Takes the least cloudy image"], answer: 1, explain: "A mosaic stacks images in collection order; the top (last) valid pixel wins." },
+  { q: "Why is the median preferred to the mean for cloud-free composites?", options: ["It is faster", "Clouds and shadows are extreme values, which the median ignores but the mean averages in", "The mean is not available in Earth Engine", "The median keeps the original date of each pixel"], answer: 1, explain: "The median is robust to outliers such as bright clouds and dark shadows." },
+  { q: "Which correction deals with sunlit and shaded slopes looking different?", options: ["Atmospheric", "BRDF", "Topographic (illumination)", "Cloud masking"], answer: 2, explain: "Topographic correction uses slope, aspect and sun position from a DEM to even out illumination." },
+  { q: "BRDF correction accounts for how reflectance changes with the angles of the sun and the sensor.", answer: true, explain: "The same surface looks brighter or darker depending on view and illumination angles, for example across Sentinel-2's 290 km swath." },
+]} />
+
+<KeyPoints points={[
+  "A mosaic stacks images (one date wins); a composite builds each pixel from all images with a rule such as the median.",
+  "Median composites remove clouds and shadows wherever most images are clear.",
+  "Atmospheric, radiometric (BRDF) and topographic corrections make pixel values comparable across a mountainous country.",
+  "The course composite is built from modules loaded with require().",
+]} />
+
+<Credit
+  source="D2 Creating Mosaics and Composites from Image Collections (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson",
+    "New: a script comparing a mosaic, a median composite and a greenest-pixel mosaic over Thimphu (with geemap)",
+    "Sentinel-2 repeat cycle given as 10 days per satellite and 5 with two",
+    "The shadow-masking module's description on the slide repeated the import module's; replaced with what the module does",
+  ]}
+/>
