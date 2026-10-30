@@ -1,17 +1,198 @@
 ---
-title: "Random Forest"
+title: "Random Forest theory"
+description: How decision trees split data using entropy and information gain, how bagging and random feature selection turn many trees into a Random Forest, and where it works well or poorly for remote sensing.
 sidebar:
   order: 1
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Quiz from '~/components/Quiz.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
+import KeyPoints from '~/components/KeyPoints.astro';
+import Challenge from '~/components/Challenge.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import Term from '~/components/Term.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["How does a computer learn to tell forest from grassland?", "Why use many trees instead of one?"]}
+  objectives={[
+    "Explain decision trees, entropy and information gain.",
+    "Explain bagging and random feature selection.",
+    "Name Random Forest's strengths and weaknesses for remote sensing.",
+  ]}
+  teaching={30} exercises={10}
+  prerequisites={["Spectral indices and functions"]}
+/>
 
-## In this lesson you will
+The [slides for this lesson](/bhutan-hfld-training/slides/random-forest/) give a visual summary.
 
-- Explain decision trees, entropy and information gain
-- Explain bagging and random feature selection
-- Name RF's strengths and weaknesses for remote sensing
+## What is a Random Forest?
 
-**Time:** about 30 min teaching + 10 min practice.
+<Term id="random-forest" /> is an **ensemble classifier**: it builds many decision trees and outputs the class that most trees vote for (the mode of their outputs) <Cite id="breiman2001" />. The idea of random decision forests was first proposed by Tin Kam Ho at Bell Labs in 1995; Breiman's version combines his "bagging" idea with random selection of features.
+
+A Random Forest has four ingredients:
+
+1. **decision trees**;
+2. **bagging** (bootstrap aggregating);
+3. **random feature selection**;
+4. **ensemble modelling**: combining the trees' votes.
+
+## Decision trees
+
+A **decision tree** is a tree-shaped set of questions. Each branch is a possible answer; following the answers from the top leads to a decision. Upside down, it looks like a tree, which is where the name comes from.
+
+| Term | Meaning |
+|---|---|
+| **Root node** | the first question, which splits all the training data |
+| **Decision node** | a question further down that splits a subset again |
+| **Leaf node** | the end of a branch, which gives the class (or value) |
+| **Entropy** | how mixed the classes are in a set of samples |
+| **Information gain** | how much a split reduces entropy |
+
+### Entropy and information gain
+
+**Entropy** measures disorder. A set where every sample is the same class has entropy 0; a set evenly split between classes has the highest entropy.
+
+<Theory title="Entropy and information gain">
+For a set with class proportions $p_i$, $E = -\sum_i p_i \log_2 p_i$. A split divides the set into subsets; its **information gain** is the entropy before minus the size-weighted entropy after: $IG = E_1 - E_2$, with $E_2 = \sum_k \frac{n_k}{n} E_k$. The tree picks the split with the largest gain.
+</Theory>
+
+### A worked example: 10 training pixels
+
+Suppose you have 10 labelled pixels from a Sentinel-2 composite of western Bhutan: 5 forest, 3 grassland and 2 water.
+
+**Entropy before any split:**
+
+$E_1 = -(0.5\log_2 0.5 + 0.3\log_2 0.3 + 0.2\log_2 0.2) = 0.500 + 0.521 + 0.464 = 1.485$
+
+Two candidate questions:
+
+| Split | Yes branch | No branch | Weighted entropy $E_2$ | Information gain |
+|---|---|---|---|---|
+| NDVI > 0.5? | 6 pixels: 5 forest, 1 grass (E = 0.650) | 4 pixels: 2 grass, 2 water (E = 1.000) | 0.6 × 0.650 + 0.4 × 1.000 = 0.790 | 1.485 − 0.790 = **0.695** |
+| NIR reflectance < 0.10? | 2 pixels: 2 water (E = 0) | 8 pixels: 5 forest, 3 grass (E = 0.954) | 0.2 × 0 + 0.8 × 0.954 = 0.764 | 1.485 − 0.764 = **0.721** |
+
+The NIR question gains more information, so it becomes the **root node**: it separates the water perfectly. The tree then asks NDVI > 0.5 on the remaining 8 pixels to separate forest from grassland, and so on until the leaves are pure or too small to split.
+
+Build your own tree, and watch entropy change with each split, in the [decision tree playground](/bhutan-hfld-training/labs/decision-tree-playground/).
+
+<Callout type="why">
+Why this matters: Earth Engine's Random Forest does exactly this for every tree, over all your covariates (bands, indices, elevation, slope), choosing at each node the question that best separates your training classes.
+</Callout>
+
+### Regression trees
+
+The same algorithm predicts numbers instead of classes, for example tree canopy cover. It uses **mean squared error** instead of information gain to choose splits, and each leaf gives a value instead of a class. A classic remote-sensing example predicts percentage tree crown cover from Landsat reflectance, elevation, aspect and slope.
+
+## From one tree to a forest
+
+A single deep tree fits its training data almost perfectly, noise included (it **overfits**), and a small change in the data can change the whole tree. Random Forest fixes this with two kinds of randomness:
+
+1. **Bagging.** Each tree is trained on a **bootstrap sample**: as many samples as the training set, drawn at random **with replacement**. Each tree sees a slightly different dataset; on average about a third of the samples are left out of each tree. These are the **out-of-bag** samples, used to estimate accuracy without a separate test set.
+2. **Random feature selection.** At each node, a tree may only choose from a random subset of the variables (often about the square root of their number). This stops every tree from relying on the same strongest variable, so the trees are less alike.
+
+Each tree then votes, and the **majority vote** is the forest's prediction. For regression, the forest averages the trees' predictions. Because the trees' errors are partly independent, they cancel out.
+
+The forest can also report the share of trees voting for each class. That share is a **probability**, and Day 3 uses it to make [forest primitives](/bhutan-hfld-training/day-3/forest-primitives/): a 0–100 probability layer for each class.
+
+<Tabs>
+  <TabItem label="JavaScript (Code Editor)">
+```js
+// A Random Forest with 100 trees; variablesPerSplit defaults to the square root of the number of variables.
+var classifier = ee.Classifier.smileRandomForest({numberOfTrees: 100})
+    .train({features: trainingPoints, classProperty: 'class', inputProperties: bandNames});
+var classified = composite.classify(classifier);
+
+// Probability mode: if 'class' is binary (forest = 1, other = 0), this gives the share of trees voting 1 (Day 3 primitives).
+var probability = composite.classify(classifier.setOutputMode('PROBABILITY'));
+```
+  </TabItem>
+  <TabItem label="Python (geemap)">
+```python
+classifier = ee.Classifier.smileRandomForest(numberOfTrees=100).train(
+    features=training_points, classProperty="class", inputProperties=band_names
+)
+classified = composite.classify(classifier)
+probability = composite.classify(classifier.setOutputMode("PROBABILITY"))
+```
+  </TabItem>
+</Tabs>
+
+These lines are a sketch: `trainingPoints`, `bandNames` and `composite` come from the [covariates](/bhutan-hfld-training/day-3/covariates/) and [forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) exercises.
+
+## Strengths and weaknesses
+
+**Advantages**
+
+- One of the most accurate general-purpose learning algorithms for many datasets.
+- Runs efficiently on large datasets.
+- Handles thousands of input variables without removing any first.
+- Estimates which variables matter for the classification (variable importance).
+- Gives an internal, unbiased estimate of the generalisation error as the forest grows (out-of-bag error).
+- Copes well with missing data and keeps its accuracy when a large share of data is missing.
+
+**Disadvantages**
+
+- It can overfit datasets with noisy classification or regression tasks.
+- For categorical variables with different numbers of levels, it favours variables with more levels, so its variable importance is unreliable for that kind of data.
+- It is poor at predicting **out-of-distribution** samples: conditions not represented in the training data, such as a land-cover type, elevation range or year it never saw.
+
+**When few variables matter.** If there are many variables but only a few are relevant, a small random subset per split may rarely include a relevant one. With 3 relevant and 100 irrelevant variables, and about 10 variables tried per split, the chance that a given split sees at least one relevant variable is only about 0.25. Choose covariates thoughtfully rather than adding everything.
+
+<Callout type="bhutan">
+Bhutan context: Bhutan's forests range from subtropical broadleaf in the south to fir and juniper near the treeline, over steep slopes. Random Forest handles this mix of spectral, seasonal and terrain covariates well, but only for conditions the training data covers: collect training points across elevation zones, aspects and Dzongkhags, not just near roads.
+</Callout>
+
+## Further reading
+
+Belgiu and Drăguţ review how Random Forest is used in remote sensing and give practical advice on parameters and training data: *Random forest in remote sensing: a review of applications and future directions* (ISPRS Journal of Photogrammetry and Remote Sensing, 2016), [doi.org/10.1016/j.isprsjprs.2016.01.011](https://doi.org/10.1016/j.isprsjprs.2016.01.011).
+
+## Common mistakes
+
+- **Using the same samples for training and accuracy assessment.** Out-of-bag error helps, but reporting accuracy needs an independent sample (Day 5).
+- **Training only where it is easy to collect points,** so the forest meets "out-of-distribution" pixels elsewhere.
+- **Too few trees.** Results vary from run to run; 100–500 trees is common.
+- **Reading variable importance as cause.** It shows what the model used, not what drives land cover.
+
+## Practice
+
+<Challenge level="complete" time={10} hints={["Entropy of a 50/50 split is 1.", "Entropy of a pure set is 0.", "Weight each branch by its share of the pixels."]}>
+In the example, the tree's second question is NDVI > 0.5 on the 8 non-water pixels (5 forest, 3 grassland). Suppose the yes branch gets 5 forest and 0 grassland, and the no branch 0 forest and 3 grassland. What is the information gain of this split?
+
+<Fragment slot="solution">
+Before: $E = 0.954$ (5 forest, 3 grass). After: both branches are pure, so $E_2 = 0$. The information gain is $0.954 - 0 = 0.954$, the largest possible for this set: the split separates the classes perfectly.
+</Fragment>
+</Challenge>
+
+## Check your understanding
+
+<Quiz id="day-3-random-forest" questions={[
+  { q: "A set of training pixels is half forest and half grassland. What is its entropy?", options: ["0", "0.5", "1", "2"], answer: 2, explain: "−(0.5 log₂ 0.5 + 0.5 log₂ 0.5) = 1, the maximum for two classes." },
+  { q: "Which split does a decision tree choose at a node?", options: ["The one with the lowest information gain", "The one with the highest information gain", "A random one", "Always the first variable"], answer: 1, explain: "The best split reduces entropy the most, i.e. has the largest information gain." },
+  { q: "What is bagging?", options: ["Training each tree on a random sample of the training data drawn with replacement", "Removing irrelevant variables", "Averaging the pixel values", "Splitting the image into tiles"], answer: 0, explain: "Each tree sees a bootstrap sample, so the trees differ; the out-of-bag samples estimate accuracy." },
+  { q: "Random Forest predicts well for land-cover types and conditions that were not in its training data.", answer: false, explain: "It is poor at out-of-distribution samples; training data must cover the conditions you want to map." },
+  { q: "What does random feature selection do?", options: ["Uses a random subset of variables at each split, making the trees less alike", "Removes variables with low variance", "Picks the best variable for the whole forest", "Randomly changes class labels"], answer: 0, explain: "Limiting each split to a random subset stops all trees relying on the same strong variable." },
+]} />
+
+<KeyPoints points={[
+  "A decision tree splits data with the question that gives the most information gain (the biggest drop in entropy).",
+  "Random Forest trains many trees on bootstrap samples, with a random subset of variables per split, and takes a majority vote.",
+  "Out-of-bag samples estimate accuracy; vote shares give class probabilities (primitives).",
+  "RF is accurate and robust, but weak outside its training data and when relevant variables are few.",
+]} />
+
+<References />
+
+<Credit
+  source="D3 Deep Dive into Random Forest Classification: Theory and Advanced Applications (slides)"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "Slides rewritten as a web lesson",
+    "The fruit-bowl example (Simplilearn figures) replaced with an original worked example on Bhutan training pixels, with entropy and information gain computed",
+    "Third-party remote-sensing figures described in text; added an Earth Engine code sketch, Lab 4 link, practice and a quiz",
+  ]}
+/>

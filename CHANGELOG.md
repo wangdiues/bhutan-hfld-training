@@ -57,3 +57,4 @@ Each correction made to the original Bhutan ART-TREES HFLD Readiness Training ma
 | D2-Importing and Exporting Datasets… | Vector-export slides: "Use Export.table.toDrive() … to download your imagery data sets" | "… to download vector data" | Importing and exporting data |
 | D2-Importing and Exporting Datasets… | Buffer, clip, merge and union explained with Esri figures only | Original Bhutan examples in `scripts/gee/day-2/feature-basics.js` | Importing and exporting data |
 | D2-Exercise-Exporting Data | Text asks to export Planet data to an asset; code exports to Drive; Dynamic World annual map made with `mosaic()` | Both options explained; lesson recommends `mode()` for an annual label (code unchanged) | Importing and exporting data |
+| D3 INTRO TO RANDOM FOREST | Fruit-bowl decision-tree example (Simplilearn figures, all rights reserved) | Original worked example with 10 Bhutan training pixels, entropy and information gain computed | Random Forest theory |
