@@ -1,11 +1,41 @@
 ---
 title: "Lab: Embedding similarity"
+description: See cosine similarity as an angle, rank Bhutan places by how alike their embeddings are, and set the similarity threshold that flags change between 2024 and 2025.
+newContent: true
 sidebar:
   order: 6
 ---
+import EmbeddingLab from '~/components/labs/EmbeddingLab.astro';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+The [Satellite Embedding dataset](/bhutan-hfld-training/day-4/satellite-embeddings/) gives every 10 m pixel 64 numbers per year. This lab shows how the course compares them. The vectors here are **synthetic**: they were generated to behave like real embeddings, so the numbers are for learning, not for Bhutan's real pixels. Your settings are saved in this browser only.
 
-See how cosine similarity between embedding vectors identifies similar places and change over time.
+<EmbeddingLab />
+
+## Things to try
+
+1. In Part 1, set both arrows to the same direction, then 90° apart, then opposite. What similarity do you get each time?
+2. Arrows 17° apart have a similarity of about 0.956. Why does the Day 5 threshold of 0.955 correspond to such a small angle?
+3. In Part 2, pick **Blue pine forest, Bumthang**. Which places come next? Why is the broadleaf forest in Trongsa less similar than the fir forest in Haa, but more similar than the paddy fields?
+4. In Part 3, start at the course threshold of 0.955. Which pixel is a false alarm, and what could cause it in a real 2025 composite?
+5. Raise the threshold until the selective logging in Bumthang is flagged. The lab counts it as a false alarm: why is degraded forest that is still forest not deforestation?
+6. Lower the threshold to 0.9. Which false alarm disappears, and which real loss is now missed? Why does it matter that the flagged pixels go into a **stratum** that is then sampled, not straight into the reported area?
+
+<Theory title="Similarity of unit vectors" more="/explanation/embeddings/">
+Satellite embeddings have unit length, so the dot product $\mathbf{a}\cdot\mathbf{b} = \sum_{i} a_i b_i$ equals $\cos\theta$, the cosine of the angle between them <Cite id="brown2025" />. Values near 1 mean the place looks and behaves the same over the year; lower values mean it changed, or is a different kind of place. A threshold on this similarity is a fast way to find candidate change, but it can't say what changed.
+</Theory>
+
+<Callout type="mistake" title="Common mistakes">
+- **Reading a low similarity as deforestation.** It shows that the pixel changed. Cloud, a different season, crop rotation or a landslide also lower it, so the course uses it only to build a stratum that is checked with reference data.
+- **Comparing embeddings from different dataset versions.** Use the same collection and version for both years.
+- **Using the dot product on vectors that aren't unit length.** It equals the cosine only for unit vectors; otherwise divide by both lengths.
+</Callout>
+
+The lab's maths is in `src/lib/stats/embeddings.ts`, with automated tests. The threshold rule matches the [Determining sample size](/bhutan-hfld-training/day-5/sample-size/) script.
+
+<References />
+
+*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*

@@ -1,0 +1,220 @@
+---
+/**
+ * Lab 6 (task M5-08): embedding similarity visualiser. Part 1 shows cosine similarity as the angle
+ * between two arrows; Part 2 ranks eight Bhutan places by similarity to a reference; Part 3 flags
+ * change between two years with the Day 5 rule (forest and similarity below a threshold). The
+ * vectors are synthetic (src/lib/stats/embeddings.ts, tested). Settings are saved through the
+ * safe storage helper.
+ */
+import '~/styles/labs.css';
+
+interface Props {
+	/** Heading level of the lab's own headings, so that it fits the page it is embedded in. */
+	headingLevel?: 2 | 3;
+}
+const { headingLevel = 2 } = Astro.props;
+const H = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<hfld-embedding-lab class="hfld-lab not-content">
+	<p class="hfld-lab__note">
+		<strong>Synthetic data.</strong> All vectors and pixels in this lab are made up to illustrate how similarity works. The
+		place names are examples; the numbers are not real Satellite Embedding values for those places.
+	</p>
+	<H id="em-part1">Part 1: similarity is an angle</H>
+	<p class="hfld-lab__hint">
+		Two unit vectors in two dimensions. Their dot product is the cosine of the angle between them. Embeddings work the
+		same way, with 64 numbers instead of 2. The Day 5 rule treats a similarity below 0.955 (about 17°) as possible change.
+	</p>
+	<div class="hfld-lab__sliders">
+		<label class="hfld-lab__slider">
+			<span>Direction of vector a (degrees)</span>
+			<span class="hfld-lab__slider-row">
+				<input type="range" id="em-a" min="0" max="359" step="1" value="20" />
+				<output for="em-a" data-out-a>20°</output>
+			</span>
+		</label>
+		<label class="hfld-lab__slider">
+			<span>Direction of vector b (degrees)</span>
+			<span class="hfld-lab__slider-row">
+				<input type="range" id="em-b" min="0" max="359" step="1" value="60" />
+				<output for="em-b" data-out-b>60°</output>
+			</span>
+		</label>
+	</div>
+	<figure class="hfld-lab__figure">
+		<svg viewBox="-110 -110 220 220" class="hfld-lab__angle" aria-hidden="true">
+			<circle r="90" class="grid" />
+			<line x1="-100" x2="100" y1="0" y2="0" class="grid" />
+			<line y1="-100" y2="100" x1="0" x2="0" class="grid" />
+			<line data-arrow-a x1="0" y1="0" x2="90" y2="0" class="a" />
+			<line data-arrow-b x1="0" y1="0" x2="90" y2="0" class="b" />
+			<text data-label-a class="a">a</text>
+			<text data-label-b class="b">b</text>
+		</svg>
+		<figcaption>Vectors a and b on the unit circle. The numbers below give the exact values.</figcaption>
+	</figure>
+	<p class="hfld-lab__headline" data-angle aria-live="polite"></p>
+
+	<H id="em-part2">Part 2: which places are alike?</H>
+	<div class="hfld-lab__grid">
+		<label>
+			Reference place
+			<select data-ref></select>
+		</label>
+	</div>
+	<p class="hfld-lab__hint" data-ref-values></p>
+	<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Similarity to the reference place">
+		<table class="hfld-lab__table" data-ranking></table>
+	</div>
+
+	<H id="em-part3">Part 3: what changed between 2024 and 2025?</H>
+	<p class="hfld-lab__hint">
+		The Day 5 rule: a pixel that was forest in 2024 and whose embeddings in 2024 and 2025 have a similarity below the
+		threshold is flagged as likely deforestation.
+	</p>
+	<div class="hfld-lab__sliders">
+		<label class="hfld-lab__slider">
+			<span>Similarity threshold</span>
+			<span class="hfld-lab__slider-row">
+				<input type="range" id="em-t" min="0.5" max="1" step="0.005" value="0.955" />
+				<output for="em-t" data-out-t>0.955</output>
+			</span>
+		</label>
+	</div>
+	<p class="hfld-lab__headline" data-change-summary aria-live="polite"></p>
+	<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Change between 2024 and 2025 (synthetic pixels)">
+		<table class="hfld-lab__table" data-change></table>
+	</div>
+</hfld-embedding-lab>
+
+<script>
+	import { cosine, cosine2d, flagged, makeChangePairs, makePlaces, rankBySimilarity } from '~/lib/stats/embeddings';
+	import { loadJSON, saveJSON } from '~/lib/storage';
+
+	const KEY = 'hfld-lab:embeddings';
+	const places = makePlaces();
+	const pairs = makeChangePairs();
+
+	class HfldEmbeddingLab extends HTMLElement {
+		private $<T extends Element = HTMLElement>(sel: string) {
+			return this.querySelector(sel) as T;
+		}
+
+		connectedCallback() {
+			const ref = this.$<HTMLSelectElement>('[data-ref]');
+			ref.innerHTML = places.map((p) => `<option value="${p.id}">${p.name}</option>`).join('');
+			const saved = loadJSON<{ a?: unknown; b?: unknown; ref?: unknown; t?: unknown }>(KEY) ?? {};
+			const inRange = (v: unknown, lo: number, hi: number): v is number => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
+			if (inRange(saved.a, 0, 359)) this.$<HTMLInputElement>('#em-a').value = String(saved.a);
+			if (inRange(saved.b, 0, 359)) this.$<HTMLInputElement>('#em-b').value = String(saved.b);
+			if (inRange(saved.t, 0.5, 1)) this.$<HTMLInputElement>('#em-t').value = String(saved.t);
+			if (typeof saved.ref === 'string' && places.some((p) => p.id === saved.ref)) ref.value = saved.ref;
+
+			for (const id of ['#em-a', '#em-b']) this.$(id).addEventListener('input', () => this.angles());
+			ref.addEventListener('change', () => this.ranking());
+			this.$('#em-t').addEventListener('input', () => this.change());
+			this.angles();
+			this.ranking();
+			this.change();
+		}
+
+		private save() {
+			saveJSON(KEY, {
+				a: Number(this.$<HTMLInputElement>('#em-a').value),
+				b: Number(this.$<HTMLInputElement>('#em-b').value),
+				ref: this.$<HTMLSelectElement>('[data-ref]').value,
+				t: Number(this.$<HTMLInputElement>('#em-t').value),
+			});
+		}
+
+		private angles() {
+			const a = Number(this.$<HTMLInputElement>('#em-a').value);
+			const b = Number(this.$<HTMLInputElement>('#em-b').value);
+			const r = Math.PI / 180;
+			const place = (sel: string, label: string, deg: number) => {
+				const x = 90 * Math.cos(deg * r);
+				const y = -90 * Math.sin(deg * r);
+				const line = this.$(sel);
+				line.setAttribute('x2', x.toFixed(1));
+				line.setAttribute('y2', y.toFixed(1));
+				const t = this.$(label);
+				t.setAttribute('x', (1.12 * x - 4).toFixed(1));
+				t.setAttribute('y', (1.12 * y + 4).toFixed(1));
+			};
+			place('[data-arrow-a]', '[data-label-a]', a);
+			place('[data-arrow-b]', '[data-label-b]', b);
+			this.$('[data-out-a]').textContent = `${a}°`;
+			this.$('[data-out-b]').textContent = `${b}°`;
+			this.$('#em-a').setAttribute('aria-valuetext', `${a} degrees`);
+			this.$('#em-b').setAttribute('aria-valuetext', `${b} degrees`);
+			const diff = Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
+			const c = cosine2d(a, b);
+			const word =
+				c >= 0.955
+					? 'very similar: at or above the Day 5 change threshold'
+					: c > 0.5
+						? 'similar, but below the Day 5 change threshold'
+						: c > -0.5
+							? 'unrelated'
+							: 'opposite';
+			this.$('[data-angle]').textContent = `Angle ${diff}°, similarity a · b = cos ${diff}° = ${c.toFixed(3)} (${word}).`;
+			this.save();
+		}
+
+		private ranking() {
+			const refId = this.$<HTMLSelectElement>('[data-ref]').value;
+			const ref = places.find((p) => p.id === refId)!;
+			this.$('[data-ref-values]').textContent = `First 8 of its 64 values: ${ref.v
+				.slice(0, 8)
+				.map((x) => x.toFixed(3))
+				.join(', ')}, … (synthetic, unit length).`;
+			const rows = rankBySimilarity(places, refId)
+				.map(
+					({ place, similarity }) =>
+						`<tr><th scope="row">${place.name}</th><td>${place.cover}</td><td>${similarity.toFixed(3)}</td>` +
+						`<td><span class="hfld-lab__meter" aria-hidden="true"><span class="hfld-lab__meter-fill${similarity < 0 ? ' is-negative' : ''}" style="left:${similarity >= 0 ? 50 : 50 + similarity * 50}%;width:${Math.abs(similarity) * 50}%"></span></span></td></tr>`,
+				)
+				.join('');
+			this.$('[data-ranking]').innerHTML =
+				`<thead><tr><th scope="col">Place</th><th scope="col">Land cover</th><th scope="col">Similarity to ${ref.name}</th><th scope="col"><span class="sr-only">Similarity on a scale from −1 to 1</span><span aria-hidden="true">−1 … 0 … 1</span></th></tr></thead><tbody>${rows}</tbody>`;
+			this.save();
+		}
+
+		private change() {
+			const t = Number(this.$<HTMLInputElement>('#em-t').value);
+			this.$('[data-out-t]').textContent = t.toFixed(3);
+			this.$('#em-t').setAttribute('aria-valuetext', t.toFixed(3));
+			let hit = 0;
+			let falseAlarm = 0;
+			let missed = 0;
+			const rows = pairs
+				.map((p) => {
+					const s = cosine(p.before, p.after)!;
+					const f = flagged(p, t);
+					let outcome = 'Correctly not flagged';
+					if (!p.forestBefore) {
+						outcome = 'Not forest in 2024: ignored';
+					} else if (f && p.realForestLoss) {
+						outcome = 'Correctly flagged';
+						hit++;
+					} else if (f) {
+						outcome = 'False alarm';
+						falseAlarm++;
+					} else if (p.realForestLoss) {
+						outcome = 'Missed';
+						missed++;
+					}
+					return `<tr><th scope="row">${p.name}</th><td>${p.forestBefore ? 'Forest' : 'Not forest'}</td><td>${s.toFixed(3)}</td><td>${f ? '<strong>Flagged</strong>' : 'Not flagged'}</td><td>${p.truth}</td><td>${outcome}</td></tr>`;
+				})
+				.join('');
+			this.$('[data-change]').innerHTML =
+				'<caption>Illustrative pixels (synthetic data)</caption><thead><tr><th scope="col">Pixel</th><th scope="col">2024 cover</th><th scope="col">Similarity 2024–2025</th><th scope="col">Rule says</th><th scope="col">What happened</th><th scope="col">Outcome</th></tr></thead>' +
+				`<tbody>${rows}</tbody>`;
+			this.$('[data-change-summary]').textContent = `At ${t.toFixed(3)}: ${hit} forest losses flagged correctly, ${falseAlarm} false alarm${falseAlarm === 1 ? '' : 's'}, ${missed} missed.`;
+			this.save();
+		}
+	}
+
+	customElements.define('hfld-embedding-lab', HfldEmbeddingLab);
+</script>

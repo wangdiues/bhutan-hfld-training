@@ -292,3 +292,37 @@
 .hfld-lab__curve circle {
 	fill: var(--hfld-chart-1);
 }
+.hfld-lab__table td.is-decided {
+	font-weight: 700;
+	outline: 2px solid var(--hfld-chart-1);
+	outline-offset: -2px;
+}
+.hfld-lab__angle {
+	width: 100%;
+	max-width: 16rem;
+	height: auto;
+	font-size: 14px;
+	font-weight: 700;
+}
+.hfld-lab__angle .grid {
+	fill: none;
+	stroke: var(--sl-color-gray-5);
+}
+.hfld-lab__angle line.a,
+.hfld-lab__angle line.b {
+	stroke-width: 4;
+	stroke-linecap: round;
+}
+.hfld-lab__angle .a {
+	stroke: var(--hfld-chart-1);
+	fill: var(--hfld-chart-1);
+}
+.hfld-lab__angle .b {
+	stroke: var(--hfld-chart-2);
+	fill: var(--hfld-chart-2);
+	stroke-dasharray: 8 5;
+}
+.hfld-lab__angle text.a,
+.hfld-lab__angle text.b {
+	stroke: none;
+}
