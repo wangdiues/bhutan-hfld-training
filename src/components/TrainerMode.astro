@@ -1,0 +1,91 @@
+---
+/**
+ * Trainer mode (task M6-04): a toggle saved in this browser, and the full May 2026 timetable
+ * with links to the lessons that now teach each session. Not secure: it only changes what this
+ * browser shows, and there are no answer keys behind it.
+ */
+import { AGENDA } from '~/data/agenda';
+import '~/styles/labs.css';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const titleOf = (key: string) => key.replace(/\/$/, '').split('/').pop()!.replace(/-/g, ' ');
+---
+
+<hfld-trainer-toggle class="hfld-lab not-content">
+	<div class="hfld-lab__buttons">
+		<button type="button" aria-pressed="false" data-toggle>Trainer mode: off</button>
+	</div>
+	<p class="hfld-lab__note" role="status" data-status></p>
+</hfld-trainer-toggle>
+
+<h2 id="timetable">Timetable of the May 2026 training</h2>
+{
+	AGENDA.map((d) => (
+		<>
+			<h3 id={`day-${d.day}`}>Day {d.day}</h3>
+			<div class="hfld-lab__scroll not-content" tabindex="0" role="region" aria-label={`Day ${d.day} timetable`}>
+				<table class="hfld-lab__table">
+					<thead>
+						<tr>
+							<th scope="col">Time</th>
+							<th scope="col">Session</th>
+							<th scope="col">Led by</th>
+							<th scope="col">Lesson</th>
+						</tr>
+					</thead>
+					<tbody>
+						{d.sessions.map((s) => (
+							<tr>
+								<th scope="row">{s.time}</th>
+								<td>{s.title}</td>
+								<td>{s.led ?? ''}</td>
+								<td>
+									{s.lessons.map((l, i) => (
+										<>
+											{i > 0 && ', '}
+											<a href={`${base}${l}`}>{titleOf(l)}</a>
+										</>
+									))}
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+			<p>Facilitation notes:</p>
+			<ul>
+				{d.notes.map((n) => (
+					<li>{n}</li>
+				))}
+			</ul>
+		</>
+	))
+}
+
+<script>
+	import { loadJSON, saveJSON } from '~/lib/storage';
+
+	class HfldTrainerToggle extends HTMLElement {
+		connectedCallback() {
+			const btn = this.querySelector<HTMLButtonElement>('[data-toggle]')!;
+			const status = this.querySelector('[data-status]')!;
+			const render = (on: boolean, announce = false) => {
+				btn.setAttribute('aria-pressed', String(on));
+				btn.textContent = `Trainer mode: ${on ? 'on' : 'off'}`;
+				if (on) document.documentElement.dataset.trainer = '';
+				else delete document.documentElement.dataset.trainer;
+				if (announce)
+					status.textContent = on
+						? 'Trainer mode is on. Lesson pages now show their timetable slot and facilitation notes at the end.'
+						: 'Trainer mode is off.';
+			};
+			render(loadJSON<unknown>('hfld-trainer') === true);
+			btn.addEventListener('click', () => {
+				const on = btn.getAttribute('aria-pressed') !== 'true';
+				saveJSON('hfld-trainer', on);
+				render(on, true);
+			});
+		}
+	}
+	customElements.define('hfld-trainer-toggle', HfldTrainerToggle);
+</script>

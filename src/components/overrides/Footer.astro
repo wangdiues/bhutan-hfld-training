@@ -1,14 +1,52 @@
 ---
 /**
  * Starlight Footer override (task M6-01): adds a "Mark this lesson complete" toggle above the
- * default footer on lesson pages. Progress is saved in this browser only.
+ * default footer on lesson pages. Progress is saved in this browser only. Trainer mode (task
+ * M6-04) adds the timetable slots and facilitator notes for the lesson, shown only when the
+ * trainer-mode toggle is on (<html data-trainer>).
  */
 import Default from '@astrojs/starlight/components/Footer.astro';
 import { isLessonKey, pageKey } from '~/lib/progress';
+import { AGENDA, sessionsFor } from '~/data/agenda';
 
-const key = pageKey(Astro.url.pathname, import.meta.env.BASE_URL);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const key = pageKey(Astro.url.pathname, base);
 const lesson = isLessonKey(key);
+const slots = sessionsFor(key);
+const days = [...new Set(slots.map((s) => s.day))];
 ---
+
+{
+	slots.length > 0 && (
+		<aside class="hfld-trainer" aria-labelledby="hfld-trainer-title">
+			<p class="hfld-trainer__title" id="hfld-trainer-title">
+				Trainer notes
+			</p>
+			<p>In the May 2026 timetable:</p>
+			<ul>
+				{slots.map(({ day, session }) => (
+					<li>
+						Day {day}, {session.time}: {session.title}
+						{session.led && ` (${session.led})`}
+					</li>
+				))}
+			</ul>
+			{days.map((d) => (
+				<>
+					<p>Day {d} facilitation:</p>
+					<ul>
+						{AGENDA.find((a) => a.day === d)!.notes.map((n) => (
+							<li>{n}</li>
+						))}
+					</ul>
+				</>
+			))}
+			<p class="hfld-trainer__off">
+				<a href={`${base}about/trainer-mode/`}>Trainer mode</a> is on in this browser.
+			</p>
+		</aside>
+	)
+}
 
 {
 	lesson && (
@@ -48,6 +86,31 @@ const lesson = isLessonKey(key);
 	}
 	customElements.define('hfld-complete', HfldComplete);
 </script>
+
+<style is:global>
+	.hfld-trainer {
+		display: none;
+	}
+	:root[data-trainer] .hfld-trainer {
+		display: block;
+		margin-block: 2rem 0;
+		padding: 0.75rem 1rem;
+		border: 1px dashed var(--sl-color-orange);
+		border-radius: 0.5rem;
+		background: var(--sl-color-orange-low);
+		font-size: var(--sl-text-sm);
+	}
+	.hfld-trainer__title {
+		font-weight: 700;
+		margin: 0;
+	}
+	.hfld-trainer ul {
+		margin-top: 0.25rem;
+	}
+	.hfld-trainer__off {
+		color: var(--sl-color-gray-2);
+	}
+</style>
 
 <style>
 	.hfld-complete {

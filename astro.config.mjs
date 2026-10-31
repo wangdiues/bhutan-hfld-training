@@ -44,6 +44,11 @@ export default defineConfig({
 			lastUpdated: true,
 			// Offline use (task M6-05): web app manifest and the service worker written by integrations/offline.mjs.
 			head: [
+				// Trainer mode (task M6-04): set before the page draws, so trainer notes don't flash.
+				{
+					tag: 'script',
+					content: `try { if (JSON.parse(localStorage.getItem('hfld-trainer')) === true) document.documentElement.dataset.trainer = ''; } catch (e) {}`,
+				},
 				{ tag: 'link', attrs: { rel: 'manifest', href: `/${REPO}/manifest.webmanifest` } },
 				{
 					tag: 'script',
