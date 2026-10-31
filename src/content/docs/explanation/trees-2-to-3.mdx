@@ -1,9 +1,63 @@
 ---
 title: "TREES 2.0 → 3.0 for HFLD"
+description: What changed between TREES 2.0 (2021) and TREES 3.0 (June 2026), which version applies to Bhutan when, and what the changes mean for HFLD activity data.
+newContent: true
 sidebar:
   order: 1
 ---
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
+import Quiz from '~/components/Quiz.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+The May 2026 training was built on TREES 2.0 <Cite id="trees2" />. In June 2026 the ART Board approved TREES 3.0 <Cite id="trees3" />, and ART published a Summary of Changes alongside it <Cite id="trees3changes" />. This page explains which version applies to Bhutan, and which changes matter for the work taught in this course.
+
+## Which version applies, and when
+
+When a new version is approved, a participant may keep the version that was in place when its TREES Registration Document was accepted until the end of that crediting period. At the start of the next crediting period, it must adopt the latest version. Alternatively, it may start a new crediting period at once under the new version <Cite id="trees3" at="Section 1.2.2" />.
+
+ART accepted Bhutan's Registration Document and first Monitoring Report, for the 2020–2024 crediting period, in April 2026 <Cite id="art2026bhutan" />. The announcement does not name the version, but TREES 2.0 was in force when the documents were submitted and accepted. We therefore infer:
+
+| Period | Standard | Why (inferred) |
+|---|---|---|
+| 2020–2024 crediting period | TREES 2.0 | the version in force when the documents were submitted and accepted |
+| next crediting period (from 2025) | TREES 3.0 | the period begins before TREES 3.0, but its Registration Document is due after the first year <Cite id="trees3" at="Section 2.3" />, when 3.0 is the latest version |
+
+Confirm the version for any submission with the ART Secretariat. This course teaches TREES 3.0 and notes where TREES 2.0 differs. Section numbers moved between the versions: for example, HFLD eligibility is Section 5.2.1 in TREES 2.0 and Section 4.2.1 in TREES 3.0.
+
+## Changes that matter for HFLD activity data
+
+**HFLD eligibility.** TREES 2.0 allowed an HFLD Score to be calculated only if forest cover was above 50% and the deforestation rate below 0.5% in every year of the reference period <Cite id="trees2" at="Section 5.2.1" />. TREES 3.0 removed these bounds. The score itself, (forest cover − 50)/100 + (0.5 − deforestation rate), and the 0.5 threshold are unchanged <Cite id="trees3" at="Section 4.2.1" />. A jurisdiction near the old bounds should recompute its score each year under the new rule.
+
+**Crediting levels below business as usual.** All three crediting levels must now be shown to be below business as usual. For the HFLD Crediting Level, this means quantitative evidence that it is conservative compared with the threat from the drivers of deforestation and degradation <Cite id="trees3" at="Sections 4.1, 4.2.2" />.
+
+**Activities during the reference period.** HFLD participants must now document the activities they undertook to reduce emissions during the reference period, as part of the REDD+ Implementation Plan <Cite id="trees3" at="Section 3.3" />.
+
+**Forest definition.** Participants must now describe how they made their forest definition operational, for example the thresholds used in the map <Cite id="trees3" at="Section 3.6" />.
+
+**Activity data.** The requirements for emissions activity data were clarified, with more references to good practice <Cite id="trees3changes" />. TREES 2.0 already asked for an accuracy assessment, confidence intervals and more than one interpreter <Cite id="trees2" at="Section 4.1.1" />. TREES 3.0 adds, explicitly, the 90% level for confidence intervals, a probability sampling design, a sample size justified for small or rare classes, and the script and map used to select the samples <Cite id="trees3" at="Section 5.1.1.1" />.
+
+**Removals for very low deforestation.** Normally a participant may credit removals only in a year when its emissions are below the TREES Crediting Level. Under TREES 3.0, a jurisdiction whose deforestation rate was below 0.25% in every year of the reference period may also claim removals in a year when its emissions are above that level, provided the removals exceed the increase and emissions are no more than 15% above it <Cite id="trees3" at="Section 4.3" />. Meanwhile, the option for HFLD jurisdictions to claim avoided foregone removals was removed <Cite id="trees3changes" />.
+
+**Uncertainty.** Uncertainty is still the half-width of the 90% confidence interval as a percentage, combined by Monte Carlo simulation. It is now assessed separately for emission reductions and for removals, each with its own adjustment factor <Cite id="trees3" at="Section 8" />, and the deduction equations moved to Section 10 <Cite id="trees3changes" />.
+
+## Other changes
+
+- Subnational accounting is allowed until 31 December 2035; after that, participants must be national governments <Cite id="trees3changes" />.
+- A Registration Document must be submitted within two calendar years of the TREES Concept, and the initial validation and verification window is now 18 months <Cite id="trees3changes" />.
+- A new Reversal Risk Rating Tool sets buffer pool contributions <Cite id="trees3changes" />.
+- The safeguards reporting is streamlined, and gender, youth and vulnerable groups are included explicitly <Cite id="trees3changes" />.
+
+## What it means for this course
+
+The methods taught here (seasonal composites, primitives, an assembled land-cover map, a stratified reference sample and area-adjusted estimates with 90% confidence intervals) meet the activity-data requirements of both versions. What TREES 3.0 asks for more explicitly is **documentation**: how the forest definition was made operational, the activities of the reference period, and the scripts and maps behind the sample. The [Reporting and documentation](/bhutan-hfld-training/day-5/reporting/) lesson and the [capstone](/bhutan-hfld-training/capstone/) checklist cover these.
+
+<Quiz id="explanation-trees-2-to-3" questions={[
+  { q: "What TREES 2.0 rule did TREES 3.0 remove for HFLD eligibility?", options: ["The 0.5 HFLD Score threshold", "The use of a reference period", "The 90% confidence interval", "The requirement that forest cover exceed 50% and deforestation be below 0.5% before a score could be calculated"], answer: 3, explain: "The bounds were removed; the score formula and the 0.5 threshold stay." },
+  { q: "Under Section 1.2.2, when must a participant adopt TREES 3.0?", options: ["At the start of its next crediting period, or earlier if it starts a new period under 3.0", "Immediately on publication", "Never", "After 20 years"], answer: 0, explain: "It may finish the current crediting period under the version in place when its Registration Document was accepted." },
+]} />
+
+<References />
+
+---
+
+*Written for this website by the course maintainers from the published standards. Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*
