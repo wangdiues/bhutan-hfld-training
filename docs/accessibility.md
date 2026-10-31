@@ -38,3 +38,7 @@ All 78 pages checked at 360 px wide, both as a narrow desktop window and with ph
 - the site title is a little smaller below 400 px so it isn't cut off.
 
 Screenshots of each page type (home, lesson, lab, slides, reference) were checked by eye.
+
+## CI scan: needs-review results (2026-10-31)
+
+pa11y treats axe's "needs review" (incomplete) results as errors by default, so CI failed from the M3-10 commit onwards although axe found no violations. The items were all contrast checks axe cannot finish automatically: the numbers drawn by Starlight's `<Steps>` (pseudo-content), table text partly scrolled out of view inside lab scroll regions, text next to the SVG curve in Lab 3, and the arrow glyph on slide buttons. Their contrast was checked in both themes. `.pa11yci.json` now sets `levelCapWhenNeedsReview: "warning"`: confirmed violations still fail the build; needs-review items are reported as warnings.
