@@ -116,3 +116,16 @@ h1#_top::after {
 html {
 	scrollbar-gutter: stable;
 }
+
+/* Long inline code (asset paths, dataset IDs) wraps instead of widening the page on phones
+   (task M7-03). Code blocks keep their own horizontal scroll. */
+.sl-markdown-content :not(pre) > code {
+	overflow-wrap: anywhere;
+}
+
+/* The full site title fits beside the search and menu buttons on 360 px phones (task M7-03). */
+@media (max-width: 400px) {
+	.site-title {
+		font-size: var(--sl-text-base);
+	}
+}

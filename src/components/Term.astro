@@ -52,14 +52,12 @@ const tipId = `term-${id}-${Math.random().toString(36).slice(2, 7)}`;
 		font-weight: 400;
 		line-height: 1.4;
 		box-shadow: var(--sl-shadow-md);
-		visibility: hidden;
-		opacity: 0;
-		transition: opacity 0.15s;
+		/* display: none, not just hidden, so closed tips don't widen the page on phones (M7-03). */
+		display: none;
 		pointer-events: none;
 	}
 	.hfld-term:hover .hfld-term__tip,
 	.hfld-term:focus-within .hfld-term__tip {
-		visibility: visible;
-		opacity: 1;
+		display: block;
 	}
 </style>

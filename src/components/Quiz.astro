@@ -129,6 +129,9 @@ const items = questions.map((qn) => {
 		color: var(--sl-color-white);
 	}
 	.hfld-quiz__q {
+		/* Fieldsets default to min-content width; 0 and wrapping keep long code options on phone screens. */
+		min-inline-size: 0;
+		overflow-wrap: anywhere;
 		margin: 0 0 1rem;
 		padding: 0.75rem 1rem;
 		border: 1px solid var(--sl-color-gray-5);

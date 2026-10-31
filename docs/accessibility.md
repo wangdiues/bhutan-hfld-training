@@ -26,3 +26,15 @@ Measured with Puppeteer against `astro preview` (cache disabled; sizes uncompres
 | Glossary | 103 KB | 108 KB | 97 KB | 0.1 s | 0.004 |
 
 All pages are under 200 KB of JavaScript. Images are WebP (slides, screenshots) or SVG. Layout shift was cut from 0.30 to under 0.1 by rendering the sidebar progress panel at build time and reserving the scrollbar gutter.
+
+## Mobile pass (task M7-03, 2026-10-31)
+
+All 78 pages checked at 360 px wide, both as a narrow desktop window and with phone emulation (Puppeteer `isMobile`): no page scrolls sideways or widens the layout viewport. Fixed on the way:
+
+- lab and quiz fieldsets defaulted to `min-content` width, so wide tables pushed the page out (`min-inline-size: 0`);
+- screen-reader-only text inside table scrollers was absolutely positioned and escaped the scroller (`position: relative` on `.hfld-lab__scroll` and `.hfld-scripts__scroll`);
+- closed glossary tooltips still counted toward page width (now `display: none` until hover or focus);
+- long inline code (asset paths) now wraps;
+- the site title is a little smaller below 400 px so it isn't cut off.
+
+Screenshots of each page type (home, lesson, lab, slides, reference) were checked by eye.
