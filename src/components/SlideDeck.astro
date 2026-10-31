@@ -10,6 +10,7 @@
  * load only when reached (the next one is prefetched).
  */
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import { getImage } from 'astro:assets';
 import { getDeck, slideImage } from '~/lib/slides';
 
 interface Props {
@@ -26,7 +27,9 @@ const slides = await Promise.all(
 	deck.slides.map(async (s, i) => ({
 		...s,
 		n: i + 1,
-		img: slideImage(slug, s.image),
+		// Through getImage, so the file is always emitted, even when the same picture is also used
+		// with <Image> in a lesson (Astro then skips the raw original).
+		img: await getImage({ src: slideImage(slug, s.image), format: 'webp' }),
 		label: s.title || `Slide ${i + 1}`,
 		textHtml: s.text ? (await md.render(escape(s.text))).code : '',
 		notesHtml: s.notes ? (await md.render(escape(s.notes))).code : '',
@@ -43,8 +46,8 @@ const id = `deck-${slug}`;
 					<li class="hfld-slides__slide" id={`slide-${s.n}`} aria-roledescription="slide" aria-label={`${s.n} of ${total}: ${s.label}`}>
 						<img
 							src={s.img.src}
-							width={s.img.width}
-							height={s.img.height}
+							width={s.img.attributes.width}
+							height={s.img.attributes.height}
 							alt={`Slide ${s.n}: ${s.label}. The slide's text follows.`}
 							loading={s.n === 1 ? 'eager' : 'lazy'}
 							decoding="async"
