@@ -1,0 +1,97 @@
+---
+/**
+ * Starlight Footer override (task M6-01): adds a "Mark this lesson complete" toggle above the
+ * default footer on lesson pages. Progress is saved in this browser only.
+ */
+import Default from '@astrojs/starlight/components/Footer.astro';
+import { isLessonKey, pageKey } from '~/lib/progress';
+
+const key = pageKey(Astro.url.pathname, import.meta.env.BASE_URL);
+const lesson = isLessonKey(key);
+---
+
+{
+	lesson && (
+		<hfld-complete class="hfld-complete" data-key={key}>
+			<button type="button" aria-pressed="false">
+				<span class="hfld-complete__box" aria-hidden="true" />
+				<span data-label>Mark this lesson complete</span>
+			</button>
+			<p class="hfld-complete__note" data-note>
+				Progress is saved in this browser only. Your progress per day shows in the sidebar.
+			</p>
+		</hfld-complete>
+	)
+}
+<Default />
+
+<script>
+	import { loadDone, setDone } from '~/lib/progress';
+
+	class HfldComplete extends HTMLElement {
+		connectedCallback() {
+			const key = this.dataset.key!;
+			const btn = this.querySelector('button')!;
+			const label = this.querySelector('[data-label]')!;
+			const render = (done: boolean) => {
+				btn.setAttribute('aria-pressed', String(done));
+				label.textContent = done ? 'Lesson complete' : 'Mark this lesson complete';
+			};
+			render(loadDone().has(key));
+			btn.addEventListener('click', () => {
+				const done = btn.getAttribute('aria-pressed') !== 'true';
+				const saved = setDone(key, done);
+				render(saved.has(key));
+				if (saved.has(key) !== done) this.querySelector('[data-note]')!.textContent = 'Progress could not be saved: this browser blocks site storage.';
+			});
+		}
+	}
+	customElements.define('hfld-complete', HfldComplete);
+</script>
+
+<style>
+	.hfld-complete {
+		display: block;
+		margin-block: 2rem 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--sl-color-hairline);
+	}
+	.hfld-complete button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.6rem 1rem;
+		border: 2px solid var(--sl-color-accent);
+		border-radius: 0.5rem;
+		background: transparent;
+		color: var(--sl-color-white);
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.hfld-complete button:focus-visible {
+		outline: 3px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+	.hfld-complete button[aria-pressed='true'] {
+		background: var(--sl-color-accent-low);
+	}
+	.hfld-complete__box {
+		width: 1.1rem;
+		height: 1.1rem;
+		border: 2px solid var(--sl-color-accent);
+		border-radius: 0.2rem;
+		display: inline-grid;
+		place-items: center;
+	}
+	.hfld-complete button[aria-pressed='true'] .hfld-complete__box::after {
+		content: '✓';
+		font-size: 0.85rem;
+		line-height: 1;
+	}
+	.hfld-complete__note {
+		margin-top: 0.5rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+</style>

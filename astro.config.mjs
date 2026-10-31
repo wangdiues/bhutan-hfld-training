@@ -41,6 +41,11 @@ export default defineConfig({
 				baseUrl: `https://github.com/${GITHUB_USER}/${REPO}/edit/main/`,
 			},
 			lastUpdated: true,
+			// Lesson progress (task M6-01): a "mark complete" toggle and per-day progress in the sidebar.
+			components: {
+				Footer: './src/components/overrides/Footer.astro',
+				Sidebar: './src/components/overrides/Sidebar.astro',
+			},
 			// /slides/ pages are custom routes (src/pages/slides/), which the validator cannot see.
 			plugins: [starlightLinksValidator({ exclude: ['/bhutan-hfld-training/slides/', '/bhutan-hfld-training/slides/**'] })],
 			sidebar: [
