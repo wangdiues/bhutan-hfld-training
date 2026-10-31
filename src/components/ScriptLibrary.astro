@@ -34,6 +34,8 @@ const STEPS: Record<string, string> = {
 };
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+// Scripts that belong to a lesson with a different name.
+const LESSON: Record<string, string> = { 'feature-basics': 'day-2/import-and-export/' };
 const headerOf = (code: string, python: boolean) =>
 	python ? (code.match(/"""([\s\S]*?)"""/)?.[1] ?? '') : (code.match(/\/\*\*([\s\S]*?)\*\//)?.[1] ?? '');
 const rows = Object.entries(files)
@@ -49,7 +51,7 @@ const rows = Object.entries(files)
 				.map((l) => l.replace(/^\s*\*?\s?/, '').trim())
 				.find((l) => l.length > 0) ?? slug;
 		const hash = code.match(/code\.earthengine\.google\.com\/([0-9a-f]{32})/)?.[1];
-		const lessonPath = dir === 'start-here' ? 'start-here/' : `${dir}/${slug}/`;
+		const lessonPath = dir === 'start-here' ? 'start-here/' : (LESSON[slug] ?? `${dir}/${slug}/`);
 		return {
 			rel,
 			dir,
