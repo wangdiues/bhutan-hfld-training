@@ -4,7 +4,7 @@
  "day": 4,
  "lesson": "day-4/rlcms-overview",
  "source": "Day 4/D4 RLCMS - GENERAL OVERVIEW AND TERMS TO KNOW.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
- "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "credit": "Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International, shown with their permission. Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
  "slides": [
   {
    "image": "01.webp",
@@ -20,7 +20,7 @@
    "title": "What Is Rlcms?",
    "text": "- The system utilizes satellite technology to facilitate the production of customized, high-quality regional land cover maps. The system is transferable to all regions around the globe because of its use of publicly available global data (e.g., Landsat, MODIS, Sentinel-2) and easily adaptable architecture that allows for the incorporation of a customizable assembly logic to map different land cover typologies based on the user's landscape monitoring objectives\n- The RLCMS was developed by SERVIR-SEA with the support of the U.S. Forest Service, NASA Applied Science Program, Google, the University of Maryland and governments of countries in the South East Asia.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "03.webp",
@@ -28,7 +28,7 @@
    "title": "Composite Preparation",
    "text": "Composite preparation: It involves image pre-processing such as shadow and cloud masking, BRDF and topographic correction. Composites can be made using any available remote sensing imagery, such as: Landsat 5, 7, and 8 images, Sentinel-1, Sentinel-2, and Planet NICFI.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "04.webp",
@@ -36,7 +36,7 @@
    "title": "Training Data Preparations",
    "text": "Training data preparation: It involves identifying typology for the particular country on the basis of which reference data are being collected. The reference data are segregated into training data and validation data. The training data are sampled to get information/data at pixel level. Several covariates are used in this step.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "05.webp",
@@ -44,7 +44,7 @@
    "title": "Primitive Layers Generation",
    "text": "Primitive layers generation: The data obtained from training data sampling are used by the classifier to generate primitive layers. These primitive layers represent probability of a certain biophysical feature existing within that pixel. Assessment of primitive layers are also done.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "06.webp",
@@ -52,7 +52,7 @@
    "title": "Major Steps",
    "text": "Assemblage to create final land cover map: In this step, the decision tree is developed based on user specified thresholds. The thresholds are determined on the basis of visual assessment and primitive assessment plot",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "07.webp",
@@ -60,7 +60,7 @@
    "title": "Simplified Methodology Diagram",
    "text": "",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "08.webp",
@@ -68,7 +68,7 @@
    "title": "Modular System Architecture",
    "text": "",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "09.webp",
@@ -76,7 +76,7 @@
    "title": "Customizable to Agency Classification Systems",
    "text": "Assembly algorithm can be reconfigured",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "10.webp",
@@ -84,7 +84,7 @@
    "title": "Customizable to Agency Classification Systems",
    "text": "Easily updated: Data and algorithm improvements",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "11.webp",
@@ -92,7 +92,7 @@
    "title": "Customizable to Agency Classification Systems",
    "text": "Training\n\nValidation",
    "notes": "",
-   "hidden_pictures": 3
+   "hidden_pictures": 0
   },
   {
    "image": "12.webp",
@@ -100,7 +100,7 @@
    "title": "Terms",
    "text": "Machine Learning (ML): ML is a type of AI that involves training algorithms on large datasets to identify patterns and relationships between input variables, which can then be used to make predictions or decisions, improving prediction accuracy over time. This includes random forest and convolutional neural networks, which are both used inside RLCMS.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "13.webp",
@@ -116,7 +116,7 @@
    "title": "Terms",
    "text": "- Random Forest Classifier\n- A random forest classifier is an ML algorithm that uses multiple decision trees to classify data into different categories. It's a collection of decision trees that are built from random subsets of a training set. The algorithm then aggregates the votes from each tree to determine the final class of a test object. It performs well in predicting most classes, but may struggle with classes that have similar characteristics in their data.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "15.webp",
@@ -124,7 +124,7 @@
    "title": "Terms",
    "text": "- Training Data\n- Reference data points are split into training data and validation data. They can be gathered from the field and/or remote sensing imagery.\n- The training data are sampled to get information/data at the pixel level. Several covariates are used in this step.\n\nWe extract covariate datasets on the pixel-level at point locations (our \"known\" points, the training data). They will be used to train a classifier which is actually predicting class of other pixels (our unknown points). Thus, the data obtained from training data sampling are used by the classifier to generate primitive layers.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "16.webp",
@@ -132,7 +132,7 @@
    "title": "Terms",
    "text": "- Covariates\n- Data that are used during classification are called covariates. They are derived using the training data. The bands in the composites images are used to calculate a series of covariates.\n- Covariates are variables that are considered during analysis. In random forests, the search for the best split at each parent node is limited to a randomly chosen subset of covariates.\n- Selecting a smaller subset of covariates reduces the computational expense of applying the model. In RLCMS, feature selection is conducted to identify the most important covariates for the model. The classifier is applied in two stages: initially with all covariates to determine the most influential variables, and secondly with only these important features, enhancing model efficiency and accuracy.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "17.webp",
@@ -140,7 +140,7 @@
    "title": "Terms",
    "text": "- Primitives\n- The output of the machine learning model (primitives) are the probability map for each land cover class.\n- There will be a separate map for each land cover being analyzed. Every pixel in a Primitive Map has a probability of whether it is the selected land cover type or not. The probability values are based on what the model has learned from the training data are the remote sensing characteristics of that land cover, and then the model has determined how similar or dissimilar that pixel's remote sensing band values are to these characteristics.\n- The accuracy of each primitive can be evaluated separately.",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "18.webp",
@@ -148,7 +148,7 @@
    "title": "Terms",
    "text": "- Assemblage Map\n- The assemblage is a method for combining different primitive layers into a land cover map, while incorporating users’ land cover definitions and priorities – while simultaneously preserving uncertainty information.\n- This is a land cover map for the selected year, where the label for each pixel is based on rules determined from the values of the different Primitives at that location. Labels are determined with a provided logic tree. Most simply, whichever Primitive has the highest probability, will be the determined label in the Assemblage Map.",
    "notes": "",
-   "hidden_pictures": 2
+   "hidden_pictures": 0
   }
  ]
 }

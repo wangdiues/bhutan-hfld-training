@@ -11,6 +11,8 @@ For each deck (all 11 by default):
      the same content hash pptx2mdx.py uses for its file names;
   3. exports each slide with PowerPoint (COM) at 1600x900 and saves it as WebP (<= 200 KB)
      to src/assets/slides/<deck>/NN.webp;
+     With --keep-pictures (the user's decision, 2026-10-31) nothing is hidden: the slides look
+     as in the original decks, and the existing JSON text (with its hand corrections) is kept.
   4. writes src/data/slides/<deck>.json: title, source, credit, and each slide's title,
      text (Markdown) and speaker notes.
 
@@ -67,6 +69,10 @@ TITLES = {
 }
 CREDIT = ("Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) "
           "by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.")
+CREDIT_ORIGINAL = ("Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and "
+                   "Samuel, Conservation International, shown with their permission. Pictures on the slides "
+                   "belong to their owners and are not covered by this site's CC BY 4.0 licence.")
+KEEP_PICTURES = False
 
 
 def review_for(deck):
@@ -124,7 +130,7 @@ def plan(path, deck):
                     key = hashlib.sha1(s.image.blob).hexdigest()[:10]
                 except Exception:
                     continue
-                if key in hidden:
+                if key in hidden and not KEEP_PICTURES:
                     hide.append(s.shape_id)
         notes = ""
         if slide.has_notes_slide:
@@ -199,10 +205,21 @@ def render(slug, app):
             pres.Close()
         title = TITLES.get(slug) or deck_title(copy) or slug.replace("-", " ").capitalize()
         os.makedirs(DATA, exist_ok=True)
+        old_path = os.path.join(DATA, slug + ".json")
+        if KEEP_PICTURES and os.path.exists(old_path):
+            # Keep the published text (it carries hand corrections); refresh only images and credit.
+            with open(old_path, encoding="utf8") as f:
+                old = json.load(f)
+            by_n = {s["source_slide"]: s for s in old["slides"]}
+            assert [s["n"] for s in slides] == [s["source_slide"] for s in old["slides"]], f"{slug}: slide list changed"
+            for s in slides:
+                o = by_n[s["n"]]
+                s["title"], s["text"], s["notes"] = o["title"], o["text"], o["notes"]
+            title = old["title"]
         data = {
             "deck": slug, "title": title, "day": day, "lesson": lesson,
             "source": f"{src_rel} (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
-            "credit": CREDIT,
+            "credit": CREDIT_ORIGINAL if KEEP_PICTURES else CREDIT,
             "slides": [{"image": s["image"], "source_slide": s["n"], "title": s["title"], "text": s["text"],
                         "notes": s["notes"], "hidden_pictures": len(s["hide"])} for s in slides],
         }
@@ -217,7 +234,10 @@ def render(slug, app):
 
 def main():
     import win32com.client  # pywin32
-    slugs = sys.argv[1:] or list(DECKS)
+    global KEEP_PICTURES
+    args = sys.argv[1:]
+    KEEP_PICTURES = "--keep-pictures" in args
+    slugs = [a for a in args if not a.startswith("--")] or list(DECKS)
     unknown = [s for s in slugs if s not in DECKS]
     if unknown:
         sys.exit(f"unknown deck(s): {', '.join(unknown)}; choose from {', '.join(DECKS)}")

@@ -4,7 +4,7 @@
  "day": 1,
  "lesson": "day-1/code-editor-and-data-catalog",
  "source": "Day 1/D1 EXPLORING DATA ARCHIVE IN GEE.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
- "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "credit": "Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International, shown with their permission. Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
  "slides": [
   {
    "image": "01.webp",
@@ -28,7 +28,7 @@
    "title": "Navigating the User Interface",
    "text": "SEARCH BAR\n\nThis tool helps GEE users quickly access datasets and zoom to locations",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "04.webp",
@@ -76,7 +76,7 @@
    "title": "Intro to JavaScript in GEE",
    "text": "PRINT FUNCTION\n\n- Print is a function to print text or further information, where the output will be displayed on the upper right-hand panel under the Console after clicking the Run button\n- print(‘Hello World’)\n\nIf you want to filter a specific area, you need to check the attribute you want to filter by\n\nLet’s go to: https://code.earthengine.google.com/ Let’s try to display the words “Hello World”",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "10.webp",
@@ -108,7 +108,7 @@
    "title": "Asset Types",
    "text": "- RASTER\n- Image\n  - A single raster image\n  - May have multiple bands, properties*\n- ImageCollection\n  - Indexed during creation\n  - Supports filtering and aggregation of many images by time, area, etc.\n\n- TABLE\n- FeatureCollection\n  - Geometry column inferred\n    - Empty MultiPoint if missing\n  - Other columns → Feature properties\n  - Property/column keys:table.getInfo().columns\n\n* All collections & elements can have key→value properties",
    "notes": "",
-   "hidden_pictures": 5
+   "hidden_pictures": 0
   },
   {
    "image": "14.webp",
@@ -116,7 +116,7 @@
    "title": "Asset Types",
    "text": "Image (ee.Image) for Landsat\n\n```js\n// Fundamental raster data type for choosing an individual image in Earth Engine.\nvar LC8_image= ee.Image('LANDSAT/LC08/C02/T1_TOA/LC08_138041_20260101')\n//Display Image\nMap.addLayer(LC8_image,{bands:['B6', 'B5', 'B4'],min: 0.05, max: 0.8,gamma: 1.6}, 'Landsat8scene');\n```\n\n🛰️LANDSAT",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "15.webp",
@@ -124,7 +124,7 @@
    "title": "Asset Types",
    "text": "Image (ee.Image) for Sentinel-2\n\n```js\n// Fundamental raster data type for choosing an individual image in Earth Engine.\n//Import single image\n//-----------------------------\nvar s2_image= ee.Image('COPERNICUS/S2_SR_HARMONIZED/20250103T044201_20250103T044548_T45RYL')\n// Define visualization parameters for False Color\n//-----------------------------------------\nvar rgbParams = {\n// bands: ['B4', 'B3', 'B2'],\n// min: 0,\n// max: 3000\n};\n//Display Image\n//-------------------------------------------\nMap.addLayer(s2_image,rgbParams, 's2scene');\n```\n\n🛰️SENTINEL-2",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "16.webp",
@@ -132,7 +132,7 @@
    "title": "Asset Types",
    "text": "ImageCollection (ee.ImageCollection)\n\n```js\n// A stack of satellite images you can filter and process for cloud-free composites or time-series analysis\nvar l8col = ee.ImageCollection(\"LANDSAT/LC08/C02/T1_TOA\");\n// filter by location/geometry\n// l8col = l8col.filterBounds(aoi)\n// show the number of image in the collection\nprint('number of images:',l8col.size())\n// filter by image property\nprint(l8col.first())\n// filter by the least cloud cover\nvar cloudfreeImg = l8col.sort(\"CLOUD_COVER\", true).first() // true, false\nprint('cloud free image',cloudfreeImg)\nvar vis = {\n// bands: ['B4', 'B3', 'B2'], // 🔥 Landsat RGB\n// min: 0,\n// max: 0.3\n};\nMap.centerObject(aoi, 10);\nMap.addLayer(cloudfreeImg, vis, 'Least Cloud Image');\n```\n\n🛰️LANDSAT",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "17.webp",
@@ -148,7 +148,7 @@
    "title": "Asset Types",
    "text": "ImageCollection (ee.ImageCollection)\n\n```js\n// A stack of satellite images you can filter and process for cloud-free composites or time-series analysis\n// Load sentinel 2 data product\nvar collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterBounds(aoi)\n// show the number of image in the collection\nprint('number of images:',collection.size())\n// filter by image property\nprint(collection.first())\nvar startingDate = '2024-01-01';\nvar endDate = '2024-12-31'\n// filter by dates\nvar s2_2024 = collection.filterDate(startingDate,endDate)\nprint('2024 images:', s2_2024)\n// filter by the least cloud cover\nvar cloudfreeImg = s2_2024.sort(\"CLOUDY_PIXEL_PERCENTAGE\", true).first() // true, false\nprint('cloud free image',cloudfreeImg)\n// Define visualization parameters for RGB\nvar rgbParams = {\n// bands: ['B4', 'B3', 'B2'],\n// min: 0,\n// max: 3000\n};\n//Display image\nMap.addLayer(cloudfreeImg,rgbParams,'cloud free image')\n```\n\n- 📍 Location (filterBounds)\n- 📅 Date (filterDate)\n- 🌥️ Cloud cover or other metadata\n\n🛰️SENTINEL-2",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "19.webp",
@@ -164,7 +164,7 @@
    "title": "Asset Types",
    "text": "FeatureCollection (ee.FeatureCollection)\n\n```js\n// A set of Features (Click here)\n// https://code.earthengine.google.com/ec007bf68789b99122646670fe6e471d\n// ============================================================\n// 1. LOAD GAUL LEVEL 1\n// ============================================================\nvar GAUL_2024_L1 = ee.FeatureCollection(\n// \"projects/sat-io/open-datasets/FAO/GAUL/GAUL_2024_L1\"\n);\n```",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "21.webp",
@@ -180,7 +180,7 @@
    "title": "Applications of GEE",
    "text": "Go to developers.google.com/earth-engine/datasets",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "23.webp",
@@ -188,7 +188,7 @@
    "title": "GEE Tutorial Homepage",
    "text": "efabook\n\nOpen Geo Blog",
    "notes": "",
-   "hidden_pictures": 3
+   "hidden_pictures": 0
   }
  ]
 }

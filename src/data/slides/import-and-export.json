@@ -4,7 +4,7 @@
  "day": 2,
  "lesson": "day-2/import-and-export",
  "source": "Day 2/D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
- "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "credit": "Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International, shown with their permission. Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
  "slides": [
   {
    "image": "01.webp",
@@ -20,7 +20,7 @@
    "title": "Overview",
    "text": "Feature Collections are similar to Image Collections - but they contain Features, not images. They are equivalent to Vector Layers in GIS.\n\nKhajavi et al., 2021\n\nFeature?\n\nAttribute?",
    "notes": "",
-   "hidden_pictures": 2
+   "hidden_pictures": 0
   },
   {
    "image": "03.webp",
@@ -28,7 +28,7 @@
    "title": "Basic Analysis Function",
    "text": "- BUFFER\n- A buffer is a zone of a specified width around a feature (point, line, or polygon) in a GIS",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "04.webp",
@@ -36,7 +36,7 @@
    "title": "Basic Analysis Function",
    "text": "- CLIP\n- Extracting specific areas from a larger dataset (e.g., extracting land cover data within a study area boundary).",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "05.webp",
@@ -44,7 +44,7 @@
    "title": "Basic Analysis Function",
    "text": "- MERGE\n- Combining multiple shapefiles or feature classes into one dataset for unified analysis",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "06.webp",
@@ -52,7 +52,7 @@
    "title": "Basic Analysis Function",
    "text": "- UNION\n- Creating a combined dataset from overlapping regions or features",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "07.webp",
@@ -60,7 +60,7 @@
    "title": "Before we begin…",
    "text": "Do you have experience with GIS software relevant to preparing feature and raster datasets?",
    "notes": "",
-   "hidden_pictures": 3
+   "hidden_pictures": 0
   },
   {
    "image": "08.webp",
@@ -84,7 +84,7 @@
    "title": "Importing Features to GEE as Assets: .csv",
    "text": "Comma-separated values (.csv)\n\n- Needs to be formatted with geometry information (lon = X, lat = Y)\n- CRS defaults to WGS84 (EPSG:4326)\n- Use ‘Advanced options’ to set these",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "11.webp",
@@ -92,7 +92,7 @@
    "title": "Importing Features to GEE Asset",
    "text": "Detailed information about tasks that are currently importing or have recently imported/exported data\n\n- Your feature and raster data stored as assets\n- (cloud assets or legacy assets)",
    "notes": "",
-   "hidden_pictures": 2
+   "hidden_pictures": 0
   },
   {
    "image": "12.webp",
@@ -100,7 +100,7 @@
    "title": "Review Result",
    "text": "What is this operation called?",
    "notes": "",
-   "hidden_pictures": 2
+   "hidden_pictures": 0
   },
   {
    "image": "13.webp",
@@ -124,7 +124,7 @@
    "title": "Exporting Data",
    "text": "- Data in Raster (GeoTIFF)\n- Data in Vector (Features)\n- Data in CSV\n- Data in KML\n- Data in GeoJSON\n- Data in Video",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "16.webp",
@@ -172,7 +172,7 @@
    "title": "Exporting Data",
    "text": "Data in CSV, KML and GeoJSON\n\nExport.table.toDrive(\\{ \ncollection: features, \ndescription:'features’, \nfolder: 'GEE’, \nfileFormat: ‘CSV’ \n\\});",
    "notes": "",
-   "hidden_pictures": 3
+   "hidden_pictures": 0
   },
   {
    "image": "22.webp",
@@ -180,7 +180,7 @@
    "title": "Exporting Data",
    "text": "Data in Video\n\n1. Data feature is polygon\n  2. Landsat products \n   -   WRS_PATH\n   -   WRS_ROW",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "23.webp",
@@ -188,7 +188,7 @@
    "title": "Exporting Data",
    "text": "Export.video.toDrive",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "24.webp",
@@ -212,7 +212,7 @@
    "title": "Any questions?",
    "text": "",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   }
  ]
 }

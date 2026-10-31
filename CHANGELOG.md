@@ -14,6 +14,9 @@ All notable changes to this course are documented here. The format follows [Keep
 - Lab 3 (spectral index explorer), Lab 4 (decision tree playground), Lab 5 (assemblage rule builder) and Lab 6 (embedding similarity).
 - Explanation pages, how-to guides, glossary (82 terms), asset catalogue, cheat sheet and debugging reference.
 
+### Changed
+- Slide player shows the original slides with all their pictures (owner's decision, 2026-10-31); slide pictures are excluded from the CC BY 4.0 licence.
+
 ## Corrections to source material
 
 Each correction made to the original Bhutan ART-TREES HFLD Readiness Training materials (May 2026) is listed here, with the lesson where it appears.

@@ -4,7 +4,7 @@
  "day": 2,
  "lesson": "day-2/mosaics-and-composites",
  "source": "Day 2/D2-Creating Mosaics and Composites from Image Collections.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
- "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "credit": "Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International, shown with their permission. Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
  "slides": [
   {
    "image": "01.webp",
@@ -28,7 +28,7 @@
    "title": "Overview of Sentinel-2",
    "text": "- Orbital Characteristics\n  - Altitude: 786 km.\n  - Inclination: 98.62 deg\n  - Period: 100.6 min\n  - Cycle: 10 days\n  - Type: Sun synchronous (Near-polar)\n- Swath Width: 290 km\n- Mean Local Solar Time (MLST) at the descending node is 10:30 (am).\n- Launch Mass: 1140 kg\n- Design life: 7 years (Nominal Mission) to 12 years (Maximum)\n\nCreating Mosaics and Composites",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "04.webp",
@@ -36,7 +36,7 @@
    "title": "Image Pre-processing",
    "text": "Atmospheric Correction\n\nRemoves the effects of atmospheric particles (like dust, water vapor) to retrieve true surface reflectance from satellite imagery\n\nRadiometric Correction\n\nAdjusts sensor errors and inconsistencies in image brightness to ensure the pixel values accurately reflect surface energy.\n\nTopographic Correction\n\nReduces illumination differences caused by terrain (e.g., slopes and shadows) to improve spectral consistency across varied topography.\n\nCreating Mosaics and Composites",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "05.webp",
@@ -100,7 +100,7 @@
    "title": "Create Cloud-free Sentinel-2 Image Composite",
    "text": "- BRDF Correction (Radiometric correction): brdf_module\n- Bidirectional Reflectance Distribution Function\n- Function of incidence and reflection of the light from a terrain surface by means of a physical model\n- BRDF plays an important role in the radiometric correction of satellite images\n\nCreating Mosaics and Composites",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "13.webp",
@@ -124,7 +124,7 @@
    "title": "GEE Tutorial Homepage",
    "text": "efabook\n\nOpen Geo Blog\n\nCreating Mosaics and Composites",
    "notes": "",
-   "hidden_pictures": 3
+   "hidden_pictures": 0
   }
  ]
 }

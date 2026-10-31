@@ -4,7 +4,7 @@
  "day": 1,
  "lesson": "day-1/image-collections",
  "source": "Day 1/D1 WORKING WITH IMAGE COLLECTIONS.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
- "credit": "Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.",
+ "credit": "Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International, shown with their permission. Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
  "slides": [
   {
    "image": "01.webp",
@@ -28,7 +28,7 @@
    "title": "Working with Image Collections",
    "text": "AN ORGANIZED SET OF IMAGES\n\n- Create an Image collection object:\n- Landsat\n- Planet\n- Sentinel\n- MODIS\n- Other",
    "notes": "",
-   "hidden_pictures": 2
+   "hidden_pictures": 0
   },
   {
    "image": "04.webp",
@@ -44,7 +44,7 @@
    "title": "Working with Image Collections",
    "text": "| Satellite | Date Range | Instruments | Resolution |\n|---|---|---|---|\n| Landsat 1 | 1972 - 1978 | MSS | 60 |\n| Landsat 2 | 1975 - 1982 | MSS | 60 |\n| Landsat 3 | 1978 - 1983 | MSS | 60 |\n| Landsat 4 | 1982-1993 | MSS/TM | 60 / 30 |\n| Landsat 5 | 1984-2012 | MSS/TM | 30 |\n| Landsat 7 | 1999 - 2022 | ETM+ | 30 / 15 (pan) |\n| Landsat 8 | 2013 - present | OLI/TIRS | 30 / 15 (pan) |\n| Landsat 9 | 2021 - present | OLI-2/TIRS-2 | 30 / 15 (pan) |\n\n© NASA's Goddard Space Flight Center",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "06.webp",
@@ -52,7 +52,7 @@
    "title": "Landsat 8 Bands",
    "text": "SWIR 2\n\nPanchromatic\n\nCirrus\n\nThermal 1\n\nThermal 2\n\nQA",
    "notes": "",
-   "hidden_pictures": 12
+   "hidden_pictures": 0
   },
   {
    "image": "07.webp",
@@ -60,7 +60,7 @@
    "title": "Landsat 8 Bands",
    "text": "False Color Composite",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "08.webp",
@@ -68,7 +68,7 @@
    "title": "Sentinel-2",
    "text": "- False Color\n- (often used for plant health)\n- NIR - RED - GREEN",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "09.webp",
@@ -76,7 +76,7 @@
    "title": "Sentinel-2",
    "text": "RGB code\n\nFalse Color code\n\n- Example:\n- Sentinel-2\n- agriculture band combination\n- SWIR-1, NIR, blue",
    "notes": "",
-   "hidden_pictures": 4
+   "hidden_pictures": 0
   },
   {
    "image": "10.webp",
@@ -92,7 +92,7 @@
    "title": "Working with Image Collections",
    "text": "Color palette\n\n```js\npalette:\n```\n\n```js\n#ffe74c\n```\n\n```js\n#ff5964\n```\n\nmin: 200\n\nSelected data range scaled linearly to 8-bit range\n\nmax: 2500",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "12.webp",
@@ -100,7 +100,7 @@
    "title": "Temporally Filter Images",
    "text": "Filter the dates to the time period you want\n\nChange these bands, based on what you  want to look at - this is to help you visualize.\n\nYou can change the coordinates and zoom level",
    "notes": "",
-   "hidden_pictures": 3
+   "hidden_pictures": 0
   },
   {
    "image": "13.webp",
@@ -132,7 +132,7 @@
    "title": "Earth Engine Reducers",
    "text": "- Reducer\n- Object used for aggregations and calculating statistics\n\nImageCollection Reducer:\n\nREDUCERS COMBINE A BUNCH OF VALUES\n\nReduces the collection of images to an individual image\n\nImage Reducer:\n\nExample; mean, median, min, max",
    "notes": "",
-   "hidden_pictures": 3
+   "hidden_pictures": 0
   },
   {
    "image": "17.webp",
@@ -148,7 +148,7 @@
    "title": "Earth Engine Reducers",
    "text": "ee.ImageCollection\n\nREDUCERS COMBINE A BUNCH OF VALUES\n\nReduces the collection of images to an individual image\n\n```js\nvar median = imageCollection\n.reduce(ee.Reducer.median(), 2);\n```\n\nhttps://code.earthengine.google.com/21c76e4eb38c13c52de23ef89f52106f\n\n```js\nee.Image\n```",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "19.webp",
@@ -156,7 +156,7 @@
    "title": "Earth Engine Reducers",
    "text": "Image Region reductions\n\n- var mean = image.reduceRegion(\\{\n- reducer: ee.Reducer.mean(),\n- geometry: santaCruz.geometry(),\n- scale: 30,\n- maxPixels: 1e9,\n- \\});\n\nhttps://code.earthengine.google.com/cb215b5eb73dd292017702673523ee7f",
    "notes": "",
-   "hidden_pictures": 1
+   "hidden_pictures": 0
   },
   {
    "image": "20.webp",
