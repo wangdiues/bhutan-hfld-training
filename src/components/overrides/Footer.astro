@@ -95,8 +95,9 @@ const days = [...new Set(slots.map((s) => s.day))];
 		margin-block: 2rem 0;
 		padding: 0.75rem 1rem;
 		border: 1px dashed var(--sl-color-orange);
-		border-radius: 0.5rem;
+		border-radius: var(--clay-radius);
 		background: var(--sl-color-orange-low);
+		box-shadow: var(--clay-raised);
 		font-size: var(--sl-text-sm);
 	}
 	.hfld-trainer__title {
@@ -124,8 +125,9 @@ const days = [...new Set(slots.map((s) => s.day))];
 		gap: 0.6rem;
 		padding: 0.6rem 1rem;
 		border: 2px solid var(--sl-color-accent);
-		border-radius: 0.5rem;
-		background: transparent;
+		border-radius: var(--clay-radius-pill);
+		background: var(--sl-color-black);
+		box-shadow: var(--clay-raised-sm);
 		color: var(--sl-color-white);
 		font: inherit;
 		font-weight: 600;
@@ -137,6 +139,7 @@ const days = [...new Set(slots.map((s) => s.day))];
 	}
 	.hfld-complete button[aria-pressed='true'] {
 		background: var(--sl-color-accent-low);
+		box-shadow: var(--clay-pressed);
 	}
 	.hfld-complete__box {
 		width: 1.1rem;

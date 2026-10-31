@@ -1,0 +1,125 @@
+/*
+ * Soft clay on Starlight's own parts (task M8-02). Starlight keeps its styles in cascade
+ * layers (@layer starlight.*), so these unlayered rules win without !important.
+ * Tokens (--clay-*) live in theme.css. Our own components use the same tokens in their scoped styles.
+ */
+
+/* Home page cards and link cards */
+.card-grid {
+	gap: 1.25rem;
+}
+.card {
+	border: var(--clay-edge);
+	border-radius: var(--clay-radius);
+	background: var(--sl-color-gray-6);
+	box-shadow: var(--clay-raised);
+	padding: 1.5rem;
+}
+.sl-link-card {
+	border: var(--clay-edge);
+	border-radius: var(--clay-radius);
+	background: var(--sl-color-gray-6);
+	box-shadow: var(--clay-raised);
+}
+.sl-link-card:hover {
+	border: var(--clay-edge);
+	background: var(--sl-color-gray-6);
+}
+
+/* Asides (:::note, :::tip, :::caution, :::danger): rounded clay instead of a side stripe */
+.starlight-aside {
+	border: var(--clay-edge);
+	border-radius: var(--clay-radius);
+	box-shadow: var(--clay-raised);
+	padding: 1rem 1.25rem;
+}
+
+/* Buttons: hero actions and the search button are raised pills */
+.sl-link-button {
+	border-radius: var(--clay-radius-pill);
+	box-shadow: var(--clay-raised-sm);
+}
+.sl-link-button.minimal {
+	background: var(--sl-color-gray-6);
+	padding-inline: 1.25rem;
+}
+.sl-link-button:active {
+	box-shadow: var(--clay-pressed);
+}
+site-search button[data-open-modal] {
+	border: var(--clay-edge);
+	border-radius: var(--clay-radius-pill);
+	background: var(--sl-color-gray-6);
+	box-shadow: var(--clay-pressed);
+}
+
+/* Code tabs: the tab row sits in a pressed-in tray, the chosen tab is a raised pill */
+starlight-tabs .tablist-wrapper {
+	border-radius: var(--clay-radius-pill);
+}
+starlight-tabs .tablist-wrapper [role='tablist'] {
+	gap: 0.25rem;
+	padding: 0.25rem;
+	border: var(--clay-edge);
+	border-radius: var(--clay-radius-pill);
+	background: var(--sl-color-gray-6);
+	box-shadow: var(--clay-pressed);
+}
+starlight-tabs .tab > [role='tab'] {
+	border: 0;
+	border-radius: var(--clay-radius-pill);
+	padding-inline: 1rem;
+}
+starlight-tabs .tab > [role='tab'][aria-selected='true'] {
+	background: var(--sl-color-black);
+	box-shadow: var(--clay-raised-sm);
+}
+
+/* Previous / next links at the foot of each page */
+.pagination-links a {
+	border: var(--clay-edge);
+	border-radius: var(--clay-radius);
+	background: var(--sl-color-gray-6);
+	box-shadow: var(--clay-raised);
+}
+
+/* Sidebar: the current page is a small raised pill */
+.sidebar-content a[aria-current='page'] {
+	border-radius: var(--clay-radius-sm);
+	box-shadow: var(--clay-raised-sm);
+}
+
+/* Home page (task M8-05): each day card has its own clay tint */
+.hfld-days .sl-link-card:nth-child(1) { background: var(--sl-color-accent-low); }
+.hfld-days .sl-link-card:nth-child(2) { background: var(--sl-color-blue-low); }
+.hfld-days .sl-link-card:nth-child(3) { background: var(--sl-color-purple-low); }
+.hfld-days .sl-link-card:nth-child(4) { background: var(--hfld-saffron-bg); }
+.hfld-days .sl-link-card:nth-child(5) { background: var(--sl-color-orange-low); }
+.hfld-days .sl-link-card:nth-child(6) { background: var(--sl-color-gray-6); }
+/* Stronger description text so it stays ≥ 4.5:1 on every tint. */
+.hfld-days .sl-link-card .description {
+	color: var(--sl-color-gray-2);
+}
+
+/* Motion (task M8-06): raised things lift a little on hover and sink when pressed.
+   The global reduced-motion rule in theme.css cuts the transition to ~0. */
+:is(.sl-link-card, .pagination-links a, .sl-link-button, .hfld-gee-btn, .hfld-lab button, .hfld-quiz button, .hfld-quiz__opt, .hfld-workflow__steps button, .hfld-slides__controls button, .hfld-complete button) {
+	transition: transform 150ms ease, box-shadow 150ms ease;
+}
+@media (hover: hover) {
+	:is(.sl-link-card, .pagination-links a, .sl-link-button, .hfld-gee-btn):hover {
+		transform: translateY(-2px);
+	}
+}
+:is(.sl-link-card, .pagination-links a, .sl-link-button, .hfld-gee-btn):active {
+	transform: translateY(1px);
+}
+
+/* Print: no shadows, plain outlines */
+@media print {
+	*,
+	*::before,
+	*::after {
+		box-shadow: none !important;
+	}
+}

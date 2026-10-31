@@ -3,6 +3,9 @@ title: Learn land-cover mapping with Earth Engine
 description: A free, hands-on course in land use and land cover (LULC) mapping with Google Earth Engine, from satellite composites to accuracy and area estimates, using Bhutan as the worked example.
 template: splash
 hero:
+  image:
+    file: ../../assets/hero-clay.svg
+    alt: ''
   tagline: A free, hands-on course in land use and land cover mapping with Google Earth Engine, from cloud-free satellite composites to land-cover maps and area estimates with 90% confidence intervals. Bhutan is the worked example.
   actions:
     - text: Start the course
@@ -19,6 +22,7 @@ import WorkflowMap from '~/components/WorkflowMap.astro';
 
 ## Five days, one workflow
 
+<div class="hfld-days">
 <CardGrid>
 	<LinkCard title="Day 1 · Earth Engine foundations" description="The Code Editor, JavaScript, image collections, filters and reducers." href="/lulc-mapping-training/day-1/introduction-to-earth-engine/" />
 	<LinkCard title="Day 2 · Composites" description="Cloud and shadow masking, terrain correction, indices and seasonal composites for Bhutan." href="/lulc-mapping-training/day-2/remote-sensing-fundamentals/" />
@@ -27,6 +31,7 @@ import WorkflowMap from '~/components/WorkflowMap.astro';
 	<LinkCard title="Day 5 · Accuracy & area" description="Stratified sampling, confusion matrices and area-adjusted estimates with uncertainty." href="/lulc-mapping-training/day-5/sampling-design/" />
 	<LinkCard title="Capstone" description="Map a Dzongkhag, sample it, interpret it, and report accuracy and adjusted areas." href="/lulc-mapping-training/capstone/" />
 </CardGrid>
+</div>
 
 ## The method, step by step
 

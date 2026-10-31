@@ -78,9 +78,11 @@ const days = [1, 2, 3, 4, 5].map((d) => ({
 	.hfld-progress {
 		display: block;
 		margin-bottom: 1rem;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--sl-color-hairline-light);
-		border-radius: 0.5rem;
+		padding: 0.75rem 1rem;
+		border: var(--clay-edge);
+		border-radius: var(--clay-radius-sm);
+		background: var(--sl-color-black);
+		box-shadow: var(--clay-raised-sm);
 		font-size: var(--sl-text-xs);
 	}
 	.hfld-progress__title {
@@ -101,15 +103,17 @@ const days = [1, 2, 3, 4, 5].map((d) => ({
 		color: var(--sl-color-gray-2);
 	}
 	.hfld-progress__track {
-		height: 0.35rem;
-		border-radius: 0.2rem;
+		height: 0.45rem;
+		border-radius: var(--clay-radius-pill);
 		background: var(--sl-color-gray-5);
+		box-shadow: var(--clay-pressed);
 		overflow: hidden;
 	}
 	.hfld-progress__fill {
 		display: block;
 		height: 100%;
 		width: 0;
+		border-radius: var(--clay-radius-pill);
 		background: var(--sl-color-accent);
 	}
 	.hfld-progress__text {

@@ -34,6 +34,7 @@ export default defineConfig({
 				'@fontsource-variable/jetbrains-mono',
 				'katex/dist/katex.min.css',
 				'./src/styles/theme.css',
+				'./src/styles/clay.css',
 			],
 			social: [
 				{ icon: 'github', label: 'GitHub', href: `https://github.com/${GITHUB_USER}/${REPO}` },

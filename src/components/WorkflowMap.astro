@@ -278,10 +278,11 @@ const steps: Step[] = [
 		gap: 0.6rem;
 		align-items: center;
 		text-align: left;
-		padding: 0.55rem 0.7rem;
+		padding: 0.6rem 0.8rem;
 		border: 1px solid var(--sl-color-gray-5);
-		border-radius: 0.5rem;
-		background: var(--sl-color-bg-nav);
+		border-radius: var(--clay-radius-sm);
+		background: var(--sl-color-gray-6);
+		box-shadow: var(--clay-raised-sm);
 		color: var(--sl-color-white);
 		font: inherit;
 		cursor: pointer;
@@ -292,6 +293,7 @@ const steps: Step[] = [
 	.hfld-workflow__steps button[aria-expanded='true'] {
 		border: 2px solid var(--sl-color-accent);
 		background: var(--sl-color-accent-low);
+		box-shadow: var(--clay-pressed);
 		font-weight: 600;
 	}
 	.hfld-workflow__steps button:focus-visible {
@@ -305,7 +307,8 @@ const steps: Step[] = [
 		width: 1.75rem;
 		height: 1.75rem;
 		border-radius: 50%;
-		background: var(--sl-color-gray-6);
+		background: var(--sl-color-black);
+		box-shadow: var(--clay-pressed);
 		font-size: var(--sl-text-sm);
 		font-weight: 700;
 	}
@@ -319,10 +322,11 @@ const steps: Step[] = [
 		font-weight: 400;
 	}
 	.hfld-workflow__panel {
-		border: 1px solid var(--sl-color-gray-5);
-		border-left: 4px solid var(--sl-color-accent);
-		border-radius: 0.5rem;
-		padding: 0.75rem 1rem;
+		border: var(--clay-edge);
+		border-radius: var(--clay-radius);
+		background: var(--sl-color-gray-6);
+		box-shadow: var(--clay-raised);
+		padding: 1rem 1.25rem;
 		margin-bottom: 0.75rem;
 	}
 	.hfld-workflow__panel[hidden] {

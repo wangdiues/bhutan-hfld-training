@@ -4,6 +4,11 @@ All notable changes to this course are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+### Changed (soft-clay look, 2026-10-31)
+- New "soft clay" visual style: panels, cards, asides, quizzes, labs, the slide player, the workflow map and buttons are rounded and gently raised; chosen options and inputs look pressed in. Body text, code, tables and maths stay flat. Dark mode uses a subtler version. Tokens: `--clay-*` in `src/styles/theme.css`; Starlight parts in `src/styles/clay.css`.
+- Home page: original clay-style hero illustration (`src/assets/hero-clay.svg`, 3.5 KB) and a tint per day card.
+- Small hover lift and press-in on buttons and cards (off with reduced motion); every clay surface keeps an outline in high-contrast mode; no shadows when printed.
+
 ### Changed (rebrand, 2026-10-31)
 - Renamed to **LULC Mapping Training** (repository and URL `lulc-mapping-training`). The course is now a general land use and land cover mapping course with Bhutan as the worked example; the ART-TREES/HFLD lessons (ART-TREES HFLD requirements, TREES 2.0 → 3.0) and all ART-TREES/HFLD framing were removed.
 - Credits for the original training moved from every lesson and script header to a single [Acknowledgements and credits](https://wangdiues.github.io/lulc-mapping-training/about/credits/) page.

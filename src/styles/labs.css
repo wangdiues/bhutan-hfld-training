@@ -14,14 +14,23 @@
 .hfld-lab fieldset {
 	/* Fieldsets default to min-content width; 0 lets wide tables scroll inside them on phones. */
 	min-inline-size: 0;
-	border: 1px solid var(--sl-color-gray-5);
-	border-radius: 0.5rem;
-	padding: 0.75rem 1rem 1rem;
-	margin-block: 1rem;
+	border: var(--clay-edge);
+	border-radius: var(--clay-radius);
+	background: var(--sl-color-gray-6);
+	box-shadow: var(--clay-raised);
+	padding: 1rem 1.25rem 1.25rem;
+	margin-block: 1.5rem;
 }
 .hfld-lab legend {
 	font-weight: 600;
-	padding-inline: 0.25rem;
+	/* Legends sit inside the clay panel rather than on its edge. */
+	float: inline-start;
+	width: 100%;
+	padding: 0;
+	margin-bottom: 0.5rem;
+}
+.hfld-lab legend + * {
+	clear: both;
 }
 .hfld-lab__hint {
 	font-size: var(--sl-text-sm);
@@ -56,6 +65,9 @@
 .hfld-lab__table :is(th[scope='row'], thead th, td:first-child) {
 	text-align: left;
 }
+.hfld-lab__table {
+	background: var(--sl-color-black);
+}
 .hfld-lab__table thead th {
 	background: var(--sl-color-gray-6);
 }
@@ -69,10 +81,11 @@
 .hfld-lab select {
 	font: inherit;
 	color: var(--sl-color-white);
-	background: var(--sl-color-bg);
+	background: var(--sl-color-black);
 	border: 1px solid var(--sl-color-gray-4);
-	border-radius: 0.25rem;
-	padding: 0.25rem 0.4rem;
+	border-radius: 0.625rem;
+	box-shadow: var(--clay-pressed);
+	padding: 0.3rem 0.6rem;
 	min-height: 2.25rem;
 }
 .hfld-lab__table input[type='text'] {
@@ -107,15 +120,21 @@
 .hfld-lab button {
 	font: inherit;
 	min-height: 2.5rem;
-	padding: 0.3rem 0.8rem;
+	padding: 0.3rem 1rem;
 	border: 1px solid var(--sl-color-gray-4);
-	border-radius: 0.375rem;
-	background: var(--sl-color-gray-6);
+	border-radius: var(--clay-radius-pill);
+	background: var(--sl-color-black);
+	box-shadow: var(--clay-raised-sm);
 	color: var(--sl-color-white);
 	cursor: pointer;
 }
+.hfld-lab button:active:not(:disabled),
+.hfld-lab button[aria-pressed='true'] {
+	box-shadow: var(--clay-pressed);
+}
 .hfld-lab__error {
 	border-left: 4px solid var(--sl-color-red);
+	border-radius: var(--clay-radius-sm);
 	background: var(--sl-color-red-low);
 	color: var(--sl-color-white);
 	padding: 0.5rem 0.75rem;
@@ -131,6 +150,7 @@
 }
 .hfld-lab__warnings {
 	border-left: 4px solid var(--sl-color-orange);
+	border-radius: var(--clay-radius-sm);
 	background: var(--sl-color-orange-low);
 	color: var(--sl-color-white);
 	padding: 0.5rem 0.75rem 0.5rem 2rem;
@@ -152,10 +172,11 @@
 	font-family: var(--sl-font-mono);
 	font-size: var(--sl-text-sm);
 	color: var(--sl-color-white);
-	background: var(--sl-color-bg);
+	background: var(--sl-color-black);
 	border: 1px solid var(--sl-color-gray-4);
-	border-radius: 0.25rem;
-	padding: 0.4rem;
+	border-radius: 0.625rem;
+	box-shadow: var(--clay-pressed);
+	padding: 0.5rem 0.6rem;
 	width: 100%;
 }
 .hfld-lab textarea:focus-visible {
@@ -178,10 +199,13 @@
 	gap: 0.75rem;
 	margin: 1rem 0;
 }
+/* Key results are small raised clay tiles. */
 .hfld-lab__stats div {
-	border: 1px solid var(--sl-color-gray-5);
-	border-radius: 0.375rem;
-	padding: 0.5rem 0.75rem;
+	border: var(--clay-edge);
+	border-radius: var(--clay-radius-sm);
+	background: var(--sl-color-black);
+	box-shadow: var(--clay-raised-sm);
+	padding: 0.75rem 1rem;
 }
 .hfld-lab__stats dt {
 	font-size: var(--sl-text-xs);
@@ -223,8 +247,9 @@
 	display: block;
 	width: 8rem;
 	height: 0.75rem;
-	background: var(--sl-color-gray-6);
-	border-radius: 0.25rem;
+	background: var(--sl-color-black);
+	border-radius: var(--clay-radius-pill);
+	box-shadow: var(--clay-pressed);
 }
 .hfld-lab__meter::after {
 	content: '';
@@ -239,16 +264,17 @@
 	top: 0;
 	bottom: 0;
 	background: var(--hfld-chart-1);
-	border-radius: 0.25rem;
+	border-radius: var(--clay-radius-pill);
 }
 .hfld-lab__meter-fill.is-negative {
 	background: var(--hfld-chart-3);
 }
 .hfld-lab__code {
 	overflow-x: auto;
-	padding: 0.75rem;
-	background: var(--sl-color-gray-6);
-	border-radius: 0.375rem;
+	padding: 0.75rem 1rem;
+	background: var(--sl-color-black);
+	border-radius: var(--clay-radius-sm);
+	box-shadow: var(--clay-pressed);
 	font-size: var(--sl-text-sm);
 }
 .hfld-lab__tree ul {
