@@ -17,6 +17,7 @@ import CodeBlock from '~/components/CodeBlock.astro';
 import Cite from '~/components/Cite.astro';
 import References from '~/components/References.astro';
 import Term from '~/components/Term.astro';
+import SpectralIndexLab from '~/components/labs/SpectralIndexLab.astro';
 
 <LessonHeader
   questions={["How do I turn bands into a measure of vegetation or water?", "How do I compute an index for every image in a year?"]}
@@ -157,6 +158,12 @@ For bands $a$ and $b$, $ND = (a - b)/(a + b)$ always lies between −1 and 1, an
 
 <OpenInGEE script="day-2/spectral-indices.js" hash="946119d88943098d0e8c6bc7fb7bcc12" />
 
+## Try it: the spectral index explorer
+
+Move the sliders to change a surface's reflectance and watch the indices from this lesson respond. The code panel writes the Earth Engine line for any index, for Sentinel-2 or Landsat. The same lab is on its own page: [Lab: Spectral index explorer](/bhutan-hfld-training/labs/spectral-index-explorer/).
+
+<SpectralIndexLab headingLevel={3} />
+
 ## Key functions
 
 | Function | What it does |
@@ -181,7 +188,7 @@ Bhutan context: maximum and minimum NDVI help separate evergreen broadleaf and c
 
 ## Practice
 
-You can also explore how reflectance values change each index in the [spectral index explorer](/bhutan-hfld-training/labs/spectral-index-explorer/).
+You can also explore how reflectance values change each index in the [spectral index explorer](#try-it-the-spectral-index-explorer) above.
 
 <Challenge level="blanks" time={20} hints={["EVI needs NIR (B8), red (B4) and blue (B2).", "Divide each band by 10000 so reflectance is between 0 and 1.", "Map the function over the collection, then select('EVI').median()."]} solution="day-2/spectral-indices-solution.js">
 Write a function that adds an **EVI** band, map it over the January to April 2025 Sentinel-2 images of Paro valley, and show the median EVI.

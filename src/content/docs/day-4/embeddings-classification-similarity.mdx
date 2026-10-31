@@ -20,6 +20,7 @@ import landCover from '~/assets/day-4/satellite-embeddings/s26-8b1b936883.webp';
 import forestProb from '~/assets/day-4/satellite-embeddings/s27-9e2cd8f9d6.webp';
 import settlement from '~/assets/day-4/satellite-embeddings/s24-4f9698177e.webp';
 import settlementSim from '~/assets/day-4/satellite-embeddings/s24-33d8d81c10.webp';
+import EmbeddingLab from '~/components/labs/EmbeddingLab.astro';
 
 <LessonHeader
   questions={["Can embeddings replace composites and covariates in my classification?", "How do I find all places similar to a few examples?"]}
@@ -173,6 +174,12 @@ change = embedding_for(2023, aoi).multiply(embedding_for(2024, aoi)).reduce(ee.R
 </Tabs>
 
 Low similarity can also come from a wet year against a dry one, so check flagged places before calling them land-cover change.
+
+## Try it: embedding similarity
+
+See similarity as an angle, rank places by how alike their embeddings are, and set the threshold that flags change between two years. The vectors in this lab are synthetic, made to behave like real embeddings. The same lab is on its own page: [Lab: Embedding similarity](/bhutan-hfld-training/labs/embedding-similarity/).
+
+<EmbeddingLab headingLevel={3} />
 
 ## The full script
 

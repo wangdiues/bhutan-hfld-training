@@ -16,6 +16,7 @@ import CodeBlock from '~/components/CodeBlock.astro';
 import Term from '~/components/Term.astro';
 import Cite from '~/components/Cite.astro';
 import References from '~/components/References.astro';
+import AssemblageLab from '~/components/labs/AssemblageLab.astro';
 
 <LessonHeader
   questions={["How do six probability layers become one land-cover map?", "Why does the order of the rules matter?"]}
@@ -30,7 +31,7 @@ import References from '~/components/References.astro';
 
 The <Term id="assemblage" /> is the last RLCMS stage. It turns the six <Term id="primitive">primitives</Term> (the probability layers for forest, cropland, grassland, other land, settlement and wetland) into one categorical land-cover map, using a **decision tree** whose thresholds and order you choose <Cite id="saah2020" />. This is where a national class system and forest definition are put into practice.
 
-You can try the same logic, and see the Earth Engine rules it produces, in the [assemblage rule builder](/bhutan-hfld-training/labs/assemblage-builder/).
+You can try the same logic, and see the Earth Engine rules it produces, in the [assemblage rule builder](#try-it-the-assemblage-rule-builder) further down.
 
 <Callout type="mistake" title="Assets you need">
 The script loads the trainers' 2025 Sentinel-2 primitives (`projects/servir-mekong/bhutan_primitives/s2_<Class>_2025`) and uses a Landsat image only to define the area of interest. Without access, point the six paths to your own primitives from [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) (each with a `target_probability` band from 0 to 1).
@@ -107,6 +108,12 @@ Export the map to an asset or to Drive. For a categorical map, `pyramidingPolicy
 <CodeBlock script="day-4/assemblage.js" lines={[317, 387]} />
 
 Move a slider, click **Run assemblage**, and watch the map and the areas change.
+
+## Try it: the assemblage rule builder
+
+Change the order and thresholds of the rules and see what six example pixels become. The code panel writes the decision tree for your rules, to paste at the end of the script. The same lab is on its own page: [Lab: Assemblage rule builder](/bhutan-hfld-training/labs/assemblage-builder/).
+
+<AssemblageLab headingLevel={3} />
 
 ## The full script
 

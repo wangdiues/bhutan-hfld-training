@@ -15,6 +15,7 @@ import Challenge from '~/components/Challenge.astro';
 import Cite from '~/components/Cite.astro';
 import References from '~/components/References.astro';
 import Term from '~/components/Term.astro';
+import DecisionTreeLab from '~/components/labs/DecisionTreeLab.astro';
 
 <LessonHeader
   questions={["How does a computer learn to tell forest from grassland?", "Why use many trees instead of one?"]}
@@ -77,7 +78,7 @@ Two candidate questions:
 
 The NIR question gains more information, so it becomes the **root node**: it separates the water perfectly. The tree then asks NDVI > 0.5 on the remaining 8 pixels to separate forest from grassland, and so on until the leaves are pure or too small to split.
 
-Build your own tree, and watch entropy change with each split, in the [decision tree playground](/bhutan-hfld-training/labs/decision-tree-playground/).
+Build your own tree, and watch entropy change with each split, in the [decision tree playground](#try-it-the-decision-tree-playground) below.
 
 <Callout type="why">
 Why this matters: Earth Engine's Random Forest does exactly this for every tree, over all your covariates (bands, indices, elevation, slope), choosing at each node the question that best separates your training classes.
@@ -122,6 +123,12 @@ probability = composite.classify(classifier.setOutputMode("PROBABILITY"))
 </Tabs>
 
 These lines are a sketch: `trainingPoints`, `bandNames` and `composite` come from the [covariates](/bhutan-hfld-training/day-3/covariates/) and [forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) exercises.
+
+## Try it: the decision tree playground
+
+Grow a tree from the worked example's 10 pixels split by split, then let a forest of trees vote on a pixel of your choice. The same lab, with suggestions of things to try, is on its own page: [Lab: Decision tree playground](/bhutan-hfld-training/labs/decision-tree-playground/).
+
+<DecisionTreeLab headingLevel={3} />
 
 ## Strengths and weaknesses
 
