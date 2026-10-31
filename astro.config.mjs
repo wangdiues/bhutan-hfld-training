@@ -68,6 +68,7 @@ export default defineConfig({
 						{ label: 'Day 4 · Land cover & embeddings', collapsed: true, items: [{ autogenerate: { directory: 'day-4' } }] },
 						{ label: 'Day 5 · Accuracy & area', collapsed: true, items: [{ autogenerate: { directory: 'day-5' } }] },
 						{ slug: 'capstone' },
+						{ slug: 'certificate' },
 					],
 				},
 				{ label: 'Slides', link: '/slides/' },

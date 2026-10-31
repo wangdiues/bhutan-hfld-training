@@ -1,0 +1,126 @@
+---
+/**
+ * Completion certificate (task M6-02): shows which days' quizzes are passed (from the scores the
+ * Quiz component saves) and, once all five are, makes a PDF in the browser with the learner's
+ * name. Nothing leaves the browser.
+ */
+import { PASS_MARK, REQUIREMENTS } from '~/lib/certificate';
+import '~/styles/labs.css';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const quizPage = (q: string) => (q.endsWith('-recap') ? `${q.replace(/-recap$/, '')}/recap/` : q.replace(/^(day-\d)-/, '$1/') + '/');
+---
+
+<hfld-certificate class="hfld-lab not-content">
+	<h2 id="cert-status">Your quizzes</h2>
+	<p class="hfld-lab__hint">
+		A day counts as passed when you score at least {Math.round(PASS_MARK * 100)}% in each of its quizzes. Scores are
+		read from this browser.
+	</p>
+	<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Quizzes passed per day">
+		<table class="hfld-lab__table">
+			<thead>
+				<tr>
+					<th scope="col">Day</th>
+					<th scope="col">Quizzes</th>
+					<th scope="col">Status</th>
+				</tr>
+			</thead>
+			<tbody>
+				{
+					REQUIREMENTS.map((r) => (
+						<tr>
+							<th scope="row">
+								Day {r.day}: {r.title}
+							</th>
+							<td>
+								{r.quizzes.map((q, i) => (
+									<>
+										{i > 0 && ', '}
+										<a href={`${base}${quizPage(q)}`}>{q.endsWith('-recap') ? 'Recap quiz' : q.replace(/^day-\d-/, '').replace(/-/g, ' ')}</a>
+									</>
+								))}
+							</td>
+							<td data-day={r.day}>Not yet</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
+
+	<h2 id="cert-make">Your certificate</h2>
+	<form class="hfld-lab__form" novalidate>
+		<div class="hfld-lab__grid">
+			<label>
+				Your name, as it should appear
+				<input type="text" name="name" maxlength="60" autocomplete="name" />
+			</label>
+		</div>
+		<div class="hfld-lab__error" role="alert" hidden data-error></div>
+		<div class="hfld-lab__buttons">
+			<button type="submit" data-make disabled>Download the certificate (PDF)</button>
+		</div>
+		<p class="hfld-lab__note" data-why aria-live="polite"></p>
+	</form>
+</hfld-certificate>
+
+<script>
+	import { certificatePdf, dayStatus, isPrintableLatin1, isScore, REQUIREMENTS, type QuizScore } from '~/lib/certificate';
+	import { loadJSON, saveJSON } from '~/lib/storage';
+
+	class HfldCertificate extends HTMLElement {
+		connectedCallback() {
+			const scores: Record<string, QuizScore | undefined> = {};
+			for (const q of REQUIREMENTS.flatMap((r) => r.quizzes)) {
+				const s = loadJSON<unknown>(`hfld-quiz:${q}`);
+				if (isScore(s)) scores[q] = s;
+			}
+			const status = dayStatus(scores);
+			for (const d of status) {
+				this.querySelector(`[data-day="${d.day}"]`)!.innerHTML = d.passed
+					? '<strong>Passed ✓</strong>'
+					: `Not yet: ${d.missing.length} quiz${d.missing.length === 1 ? '' : 'zes'} to pass`;
+			}
+			const ready = status.every((d) => d.passed);
+			const form = this.querySelector('form')!;
+			const button = this.querySelector<HTMLButtonElement>('[data-make]')!;
+			const name = form.elements.namedItem('name') as HTMLInputElement;
+			const saved = loadJSON<unknown>('hfld-certificate-name');
+			if (typeof saved === 'string') name.value = saved;
+			button.disabled = !ready;
+			this.querySelector('[data-why]')!.textContent = ready
+				? 'All five days passed. Enter your name and download your certificate.'
+				: `Pass the quizzes for ${status.filter((d) => !d.passed).map((d) => `Day ${d.day}`).join(', ')} to unlock the certificate.`;
+
+			form.addEventListener('submit', (e) => {
+				e.preventDefault();
+				const err = this.querySelector<HTMLElement>('[data-error]')!;
+				const n = name.value.trim().replace(/\s+/g, ' ');
+				let problem = '';
+				if (!ready) problem = 'Pass all five days first.';
+				else if (!n) problem = 'Enter your name.';
+				else if (!isPrintableLatin1(n)) problem = 'Use Latin letters for the name (the PDF fonts cannot show other scripts).';
+				if (problem) {
+					err.textContent = problem;
+					err.hidden = false;
+					name.setAttribute('aria-invalid', 'true');
+					name.focus();
+					return;
+				}
+				err.hidden = true;
+				name.removeAttribute('aria-invalid');
+				saveJSON('hfld-certificate-name', n);
+				const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+				const pdf = certificatePdf({ name: n, date, days: REQUIREMENTS, url: location.origin + location.pathname.replace(/certificate\/?$/, '') });
+				const url = URL.createObjectURL(new Blob([pdf], { type: 'application/pdf' }));
+				const a = Object.assign(document.createElement('a'), { href: url, download: 'bhutan-hfld-certificate.pdf' });
+				document.body.append(a);
+				a.click();
+				a.remove();
+				setTimeout(() => URL.revokeObjectURL(url), 1000);
+			});
+		}
+	}
+	customElements.define('hfld-certificate', HfldCertificate);
+</script>
