@@ -1,0 +1,237 @@
+---
+/**
+ * Lab 3 (task M5-05): spectral index explorer. Sliders set the reflectance in six bands; a curve
+ * draws the spectral signature, the table shows eight indices computed by
+ * src/lib/stats/indices.ts (tested), and the code panel writes the Earth Engine code for the
+ * chosen index and sensor. State is saved through the safe storage helper.
+ */
+import { BANDS, INDICES, PRESETS } from '~/lib/stats/indices';
+import '~/styles/labs.css';
+
+interface Props {
+	/** Heading level of the lab's own headings, so that it fits the page it is embedded in. */
+	headingLevel?: 2 | 3;
+}
+const { headingLevel = 2 } = Astro.props;
+const H = `h${headingLevel}` as 'h2' | 'h3';
+const H2 = `h${headingLevel + 1}` as 'h3' | 'h4';
+const start = PRESETS[0];
+// Curve geometry: six bands across, reflectance 0-60% up.
+const W = 480, Hh = 200, L = 44, R = 16, T = 12, B = 36;
+const cx = (i: number) => L + (i / (BANDS.length - 1)) * (W - L - R);
+const cy = (v: number) => T + (Hh - T - B) * (1 - Math.min(v, 0.6) / 0.6);
+---
+
+<hfld-index-explorer class="hfld-lab not-content">
+	<form class="hfld-lab__form" novalidate>
+		<fieldset>
+			<legend>Surface</legend>
+			<div class="hfld-lab__grid">
+				<label>
+					Start from a typical surface
+					<select name="preset">
+						{PRESETS.map((p) => <option value={p.id}>{p.name}</option>)}
+						<option value="custom">Your own values</option>
+					</select>
+				</label>
+			</div>
+			<p class="hfld-lab__hint">Values are rounded, typical figures for teaching, not measurements.</p>
+		</fieldset>
+
+		<fieldset>
+			<legend>Reflectance (%)</legend>
+			<div class="hfld-lab__sliders">
+				{
+					BANDS.map((b) => (
+						<label class="hfld-lab__slider">
+							<span>
+								{b.name} <span class="hfld-lab__hint">(Sentinel-2 {b.s2}, Landsat {b.landsat})</span>
+							</span>
+							<span class="hfld-lab__slider-row">
+								<input
+									type="range"
+									id={`ix-${b.id}`}
+									name={b.id}
+									min="0"
+									max="100"
+									step="0.1"
+									value={start.r[b.id] * 100}
+									aria-valuetext={`${(start.r[b.id] * 100).toFixed(1)}%`}
+								/>
+								<output id={`out-${b.id}`} for={`ix-${b.id}`}>{(start.r[b.id] * 100).toFixed(1)}%</output>
+							</span>
+						</label>
+					))
+				}
+			</div>
+		</fieldset>
+	</form>
+
+	<figure class="hfld-lab__figure">
+		<svg viewBox={`0 0 ${W} ${Hh}`} class="hfld-lab__curve" aria-hidden="true">
+			{[0, 0.2, 0.4, 0.6].map((v) => (
+				<g>
+					<line x1={L} x2={W - R} y1={cy(v)} y2={cy(v)} class="grid" />
+					<text x={L - 6} y={cy(v) + 4} text-anchor="end">{v * 100}%</text>
+				</g>
+			))}
+			{BANDS.map((b, i) => (
+				<text x={cx(i)} y={Hh - B + 18} text-anchor="middle">{b.id === 'swir1' ? 'SWIR1' : b.id === 'swir2' ? 'SWIR2' : b.id === 'nir' ? 'NIR' : b.name}</text>
+			))}
+			<polyline data-curve class="line" points={BANDS.map((b, i) => `${cx(i)},${cy(start.r[b.id])}`).join(' ')} />
+			{BANDS.map((b, i) => <circle data-dot={b.id} cx={cx(i)} cy={cy(start.r[b.id])} r="4" />)}
+		</svg>
+		<figcaption>Spectral signature of the current values (the axis stops at 60%). The sliders above give the exact numbers.</figcaption>
+	</figure>
+
+	<section class="hfld-lab__results" aria-labelledby="ix-results">
+		<H id="ix-results">Indices</H>
+		<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Index values">
+			<table class="hfld-lab__table">
+				<thead>
+					<tr>
+						<th scope="col">Index</th>
+						<th scope="col">Formula</th>
+						<th scope="col">Value</th>
+						<th scope="col"><span class="sr-only">Value on a scale from −1 to 1</span><span aria-hidden="true">−1 … 0 … 1</span></th>
+						<th scope="col">High values mean</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						INDICES.map((d) => (
+							<tr>
+								<th scope="row">{d.name}</th>
+								<td>{d.formula}</td>
+								<td data-value={d.id}>—</td>
+								<td>
+									<span class="hfld-lab__meter" aria-hidden="true">
+										<span class="hfld-lab__meter-fill" data-bar={d.id} />
+									</span>
+								</td>
+								<td>{d.high}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+		<p class="hfld-lab__note" data-note></p>
+		<p class="sr-only" aria-live="polite" data-summary></p>
+
+		<H2>Earth Engine code</H2>
+		<div class="hfld-lab__grid">
+			<label>
+				Index
+				<select data-code-index>
+					{INDICES.map((d) => <option value={d.id}>{d.name}</option>)}
+				</select>
+			</label>
+			<label>
+				Sensor
+				<select data-code-sensor>
+					<option value="s2">Sentinel-2</option>
+					<option value="landsat">Landsat 8/9</option>
+				</select>
+			</label>
+		</div>
+		<pre class="hfld-lab__code" tabindex="0" aria-label="Earth Engine code"><code data-code></code></pre>
+	</section>
+</hfld-index-explorer>
+
+<script>
+	import { BANDS, computeAll, eeSnippet, INDICES, isReflectance, PRESETS, type Reflectance } from '~/lib/stats/indices';
+	import { loadJSON, saveJSON } from '~/lib/storage';
+
+	const KEY = 'hfld-lab:index-explorer';
+
+	class HfldIndexExplorer extends HTMLElement {
+		private form!: HTMLFormElement;
+
+		private get preset() {
+			return this.form.elements.namedItem('preset') as HTMLSelectElement;
+		}
+
+		connectedCallback() {
+			this.form = this.querySelector('form')!;
+			const saved = loadJSON<{ preset: string; r: unknown }>(KEY);
+			if (saved && isReflectance(saved.r)) this.set(saved.r, saved.preset);
+			else this.set(PRESETS[0].r, PRESETS[0].id);
+
+			this.preset.addEventListener('change', () => {
+				const p = PRESETS.find((x) => x.id === this.preset.value);
+				if (p) this.set(p.r, p.id);
+			});
+			for (const b of BANDS) {
+				(this.form.elements.namedItem(b.id) as HTMLInputElement).addEventListener('input', () => {
+					this.preset.value = 'custom';
+					this.update();
+				});
+			}
+			this.querySelector('[data-code-index]')!.addEventListener('change', () => this.code());
+			this.querySelector('[data-code-sensor]')!.addEventListener('change', () => this.code());
+			this.code();
+		}
+
+		private read(): Reflectance {
+			const r = {} as Reflectance;
+			for (const b of BANDS) r[b.id] = Number((this.form.elements.namedItem(b.id) as HTMLInputElement).value) / 100;
+			return r;
+		}
+
+		private set(r: Reflectance, preset: string) {
+			for (const b of BANDS) (this.form.elements.namedItem(b.id) as HTMLInputElement).value = String(r[b.id] * 100);
+			this.preset.value = PRESETS.some((p) => p.id === preset) ? preset : 'custom';
+			this.update();
+		}
+
+		private update() {
+			const r = this.read();
+			// Same geometry as the curve in the markup: six bands across, 0-60% reflectance up.
+			const cx = (i: number) => 44 + (i / (BANDS.length - 1)) * (480 - 44 - 16);
+			const cy = (v: number) => 12 + (200 - 12 - 36) * (1 - Math.min(v, 0.6) / 0.6);
+			BANDS.forEach((b, i) => {
+				const pct = `${(r[b.id] * 100).toFixed(1)}%`;
+				this.querySelector(`#out-${b.id}`)!.textContent = pct;
+				(this.form.elements.namedItem(b.id) as HTMLInputElement).setAttribute('aria-valuetext', pct);
+				this.querySelector(`[data-dot="${b.id}"]`)!.setAttribute('cy', String(cy(r[b.id])));
+			});
+			this.querySelector('[data-curve]')!.setAttribute('points', BANDS.map((b, i) => `${cx(i)},${cy(r[b.id])}`).join(' '));
+			let undefinedCount = 0;
+			for (const { id, value } of computeAll(r)) {
+				const cell = this.querySelector(`[data-value="${id}"]`)!;
+				const bar = this.querySelector<HTMLElement>(`[data-bar="${id}"]`)!;
+				if (value === null) {
+					undefinedCount++;
+					cell.textContent = '—';
+					bar.style.width = '0';
+					continue;
+				}
+				cell.textContent = value.toFixed(3);
+				// Bars run from the centre (0): right for positive values, left for negative, clipped at ±1.
+				const v = Math.max(-1, Math.min(1, value));
+				bar.style.left = v >= 0 ? '50%' : `${50 + v * 50}%`;
+				bar.style.width = `${Math.abs(v) * 50}%`;
+				bar.classList.toggle('is-negative', v < 0);
+			}
+			this.querySelector('[data-note]')!.textContent = undefinedCount
+				? `— means the index is undefined for these values: its denominator is zero or almost zero (${undefinedCount} of ${INDICES.length}).`
+				: '';
+			const all = computeAll(r);
+			const say = (id: string) => {
+				const v = all.find((x) => x.id === id)!.value;
+				return `${INDICES.find((d) => d.id === id)!.name} ${v === null ? 'undefined' : v.toFixed(2)}`;
+			};
+			this.querySelector('[data-summary]')!.textContent = `${say('ndvi')}, ${say('ndwi')}, ${say('nbr')}.`;
+			saveJSON(KEY, { preset: this.preset.value, r });
+		}
+
+		private code() {
+			const id = (this.querySelector('[data-code-index]') as HTMLSelectElement).value;
+			const sensor = (this.querySelector('[data-code-sensor]') as HTMLSelectElement).value as 's2' | 'landsat';
+			this.querySelector('[data-code]')!.textContent = eeSnippet(INDICES.find((d) => d.id === id)!, sensor);
+		}
+	}
+
+	customElements.define('hfld-index-explorer', HfldIndexExplorer);
+</script>

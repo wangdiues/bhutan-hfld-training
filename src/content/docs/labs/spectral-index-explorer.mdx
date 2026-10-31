@@ -1,11 +1,40 @@
 ---
 title: "Lab: Spectral index explorer"
+description: Move reflectance sliders and watch NDVI, EVI, SAVI, NDMI, NBR, NDWI, MNDWI and NDBI respond, then copy the Earth Engine code for any index.
+newContent: true
 sidebar:
   order: 3
 ---
+import SpectralIndexLab from '~/components/labs/SpectralIndexLab.astro';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+Pick a surface, then move the sliders to change its reflectance in each band. The curve shows the surface's spectral signature, and the table recomputes eight indices at once, so you can see which bands each index reacts to. Your values are saved in this browser only.
 
-Move reflectance sliders and watch NDVI, NDWI, EVI and SAVI respond.
+<SpectralIndexLab />
+
+## Things to try
+
+1. Start from **Dense forest** and lower the NIR slider. Which indices fall fastest? Which barely change?
+2. Switch to **Recently burned or cleared** and compare NBR with dense forest. A drop in NBR between two dates is how burn and clearing maps are made.
+3. Choose **Clear water**. Why is NDVI negative while NDWI and MNDWI are positive?
+4. Make all six bands brighter by the same factor (for example, double each one). NDVI stays the same; EVI changes. Why?
+5. Set every slider to 0. Which indices become undefined (—), and why?
+
+<Theory title="Why ratios cancel brightness" more="/explanation/remote-sensing-physics/">
+A normalised difference $(a-b)/(a+b)$ is unchanged when both bands are multiplied by the same factor $k$: $(ka-kb)/(ka+kb) = (a-b)/(a+b)$. So NDVI <Cite id="tucker1979" /> is partly insensitive to overall brightness, for example a slope lit more or less by the Sun. SAVI <Cite id="huete1988" /> and EVI <Cite id="huete2002" /> add constants (the $+0.5$ and $+1$), which assume reflectance from 0 to 1, so they do change with brightness and with the scaling of the data.
+</Theory>
+
+<Callout type="mistake" title="Common mistakes">
+- **EVI or SAVI on scaled data.** Sentinel-2 SR stores reflectance × 10,000, and Landsat Level-2 needs `multiply(0.0000275).add(-0.2)`. Scale first, or the constants in the formula become meaningless.
+- **Wrong NIR band on Landsat.** Landsat 8/9's NIR is B5, not B8. The code panel switches the bands for you.
+- **Reading one value as a class.** Typical values overlap between surfaces. Use indices as covariates for a classifier, not as fixed thresholds.
+</Callout>
+
+The formulas are in `src/lib/stats/indices.ts`, with automated tests, and match the course's [covariates script](/bhutan-hfld-training/day-3/covariates/). IBI, which that script also computes, is left out here: in the index form it uses, the denominator can cross zero, so its values are unbounded and can't be compared on one scale. Values beyond ±10, which only a near-zero denominator produces, are shown as —. The [cheat sheet](/bhutan-hfld-training/reference/cheat-sheet/) lists the bands of each sensor.
+
+<References />
+
+*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*

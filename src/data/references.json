@@ -62,5 +62,17 @@
 		"short": "Soenen et al. 2005",
 		"text": "Soenen, S. A., Peddle, D. R., & Coburn, C. A. (2005). SCS+C: A modified sun-canopy-sensor topographic correction in forested terrain. IEEE Transactions on Geoscience and Remote Sensing, 43(9), 2148–2159.",
 		"url": "https://doi.org/10.1109/TGRS.2005.852480"
+	},
+	{
+		"id": "huete1988",
+		"short": "Huete 1988",
+		"text": "Huete, A. R. (1988). A soil-adjusted vegetation index (SAVI). Remote Sensing of Environment, 25(3), 295–309.",
+		"url": "https://doi.org/10.1016/0034-4257(88)90106-X"
+	},
+	{
+		"id": "huete2002",
+		"short": "Huete et al. 2002",
+		"text": "Huete, A., Didan, K., Miura, T., Rodriguez, E. P., Gao, X., & Ferreira, L. G. (2002). Overview of the radiometric and biophysical performance of the MODIS vegetation indices. Remote Sensing of Environment, 83(1–2), 195–213.",
+		"url": "https://doi.org/10.1016/S0034-4257(02)00096-2"
 	}
 ]

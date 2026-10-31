@@ -189,3 +189,106 @@
 	font-weight: 600;
 	font-variant-numeric: tabular-nums;
 }
+.hfld-lab__sliders {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+	gap: 0.75rem 1.5rem;
+}
+.hfld-lab__slider {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	font-size: var(--sl-text-sm);
+}
+.hfld-lab__slider-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.hfld-lab__slider-row input[type='range'] {
+	flex: 1;
+	accent-color: var(--hfld-chart-1);
+}
+.hfld-lab__slider-row output {
+	min-width: 4.5ch;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+.hfld-lab__meter {
+	position: relative;
+	display: block;
+	width: 8rem;
+	height: 0.75rem;
+	background: var(--sl-color-gray-6);
+	border-radius: 0.25rem;
+}
+.hfld-lab__meter::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: -2px;
+	bottom: -2px;
+	border-left: 1px solid var(--sl-color-gray-3);
+}
+.hfld-lab__meter-fill {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	background: var(--hfld-chart-1);
+	border-radius: 0.25rem;
+}
+.hfld-lab__meter-fill.is-negative {
+	background: var(--hfld-chart-3);
+}
+.hfld-lab__code {
+	overflow-x: auto;
+	padding: 0.75rem;
+	background: var(--sl-color-gray-6);
+	border-radius: 0.375rem;
+	font-size: var(--sl-text-sm);
+}
+.hfld-lab__tree ul {
+	list-style: none;
+	margin: 0.25rem 0 0.25rem 1.25rem;
+	padding-left: 0.75rem;
+	border-left: 2px solid var(--sl-color-gray-5);
+}
+.hfld-lab__tree > ul {
+	margin-left: 0;
+	border-left: none;
+	padding-left: 0;
+}
+.hfld-lab__tree li {
+	margin-block: 0.35rem;
+}
+.hfld-lab__branch {
+	display: inline-block;
+	min-width: 2.5ch;
+	font-weight: 600;
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-2);
+}
+.hfld-lab__tree button[aria-pressed='true'] {
+	outline: 2px solid var(--sl-color-accent);
+	font-weight: 600;
+}
+.hfld-lab__curve {
+	width: 100%;
+	max-width: 32rem;
+	height: auto;
+	font-size: 12px;
+}
+.hfld-lab__curve text {
+	fill: var(--sl-color-gray-2);
+}
+.hfld-lab__curve .grid {
+	stroke: var(--sl-color-gray-5);
+}
+.hfld-lab__curve .line {
+	fill: none;
+	stroke: var(--hfld-chart-1);
+	stroke-width: 3;
+}
+.hfld-lab__curve circle {
+	fill: var(--hfld-chart-1);
+}
