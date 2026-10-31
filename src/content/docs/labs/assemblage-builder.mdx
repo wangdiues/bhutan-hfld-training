@@ -1,11 +1,39 @@
 ---
 title: "Lab: Assemblage rule builder"
+description: Set the priority order and probability thresholds of the six RLCMS primitives, see what example pixels become, and copy the Earth Engine code for your rules.
+newContent: true
 sidebar:
   order: 5
 ---
+import AssemblageLab from '~/components/labs/AssemblageLab.astro';
+import Callout from '~/components/Callout.astro';
+import Theory from '~/components/Theory.astro';
+import Cite from '~/components/Cite.astro';
+import References from '~/components/References.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+This lab starts from the rules in the [Assemblage](/bhutan-hfld-training/day-4/assemblage/) script: forest, cropland, grassland, other land, settlement and wetland, in that order, with the script's default thresholds. Change the order or a threshold and watch what six example pixels become. The code panel writes the same decision tree that the script builds, ready to paste at the end of the script in the Code Editor. Your rules are saved in this browser only.
 
-Set class priorities and probability thresholds, and generate the Earth Engine code for your rules.
+<AssemblageLab />
+
+## Things to try
+
+1. Look at the **Agroforestry edge** pixel. The rules call it forest even though cropland is more probable. Move cropland above forest: what happens to this pixel, and to the dense forest pixel?
+2. The **Shaded slope** pixel passes no rule. Lower the forest threshold until it is classified. What is the risk of setting thresholds this low across the whole country?
+3. Move **settlement** to the top. Which pixels change? Settlement often has a low threshold (0.30 here) because its primitive rarely reaches high probabilities; is it safe to give it first place?
+4. Paste the generated code at the end of the [assemblage script](/bhutan-hfld-training/day-4/assemblage/), run it, and compare the **My assemblage** layer with the script's own **Decision Tree LC** layer.
+
+<Theory title="Rule order is a decision" more="/explanation/rlcms-primitives-and-assemblage/">
+The assemblage is a decision tree that stops at the first rule a pixel passes. Two primitives often overlap at edges, in agroforestry and in shrubland, so the order decides which class wins there, and the thresholds decide how sure the model must be <Cite id="saah2020" />. Record both in the assumptions log and keep them fixed across years, so that maps from different years stay comparable.
+</Theory>
+
+<Callout type="mistake" title="Common mistakes">
+- **Reading "most probable" as "correct".** The probabilities come from separate yes/no models, so they don't add up to 1, and the highest one is only a rough guide. That is why the assemblage uses rules rather than simply taking the highest probability.
+- **Tuning thresholds on the reference sample.** Choose thresholds with validation pixels that were not used for training (probabilities at training pixels are too high), and never with the probability sample you will use for accuracy and area (Day 5).
+- **Changing rules between years.** New rules change the mapped areas even where nothing changed on the ground.
+</Callout>
+
+The lab's logic is in `src/lib/stats/assemblage.ts`. An automated test runs `buildDecisionTree()` from the assemblage script with its default thresholds and checks that the lab writes exactly the same decision-tree text.
+
+<References />
+
+*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International, and its exercise* EXERCISE D3_ Final- Assemblage-DECISION TREE RULE.docx. *Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*

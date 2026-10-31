@@ -1,0 +1,189 @@
+---
+/**
+ * Lab 5 (task M5-07): assemblage rule builder. Learners reorder the six primitives and set their
+ * thresholds; the lab shows which class each example pixel gets and writes the Earth Engine
+ * code (the same decision-tree text as scripts/gee/day-4/assemblage.js). Maths and code
+ * generation are in src/lib/stats/assemblage.ts (tested). Rules are saved through the safe
+ * storage helper.
+ */
+import '~/styles/labs.css';
+
+interface Props {
+	/** Heading level of the lab's own headings, so that it fits the page it is embedded in. */
+	headingLevel?: 2 | 3;
+}
+const { headingLevel = 2 } = Astro.props;
+const H = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<hfld-assemblage class="hfld-lab not-content">
+	<H id="as-rules">Your rules</H>
+	<p class="hfld-lab__hint">
+		Rules are checked from the top. A pixel gets the first class whose probability is at or above its threshold; if none
+		passes, it stays unclassified (0).
+	</p>
+	<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Assemblage rules">
+		<table class="hfld-lab__table">
+			<thead>
+				<tr>
+					<th scope="col">Order</th>
+					<th scope="col">Class (band)</th>
+					<th scope="col">Threshold (0–1)</th>
+					<th scope="col">Move</th>
+				</tr>
+			</thead>
+			<tbody data-rules></tbody>
+		</table>
+	</div>
+	<div class="hfld-lab__buttons">
+		<button type="button" data-reset>Reset to the script's defaults</button>
+	</div>
+	<div class="hfld-lab__error" role="alert" hidden data-error></div>
+	<p class="sr-only" aria-live="polite" data-status></p>
+
+	<H id="as-pixels">What the example pixels become</H>
+	<p class="hfld-lab__hint">
+		Probabilities are illustrative, chosen to show where the rules matter. ✓ marks a value at or above its threshold;
+		the outlined, bold value is the rule that decided the class.
+	</p>
+	<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Example pixels">
+		<table class="hfld-lab__table" data-pixels></table>
+	</div>
+
+	<H id="as-code">Earth Engine code</H>
+	<pre class="hfld-lab__code" tabindex="0" aria-label="Earth Engine code for your rules"><code data-code></code></pre>
+	<div class="hfld-lab__buttons">
+		<button type="button" data-copy>Copy the code</button>
+	</div>
+</hfld-assemblage>
+
+<script>
+	import {
+		assign,
+		DEFAULT_CLASSES,
+		eeCode,
+		EXAMPLE_PIXELS,
+		isRules,
+		mostProbable,
+		type ClassDef,
+	} from '~/lib/stats/assemblage';
+	import { loadJSON, saveJSON } from '~/lib/storage';
+
+	const KEY = 'hfld-lab:assemblage';
+	const byBand = new Map(DEFAULT_CLASSES.map((c) => [c.band, c]));
+
+	class HfldAssemblage extends HTMLElement {
+		private rules: ClassDef[] = DEFAULT_CLASSES.map((c) => ({ ...c }));
+
+		connectedCallback() {
+			const saved = loadJSON<unknown>(KEY);
+			if (isRules(saved)) this.rules = saved.map((r) => ({ ...byBand.get(r.band)!, threshold: r.threshold }));
+			this.renderRules();
+			const body = this.querySelector('[data-rules]')!;
+			body.addEventListener('click', (e) => {
+				const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-move]');
+				if (!btn) return;
+				const i = Number(btn.dataset.index);
+				const j = btn.dataset.move === 'up' ? i - 1 : i + 1;
+				if (j < 0 || j >= this.rules.length) return;
+				[this.rules[i], this.rules[j]] = [this.rules[j], this.rules[i]];
+				this.renderRules();
+				// Keep focus on the same button of the moved class so keyboard users can keep moving it.
+				const again = this.querySelector<HTMLButtonElement>(`button[data-move="${btn.dataset.move}"][data-index="${j}"]`);
+				(again && !again.disabled ? again : this.querySelector<HTMLButtonElement>(`[data-threshold="${j}"]`))?.focus();
+				this.status(`${this.rules[j].name} moved to position ${j + 1}.`);
+			});
+			body.addEventListener('input', (e) => {
+				const input = (e.target as HTMLElement).closest<HTMLInputElement>('input[data-threshold]');
+				if (input) {
+					const before = this.results();
+					this.update();
+					const changed = this.results().filter((r, k) => r !== before[k]).length;
+					this.status(changed ? `${changed} example pixel${changed === 1 ? '' : 's'} changed class.` : 'No example pixel changed class.');
+				}
+			});
+			this.querySelector('[data-reset]')!.addEventListener('click', () => {
+				this.rules = DEFAULT_CLASSES.map((c) => ({ ...c }));
+				this.renderRules();
+				this.status('Rules reset to the defaults of the assemblage script.');
+			});
+			this.querySelector('[data-copy]')!.addEventListener('click', async () => {
+				try {
+					await navigator.clipboard.writeText(this.querySelector('[data-code]')!.textContent ?? '');
+					this.status('Code copied.');
+				} catch {
+					this.status('Copying is blocked in this browser: select the code and copy it by hand.');
+				}
+			});
+		}
+
+		private results(): string[] {
+			return EXAMPLE_PIXELS.map((px) => assign(this.rules, px.p).name);
+		}
+
+		private status(text: string) {
+			this.querySelector('[data-status]')!.textContent = text;
+		}
+
+		private renderRules() {
+			const n = this.rules.length;
+			this.querySelector('[data-rules]')!.innerHTML = this.rules
+				.map(
+					(r, i) => `<tr>
+						<td>${i + 1}</td>
+						<th scope="row">${r.name} <code>${r.band}</code></th>
+						<td><label class="sr-only" for="as-t-${i}">Threshold for ${r.name}</label>
+							<input id="as-t-${i}" type="number" min="0" max="1" step="0.01" value="${r.threshold}" data-threshold="${i}" /></td>
+						<td><button type="button" data-move="up" data-index="${i}" ${i === 0 ? 'disabled' : ''}>Up<span class="sr-only">: move ${r.name} up</span></button>
+							<button type="button" data-move="down" data-index="${i}" ${i === n - 1 ? 'disabled' : ''}>Down<span class="sr-only">: move ${r.name} down</span></button></td>
+					</tr>`,
+				)
+				.join('');
+			this.update();
+		}
+
+		private update() {
+			const err = this.querySelector<HTMLElement>('[data-error]')!;
+			const bad: string[] = [];
+			this.querySelectorAll<HTMLInputElement>('input[data-threshold]').forEach((input) => {
+				const i = Number(input.dataset.threshold);
+				const v = input.value.trim() === '' ? NaN : Number(input.value);
+				if (Number.isFinite(v) && v >= 0 && v <= 1) {
+					this.rules[i].threshold = v;
+					input.removeAttribute('aria-invalid');
+				} else {
+					bad.push(this.rules[i].name);
+					input.setAttribute('aria-invalid', 'true');
+				}
+			});
+			if (bad.length) {
+				err.textContent = `Thresholds must be numbers from 0 to 1. Check: ${bad.join(', ')}. The results below use the last valid values.`;
+				err.hidden = false;
+			} else err.hidden = true;
+
+			const head =
+				'<thead><tr><th scope="col">Pixel</th>' +
+				this.rules.map((r) => `<th scope="col">${r.name}</th>`).join('') +
+				'<th scope="col">Rules give</th><th scope="col">Most probable</th></tr></thead>';
+			const rows = EXAMPLE_PIXELS.map((px) => {
+				const a = assign(this.rules, px.p);
+				const top = mostProbable(this.rules, px.p);
+				const cells = this.rules
+					.map((r, i) => {
+						const v = px.p[r.band];
+						const pass = v >= r.threshold;
+						const decided = i === a.rule;
+						return `<td${decided ? ' class="is-decided"' : ''}>${v.toFixed(2)}${pass ? ' ✓' : ''}${decided ? '<span class="sr-only"> (decides)</span>' : ''}</td>`;
+					})
+					.join('');
+				const differs = a.name !== top ? ' (differs)' : '';
+				return `<tr><th scope="row">${px.name}</th>${cells}<td><strong>${a.value === 0 ? 'Unclassified (0)' : `${a.name} (${a.value})`}</strong></td><td>${top}${differs}</td></tr>`;
+			}).join('');
+			this.querySelector('[data-pixels]')!.innerHTML = `${head}<tbody>${rows}</tbody>`;
+			this.querySelector('[data-code]')!.textContent = eeCode(this.rules);
+			if (!bad.length) saveJSON(KEY, this.rules.map((r) => ({ band: r.band, threshold: r.threshold })));
+		}
+	}
+
+	customElements.define('hfld-assemblage', HfldAssemblage);
+</script>
