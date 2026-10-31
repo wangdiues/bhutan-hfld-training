@@ -11,6 +11,8 @@ All notable changes to this course are documented here. The format follows [Keep
 - On-site slide player for the 11 training decks (`/slides/`), with third-party pictures removed.
 - Start here page and the Hello Bhutan script.
 - Lab 1 (sample size and allocation) and Lab 2 (accuracy and area) calculators.
+- Lab 3 (spectral index explorer), Lab 4 (decision tree playground), Lab 5 (assemblage rule builder) and Lab 6 (embedding similarity).
+- Explanation pages, how-to guides, glossary (82 terms), asset catalogue, cheat sheet and debugging reference.
 
 ## Corrections to source material
 

@@ -1,0 +1,415 @@
+---
+/**
+ * Lab 4 (task M5-06): decision tree playground. Part 1 grows a tree by hand, showing entropy
+ * and information gain for each candidate split; Part 2 grows a seeded Random Forest and shows
+ * how its trees vote on a pixel. All maths is in src/lib/stats/trees.ts (tested). Settings are
+ * saved through the safe storage helper.
+ */
+import { FEATURES } from '~/lib/stats/trees';
+import '~/styles/labs.css';
+
+interface Props {
+	/** Heading level of the lab's own headings, so that it fits the page it is embedded in. */
+	headingLevel?: 2 | 3;
+}
+const { headingLevel = 2 } = Astro.props;
+const H = `h${headingLevel}` as 'h2' | 'h3';
+const H2 = `h${headingLevel + 1}` as 'h3' | 'h4';
+---
+
+<hfld-tree-lab class="hfld-lab not-content">
+	<H id="dt-part1">Part 1: grow a tree by hand</H>
+	<div class="hfld-lab__grid">
+		<label>
+			Training pixels
+			<select data-dataset>
+				<option value="worked">Worked example (10 pixels, from the lesson)</option>
+				<option value="west">Western Bhutan (24 pixels, adds cropland)</option>
+			</select>
+		</label>
+	</div>
+
+	<H2>Your tree</H2>
+	<p class="hfld-lab__hint">Choose a leaf to split. Leaves show the class they would predict and the pixels they hold.</p>
+	<div data-tree class="hfld-lab__tree"></div>
+	<div class="hfld-lab__buttons">
+		<button type="button" data-undo>Undo the last split</button>
+		<button type="button" data-reset>Start again</button>
+	</div>
+
+	<fieldset data-split-form>
+		<legend data-split-legend>Split the root</legend>
+		<div class="hfld-lab__grid">
+			<label>
+				Covariate
+				<select data-feature>
+					{FEATURES.map((f) => <option value={f.id}>{f.name}</option>)}
+				</select>
+			</label>
+			<label>
+				Question
+				<select data-op>
+					<option value=">">greater than</option>
+					<option value="<">less than</option>
+				</select>
+			</label>
+			<label>
+				Threshold
+				<input type="number" data-threshold step="any" value="0.5" />
+			</label>
+		</div>
+		<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Split preview">
+			<table class="hfld-lab__table" data-preview></table>
+		</div>
+		<p class="hfld-lab__headline" data-gain aria-live="polite"></p>
+		<p class="sr-only" aria-live="polite" data-status></p>
+		<div class="hfld-lab__buttons">
+			<button type="button" data-apply>Apply this split</button>
+			<button type="button" data-best>Fill in the best split</button>
+		</div>
+		<details>
+			<summary>Pixels in this leaf</summary>
+			<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Pixels in the selected leaf">
+				<table class="hfld-lab__table" data-samples></table>
+			</div>
+		</details>
+	</fieldset>
+
+	<H id="dt-part2">Part 2: let a forest vote</H>
+	<p class="hfld-lab__hint">
+		Each tree is grown on a bootstrap sample of the 24 western Bhutan pixels and looks at one random covariate per split.
+		The same seed always gives the same forest.
+	</p>
+	<form class="hfld-lab__form" data-forest-form novalidate>
+		<div class="hfld-lab__grid">
+			<label>
+				Number of trees (1–200)
+				<input type="number" name="trees" min="1" max="200" step="1" value="50" />
+			</label>
+			<label>
+				Maximum depth (1–6)
+				<input type="number" name="depth" min="1" max="6" step="1" value="3" />
+			</label>
+			<label>
+				Random seed
+				<input type="number" name="seed" step="1" value="42" />
+			</label>
+		</div>
+		<fieldset>
+			<legend>Pixel to classify</legend>
+			<div class="hfld-lab__grid">
+				<label>
+					NDVI (−1 to 1)
+					<input type="number" name="ndvi" min="-1" max="1" step="0.01" value="0.6" />
+				</label>
+				<label>
+					NIR reflectance (0 to 1)
+					<input type="number" name="nir" min="0" max="1" step="0.01" value="0.26" />
+				</label>
+				<label>
+					Elevation (m)
+					<input type="number" name="elevation" min="0" max="7600" step="10" value="1500" />
+				</label>
+			</div>
+		</fieldset>
+	</form>
+	<div class="hfld-lab__error" role="alert" hidden data-forest-error></div>
+	<section aria-labelledby="dt-votes">
+		<H2 id="dt-votes">Votes</H2>
+		<p class="hfld-lab__headline" data-verdict aria-live="polite"></p>
+		<div class="hfld-lab__scroll" tabindex="0" role="region" aria-label="Votes per class">
+			<table class="hfld-lab__table" data-votes></table>
+		</div>
+		<p data-train-accuracy></p>
+	</section>
+	<details>
+		<summary>Show the first tree</summary>
+		<pre class="hfld-lab__code" tabindex="0" aria-label="The first tree of the forest"><code data-first-tree></code></pre>
+	</details>
+</hfld-tree-lab>
+
+<script>
+	import {
+		bestSplit,
+		describe,
+		entropy,
+		FEATURES,
+		growForest,
+		majority,
+		predict,
+		splitStats,
+		vote,
+		WESTERN_BHUTAN,
+		WORKED_EXAMPLE,
+		counts,
+		type Feature,
+		type Node,
+		type Op,
+		type Sample,
+	} from '~/lib/stats/trees';
+	import { loadJSON, saveJSON } from '~/lib/storage';
+
+	const KEY = 'hfld-lab:decision-tree';
+	const DATA: Record<string, Sample[]> = { worked: WORKED_EXAMPLE, west: WESTERN_BHUTAN };
+	const f3 = (x: number) => x.toFixed(3);
+	const featureName = (f: Feature) => FEATURES.find((x) => x.id === f)!.name;
+	const countText = (s: Sample[]) =>
+		Object.entries(counts(s))
+			.map(([k, v]) => `${v} ${k.toLowerCase()}`)
+			.join(', ') || 'none';
+
+	interface Saved {
+		dataset: string;
+		trees: number;
+		depth: number;
+		seed: number;
+		ndvi: number;
+		nir: number;
+		elevation: number;
+	}
+
+	class HfldTreeLab extends HTMLElement {
+		private root!: Node;
+		private history: Node[] = [];
+		/** Path of the leaf being split ('' is the root, 'yn' is root → yes → no); null when every leaf is pure. */
+		private selected: string | null = '';
+
+		private $<T extends Element = HTMLElement>(sel: string) {
+			return this.querySelector(sel) as T;
+		}
+
+		private firstImpure(): string | null {
+			const find = (n: Node, p: string): string | null =>
+				n.kind === 'leaf' ? (entropy(n.samples) > 0 ? p : null) : (find(n.yes, p + 'y') ?? find(n.no, p + 'n'));
+			return find(this.root, '');
+		}
+
+		private status(text: string) {
+			this.$('[data-status]').textContent = text;
+		}
+
+		private where(path: string) {
+			return path === '' ? 'the root' : `the leaf at ${path.split('').map((c) => (c === 'y' ? 'yes' : 'no')).join(' → ')}`;
+		}
+
+		connectedCallback() {
+			const saved = loadJSON<Partial<Saved>>(KEY) ?? {};
+			const ds = this.$<HTMLSelectElement>('[data-dataset]');
+			if (typeof saved.dataset === 'string' && saved.dataset in DATA) ds.value = saved.dataset;
+			const ff = this.$<HTMLFormElement>('[data-forest-form]');
+			for (const k of ['trees', 'depth', 'seed', 'ndvi', 'nir', 'elevation'] as const) {
+				const v = saved[k];
+				if (typeof v === 'number' && Number.isFinite(v)) (ff.elements.namedItem(k) as HTMLInputElement).value = String(v);
+			}
+			this.reset();
+			ds.addEventListener('change', () => {
+				this.reset();
+				this.save();
+			});
+			this.$('[data-reset]').addEventListener('click', () => this.reset());
+			this.$('[data-undo]').addEventListener('click', () => {
+				const prev = this.history.pop();
+				if (prev) {
+					this.root = prev;
+					this.selected = this.firstImpure();
+					this.renderTree();
+					this.status('Last split undone.');
+				}
+			});
+			for (const sel of ['[data-feature]', '[data-op]', '[data-threshold]'])
+				this.$(sel).addEventListener('input', () => this.preview());
+			this.$('[data-apply]').addEventListener('click', () => this.apply());
+			this.$('[data-best]').addEventListener('click', () => this.fillBest());
+			this.$('[data-tree]').addEventListener('click', (e) => {
+				const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-path]');
+				if (!btn) return;
+				this.selected = btn.dataset.path!;
+				this.renderTree();
+				this.status(`Now splitting ${this.where(this.selected)}.`);
+				this.$<HTMLSelectElement>('[data-feature]').focus();
+			});
+			ff.addEventListener('input', () => this.forest());
+			this.forest();
+		}
+
+		private reset() {
+			this.root = { kind: 'leaf', samples: DATA[this.$<HTMLSelectElement>('[data-dataset]').value] };
+			this.history = [];
+			this.selected = '';
+			this.renderTree();
+		}
+
+		private nodeAt(path: string): Node {
+			let n = this.root;
+			for (const c of path) if (n.kind === 'split') n = c === 'y' ? n.yes : n.no;
+			return n;
+		}
+
+		private replaceAt(node: Node, path: string, value: Node): Node {
+			if (path === '') return value;
+			if (node.kind !== 'split') return node;
+			const [c, rest] = [path[0], path.slice(1)];
+			return c === 'y'
+				? { ...node, yes: this.replaceAt(node.yes, rest, value) }
+				: { ...node, no: this.replaceAt(node.no, rest, value) };
+		}
+
+		private renderTree() {
+			if (this.selected !== null && this.nodeAt(this.selected).kind !== 'leaf') this.selected = this.firstImpure();
+			const html = (n: Node, path: string, label: string): string => {
+				const head = label ? `<span class="hfld-lab__branch">${label}</span> ` : '';
+				if (n.kind === 'leaf') {
+					const pure = entropy(n.samples) === 0;
+					const current = path === this.selected;
+					return `<li>${head}<button type="button" data-path="${path}" aria-pressed="${current}">Leaf: ${majority(n.samples)}</button> ${countText(n.samples)}${pure ? ' (pure)' : `, entropy ${f3(entropy(n.samples))}`}</li>`;
+				}
+				return `<li>${head}<strong>${featureName(n.feature)} ${n.op} ${n.threshold}?</strong> (${countText(n.samples)})<ul>${html(n.yes, path + 'y', 'yes')}${html(n.no, path + 'n', 'no')}</ul></li>`;
+			};
+			this.$('[data-tree]').innerHTML = `<ul>${html(this.root, '', '')}</ul>`;
+			this.$<HTMLButtonElement>('[data-undo]').disabled = this.history.length === 0;
+			const form = this.$<HTMLFieldSetElement>('[data-split-form]');
+			if (this.selected === null) {
+				form.disabled = true;
+				this.$('[data-split-legend]').textContent = 'Every leaf is pure';
+				this.$('[data-preview]').innerHTML = '';
+				this.$('[data-samples]').innerHTML = '';
+				this.$('[data-gain]').textContent = 'Every leaf is pure: there is nothing left to split. Undo a split or start again.';
+				return;
+			}
+			form.disabled = false;
+			const leaf = this.nodeAt(this.selected);
+			const where = this.where(this.selected);
+			this.$('[data-split-legend]').textContent = `Split ${where}`;
+			this.$('[data-samples]').innerHTML =
+				'<thead><tr><th scope="col">Class</th><th scope="col">NDVI</th><th scope="col">NIR</th><th scope="col">Elevation (m)</th></tr></thead><tbody>' +
+				leaf.samples.map((s) => `<tr><th scope="row">${s.label}</th><td>${s.ndvi}</td><td>${s.nir}</td><td>${s.elevation}</td></tr>`).join('') +
+				'</tbody>';
+			this.preview();
+		}
+
+		private current() {
+			const feature = this.$<HTMLSelectElement>('[data-feature]').value as Feature;
+			const op = this.$<HTMLSelectElement>('[data-op]').value as Op;
+			const raw = this.$<HTMLInputElement>('[data-threshold]').value;
+			const threshold = Number(raw);
+			return { feature, op, threshold, valid: raw.trim() !== '' && Number.isFinite(threshold) };
+		}
+
+		private preview() {
+			if (this.selected === null) return;
+			const leaf = this.nodeAt(this.selected);
+			const c = this.current();
+			const apply = this.$<HTMLButtonElement>('[data-apply]');
+			if (!c.valid) {
+				this.$('[data-preview]').innerHTML = '';
+				this.$('[data-gain]').textContent = 'Enter a number for the threshold.';
+				apply.disabled = true;
+				return;
+			}
+			const s = splitStats(leaf.samples, c.feature, c.op, c.threshold);
+			const n = leaf.samples.length;
+			this.$('[data-preview]').innerHTML =
+				'<thead><tr><th scope="col">Branch</th><th scope="col">Pixels</th><th scope="col">Classes</th><th scope="col">Entropy</th></tr></thead><tbody>' +
+				`<tr><th scope="row">Before the split</th><td>${n}</td><td>${countText(leaf.samples)}</td><td>${f3(s.before)}</td></tr>` +
+				`<tr><th scope="row">Yes</th><td>${s.yes.length}</td><td>${countText(s.yes)}</td><td>${f3(s.yesEntropy)}</td></tr>` +
+				`<tr><th scope="row">No</th><td>${s.no.length}</td><td>${countText(s.no)}</td><td>${f3(s.noEntropy)}</td></tr>` +
+				'</tbody>';
+			const empty = s.yes.length === 0 || s.no.length === 0;
+			this.$('[data-gain]').textContent = empty
+				? 'Every pixel goes to one branch, so this split gains nothing. Try another threshold.'
+				: `Weighted entropy after: ${s.after.toFixed(4)}. Information gain: ${s.before.toFixed(4)} − ${s.after.toFixed(4)} = ${f3(s.gain)}.`;
+			apply.disabled = empty || entropy(leaf.samples) === 0;
+			if (entropy(leaf.samples) === 0) this.$('[data-gain]').textContent = 'This leaf is pure: there is nothing left to separate.';
+		}
+
+		private apply() {
+			if (this.selected === null) return;
+			const leaf = this.nodeAt(this.selected);
+			const c = this.current();
+			const s = splitStats(leaf.samples, c.feature, c.op, c.threshold);
+			if (!c.valid || !s.yes.length || !s.no.length) return;
+			this.history.push(this.root);
+			const node: Node = {
+				kind: 'split',
+				samples: leaf.samples,
+				feature: c.feature,
+				op: c.op,
+				threshold: c.threshold,
+				yes: { kind: 'leaf', samples: s.yes },
+				no: { kind: 'leaf', samples: s.no },
+			};
+			this.root = this.replaceAt(this.root, this.selected, node);
+			// Move on to the first impure leaf, if any.
+			this.selected = this.firstImpure();
+			this.renderTree();
+			this.status(
+				this.selected === null ? 'Split applied. Every leaf is now pure.' : `Split applied. Now splitting ${this.where(this.selected)}.`,
+			);
+		}
+
+		private fillBest() {
+			if (this.selected === null) return;
+			const best = bestSplit(this.nodeAt(this.selected).samples);
+			if (!best) {
+				this.$('[data-gain]').textContent = 'No split can separate these pixels further.';
+				return;
+			}
+			this.$<HTMLSelectElement>('[data-feature]').value = best.feature;
+			this.$<HTMLSelectElement>('[data-op]').value = best.op;
+			this.$<HTMLInputElement>('[data-threshold]').value = String(best.threshold);
+			this.preview();
+		}
+
+		private forest() {
+			const ff = this.$<HTMLFormElement>('[data-forest-form]');
+			const num = (k: string) => {
+				const raw = (ff.elements.namedItem(k) as HTMLInputElement).value;
+				return raw.trim() === '' ? NaN : Number(raw);
+			};
+			const v = { trees: num('trees'), depth: num('depth'), seed: num('seed'), ndvi: num('ndvi'), nir: num('nir'), elevation: num('elevation') };
+			const err = this.$('[data-forest-error]');
+			const problems: string[] = [];
+			if (!Number.isInteger(v.trees) || v.trees < 1 || v.trees > 200) problems.push('Number of trees must be a whole number from 1 to 200.');
+			if (!Number.isInteger(v.depth) || v.depth < 1 || v.depth > 6) problems.push('Maximum depth must be a whole number from 1 to 6.');
+			if (!Number.isInteger(v.seed)) problems.push('The seed must be a whole number.');
+			const ranges = { ndvi: [-1, 1], nir: [0, 1], elevation: [0, 7600] } as const;
+			for (const k of ['ndvi', 'nir', 'elevation'] as const) {
+				const [lo, hi] = ranges[k];
+				if (!Number.isFinite(v[k]) || v[k] < lo || v[k] > hi) problems.push(`${featureName(k)} must be a number from ${lo} to ${hi}.`);
+			}
+			if (problems.length) {
+				err.textContent = problems.join(' ');
+				err.hidden = false;
+				return;
+			}
+			err.hidden = true;
+			const forest = growForest(WESTERN_BHUTAN, v.trees, v.depth, v.seed);
+			const votes = vote(forest, v);
+			const pct = (k: number) => Math.round((100 * k) / v.trees);
+			const tied = votes.filter((x) => x.votes === votes[0].votes);
+			this.$('[data-verdict]').textContent =
+				tied.length > 1
+					? `A tie: ${tied.map((x) => x.label).join(' and ')} get ${votes[0].votes} votes each (${pct(votes[0].votes)}%). Add trees or training pixels to break it.`
+					: `The forest says ${votes[0].label}: ${votes[0].votes} of ${v.trees} trees (${pct(votes[0].votes)}%).`;
+			this.$('[data-votes]').innerHTML =
+				'<thead><tr><th scope="col">Class</th><th scope="col">Votes</th><th scope="col">Share</th></tr></thead><tbody>' +
+				votes.map((x) => `<tr><th scope="row">${x.label}</th><td>${x.votes}</td><td>${((100 * x.votes) / v.trees).toFixed(0)}%</td></tr>`).join('') +
+				'</tbody>';
+			const right = WESTERN_BHUTAN.filter((s) => vote(forest, s)[0].label === s.label).length;
+			const first = predict(forest.trees[0], v);
+			this.$('[data-train-accuracy]').textContent = `On its own 24 training pixels the forest is right for ${right}. That is not the map's accuracy: training pixels are not an independent sample. The first tree alone says ${first}.`;
+			this.$('[data-first-tree]').textContent = describe(forest.trees[0]).join('\n');
+			this.lastValid = v;
+			this.save();
+		}
+
+		/** The last forest settings that passed validation, so blanks are never saved. */
+		private lastValid: Omit<Saved, 'dataset'> | null = null;
+
+		private save() {
+			saveJSON(KEY, { dataset: this.$<HTMLSelectElement>('[data-dataset]').value, ...(this.lastValid ?? {}) });
+		}
+	}
+
+	customElements.define('hfld-tree-lab', HfldTreeLab);
+</script>
