@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import offline from './integrations/offline.mjs';
 
 // GitHub Pages project site: https://<user>.github.io/<repo>/
 const GITHUB_USER = 'wangdiues';
@@ -41,6 +42,14 @@ export default defineConfig({
 				baseUrl: `https://github.com/${GITHUB_USER}/${REPO}/edit/main/`,
 			},
 			lastUpdated: true,
+			// Offline use (task M6-05): web app manifest and the service worker written by integrations/offline.mjs.
+			head: [
+				{ tag: 'link', attrs: { rel: 'manifest', href: `/${REPO}/manifest.webmanifest` } },
+				{
+					tag: 'script',
+					content: `if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/${REPO}/sw.js', { scope: '/${REPO}/' }).catch(() => {}));`,
+				},
+			],
 			// Lesson progress (task M6-01): a "mark complete" toggle and per-day progress in the sidebar.
 			components: {
 				Footer: './src/components/overrides/Footer.astro',
@@ -69,5 +78,6 @@ export default defineConfig({
 				{ label: 'About', collapsed: true, items: [{ autogenerate: { directory: 'about' } }] },
 			],
 		}),
+		offline({ base: `/${REPO}` }),
 	],
 });

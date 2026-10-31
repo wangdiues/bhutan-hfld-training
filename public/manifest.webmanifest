@@ -1,0 +1,11 @@
+{
+	"name": "Bhutan HFLD Training",
+	"short_name": "HFLD Training",
+	"description": "An open course on producing ART-TREES HFLD activity data for Bhutan with Google Earth Engine.",
+	"start_url": "/bhutan-hfld-training/",
+	"scope": "/bhutan-hfld-training/",
+	"display": "standalone",
+	"background_color": "#17181c",
+	"theme_color": "#2f6f4f",
+	"icons": [{ "src": "/bhutan-hfld-training/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
