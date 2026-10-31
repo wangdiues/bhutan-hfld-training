@@ -1,9 +1,143 @@
 ---
 title: "Capstone project"
+description: The Day 5 group activity. Map six land-cover classes for one Dzongkhag in 2025, draw a stratified sample, interpret it in Collect Earth Online, assess accuracy and present your results.
 sidebar:
   order: 0
 ---
+import Callout from '~/components/Callout.astro';
+import Credit from '~/components/Credit.astro';
+import LessonHeader from '~/components/LessonHeader.astro';
 
-:::note[Coming soon]
-This page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).
-:::
+<LessonHeader
+  questions={["Can I run the whole method, from imagery to an accuracy table, for one Dzongkhag?"]}
+  objectives={[
+    "Assemble a 6-class land-cover map for 2025.",
+    "Draw a stratified sample and set up a Collect Earth Online project with it.",
+    "Write a response design and interpret the samples.",
+    "Report accuracy and adjusted areas with 90% confidence intervals, and document how to reproduce them.",
+  ]}
+  teaching={0} exercises={240}
+  prerequisites={["Days 1–5"]}
+/>
+
+Work in a group. Your trainer assigns each group one Dzongkhag. At the end, each group presents its results to the others. If you are working alone, pick a Dzongkhag you know.
+
+## The brief
+
+### Part 1: Assemble a land-cover map for 2025
+
+Use the composites you made on Day 2 and the workflow from Days 3 and 4 ([Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/), [Assemblage](/bhutan-hfld-training/day-4/assemblage/)) to make a map with six classes:
+
+- Cropland
+- Forest
+- Grassland
+- Wetland
+- Settlement (called "Built-up" in the assemblage script's legend)
+- Other land
+
+In the assemblage, a class's **code** in the map (1–6) follows the order of your rules: with the script's defaults, 1 = Forest, 2 = Cropland, 3 = Grassland, 4 = Other land, 5 = Settlement, 6 = Wetland, and 0 = no rule passed. **Write down your code → name table**, together with the thresholds and rule order you used. You need it in Part 4.
+
+Clip the map to your Dzongkhag, and compute the mapped area of each class inside the Dzongkhag, including the unclassified (0) area ([Compute the area of a class](/bhutan-hfld-training/how-to/compute-class-area/)).
+
+### Part 2: Create a stratified sampling design
+
+Draw **10 samples in each of the six classes** of your map, inside your Dzongkhag. The [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) script samples a different, three-stratum map, so replace its sampling step with one on your own map. List the class values explicitly so that unclassified pixels (0) are left out, and use the map's 10 m scale:
+
+```js
+var dz = ee.FeatureCollection('FAO/GAUL/2015/level1')
+    .filter(ee.Filter.eq('ADM1_NAME', 'Punakha'));  // your Dzongkhag
+var samples = landClass.clip(dz).stratifiedSample({
+  numPoints: 0,
+  classBand: 'classification',
+  classValues: [1, 2, 3, 4, 5, 6],
+  classPoints: [10, 10, 10, 10, 10, 10],
+  region: dz.geometry(),
+  scale: 10,
+  seed: 42,
+  geometries: true
+});
+print(samples.aggregate_histogram('classification'));
+```
+
+The script uses [FAO GAUL 2015](https://developers.google.com/earth-engine/datasets/catalog/FAO_GAUL_2015_level1) boundaries. If a class has fewer than 10 pixels in your Dzongkhag, you get fewer samples: keep them all and note it. Then index the samples, make a plot of at least 30 m × 30 m around each one (`buffer(15).bounds()`), and export both as shapefiles, as in Parts 4–6 of that lesson. Record the seed.
+
+Create a new [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/) project and upload the plots and samples ([how-to](/bhutan-hfld-training/how-to/ceo-project-from-gee/)).
+
+<Callout type="implication">
+Equal allocation is a valid stratified design: the calculator weights each class by its mapped area, so the estimates are unbiased. But 10 samples per class gives low precision. With 10 samples and a user's accuracy of 0.8, the 90% confidence interval is about ±0.22, and a class with 10 of 10 correct shows a standard error of 0, which understates its uncertainty. For reporting you would size the sample for a target precision ([Determining sample size](/bhutan-hfld-training/day-5/sample-size/)). Say this in your presentation.
+</Callout>
+
+### Part 3: Interpret the samples
+
+Write a **response design** before you interpret. It must contain at least:
+
+- the land-cover class of each sample at the **end of 2025**;
+- the **assessment unit**: your map has 10 m pixels and each plot covers about 3 × 3 of them, so say whether you label the whole plot (for example, the class covering most of it) and compare it with the map class at the sample point;
+- the rules for deciding the main class when a plot holds more than one (for example, how trees in cropland are treated);
+- what to do with plots you can't interpret (cloud, shadow, no clear imagery).
+
+Use the same class names in CEO as in your code → name table. Then interpret all the plots and export the results.
+
+### Part 4: Assess the accuracy
+
+1. Join the CEO results to your samples so that each sample has a **map** class and a **reference** class.
+2. Convert the map codes to the class names, using your code → name table, so that the two columns use exactly the same names (for example "Other land", not "Otherland").
+3. **Remove plots marked uninterpretable**, and count how many you removed in each class. (Left in, they would become a seventh class and lower every other class's adjusted area.)
+4. Paste the rows into the [accuracy and area estimator](/bhutan-hfld-training/labs/accuracy-area-estimator/) (the [one-row-per-sample template](/bhutan-hfld-training/reference/downloads/) shows the format), and enter the mapped area of each class in your Dzongkhag.
+
+Report the confusion matrix, user's, producer's and overall accuracy, the adjusted area of each class with its standard error and 90% confidence interval, and the uncertainty as a percentage.
+
+## Submission checklist
+
+Hand in, or show in your presentation:
+
+- ☐ the map (a screenshot with a legend) and the link to your Earth Engine script;
+- ☐ your code → name table, thresholds and rule order;
+- ☐ the mapped area of each class in the Dzongkhag, including unclassified;
+- ☐ the sample design: samples per class (and any class with fewer than 10), plot size, the seed, and the asset IDs of the exported samples and plots;
+- ☐ the response design (one page);
+- ☐ the CEO export (CSV), and the number of uninterpretable plots per class, with reasons;
+- ☐ the report from the accuracy and area estimator (CSV) and an activity-data table ([Reporting and documentation](/bhutan-hfld-training/day-5/reporting/));
+- ☐ an assumptions log: image dates, collections and their versions, thresholds, class definitions;
+- ☐ the reproducibility checklist from Reporting and documentation, each item ticked or marked missing;
+- ☐ a short note on what you would change for a real reporting exercise.
+
+When the [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/) lesson is published, this checklist will add one more item: compare your uncertainty with the requirement it describes and cite the TREES 3.0 section.
+
+## Presentation (10 minutes)
+
+A suggested outline of six slides:
+
+1. **Your Dzongkhag**: where it is, its main land covers, anything that made mapping hard (terrain, cloud, snow).
+2. **The map**: the map, the class areas, and the rules you chose.
+3. **The sample**: how many samples, where, and the plot size.
+4. **Interpretation**: your response design and two or three difficult plots, with how you decided.
+5. **Results**: the confusion matrix, the accuracies, and the adjusted areas with 90% confidence intervals.
+6. **Lessons**: what caused most errors, and what you would do differently.
+
+## Rubric
+
+Each criterion is scored 0–3: 0 missing, 1 partly done, 2 done, 3 done well and explained.
+
+| Criterion | 3 = done well and explained |
+|---|---|
+| Land-cover map | All six classes mapped for the whole Dzongkhag; code → name table, thresholds and rule order recorded and justified; class areas computed within the Dzongkhag |
+| Sample design | Up to 10 samples per class drawn with `stratifiedSample()` inside the Dzongkhag, with classes that had fewer pixels noted; plots of at least 30 m; seed and asset IDs recorded |
+| Response design | Assessment unit, class definitions, a rule for mixed plots and a rule for uninterpretable plots, written before interpretation |
+| Interpretation | All plots interpreted or marked uninterpretable with a reason; difficult cases explained |
+| Accuracy and area | Uninterpretable plots removed and counted; correct matrix and accuracies; adjusted areas with SE and 90% CI; uncertainty stated; the effect of the small sample discussed |
+| Documentation | Script link, asset IDs, image dates and versions, an assumptions log and the reproducibility checklist, so another group could reproduce the numbers |
+| Presentation | Clear, on time, and honest about limitations |
+
+<Credit
+  source="EXERCISE D5_ Group Activity.docx"
+  authors="Ate Poortinga & Samuel (Conservation International)"
+  date="May 2026"
+  changes={[
+    "The four parts of the activity kept; the source's links to Google Docs and Sheets replaced by the lessons, labs and how-to guides they correspond to",
+    "\"Days 1–3\" for the map pointed to the Day 2 composites and the Day 3–4 primitives and assemblage lessons; \"Otherland\" written \"Other land\"",
+    "Added: code for sampling six classes in one Dzongkhag, the class code → name step, removal of uninterpretable plots, the assessment unit and uninterpretable-plot rule in the response design",
+    "The accuracy assessment table template replaced by the accuracy and area estimator and its CSV template",
+    "Added: a note on the precision of 10 samples per class, a submission checklist, a 10-minute presentation outline and a rubric",
+  ]}
+/>
