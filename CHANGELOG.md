@@ -15,6 +15,7 @@ All notable changes to this course are documented here. The format follows [Keep
 - Explanation pages, how-to guides, glossary (82 terms), asset catalogue, cheat sheet and debugging reference.
 
 ### Changed
+- Open Geo Blog links point to the Internet Archive copy (mygeoblog.com now returns 410 Gone).
 - Slide player shows the original slides with all their pictures (owner's decision, 2026-10-31); slide pictures are excluded from the CC BY 4.0 licence.
 
 ## Corrections to source material
