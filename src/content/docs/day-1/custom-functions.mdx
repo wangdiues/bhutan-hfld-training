@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -106,13 +105,11 @@ ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
 
 cloud_thresh = 40
 
-
 def cloudfunction(image):
     cloud_score = ee.Algorithms.Landsat.simpleCloudScore(image)
     cloud01 = cloud_score.select("cloud").gt(cloud_thresh)
     cloudmask = image.mask().And(cloud01.Not())
     return image.mask(cloudmask)
-
 
 lc8_image = ee.Image("LANDSAT/LC08/C02/T1_RT_TOA/LC08_138041_20260101")
 lc8_image_no_clouds = cloudfunction(lc8_image)
@@ -171,7 +168,7 @@ Your script runs in two places. Plain JavaScript (variables, `function`, `if`, l
 | Typical cause | A typo, a local variable used outside its function, a missing `return` | A band or property that doesn't exist, too much data at once |
 | Fix | Read the line number and check names and scope | Print the object (`bandNames()`, `first()`), filter more, or use a larger scale |
 
-[Debugging Earth Engine](/bhutan-hfld-training/how-to/debug-earth-engine/) has more examples.
+[Debugging Earth Engine](/lulc-mapping-training/how-to/debug-earth-engine/) has more examples.
 
 ## The full script
 
@@ -226,14 +223,3 @@ Use the collection `COPERNICUS/S2_SR_HARMONIZED`, and the point `ee.Geometry.Poi
   "Mask clouds per image, then reduce (median) to get a cleaner composite.",
   "Client-side errors come from the JavaScript in your browser; server-side errors come from Earth Engine's computation.",
 ]} />
-
-<Credit
-  source="EXERCISE D1: Writing Custom Functions and Mapping Across Image Collections"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; the step-by-step snippets merged into one script that runs top to bottom",
-    "StudyArea defaults to Bhutan's boundary (USDOS LSIB) instead of a polygon drawn around Manila or the learner's town",
-    "Added a client- and server-side error comparison, Python (geemap) versions, a from-scratch NDVI exercise and a quiz",
-  ]}
-/>

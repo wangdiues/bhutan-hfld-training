@@ -7,7 +7,6 @@ sidebar:
 import { Steps } from '@astrojs/starlight/components';
 import Callout from '~/components/Callout.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -25,7 +24,7 @@ import Term from '~/components/Term.astro';
   prerequisites={["Day 3: Forest primitives"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/rlcms-overview/) give a visual summary.
+The [slides for this lesson](/lulc-mapping-training/slides/rlcms-overview/) give a visual summary.
 
 ## What is RLCMS?
 
@@ -37,13 +36,13 @@ RLCMS was developed by SERVIR-Mekong (now SERVIR-Southeast Asia, SERVIR-SEA) wit
 
 <Steps>
 
-1. **Composite preparation.** Pre-process images (shadow and cloud masking, BRDF and topographic correction) and build composites. Any available imagery can be used: Landsat 5, 7, 8 and 9, Sentinel-1, Sentinel-2, or Planet NICFI. *Course:* [Sentinel-2](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) and [Landsat](/bhutan-hfld-training/day-2/landsat-mrv-composite/) MRV composites.
+1. **Composite preparation.** Pre-process images (shadow and cloud masking, BRDF and topographic correction) and build composites. Any available imagery can be used: Landsat 5, 7, 8 and 9, Sentinel-1, Sentinel-2, or Planet NICFI. *Course:* [Sentinel-2](/lulc-mapping-training/day-2/sentinel-2-mrv-composite/) and [Landsat](/lulc-mapping-training/day-2/landsat-mrv-composite/) MRV composites.
 
-2. **Training data preparation.** Define the land-cover typology (the list of classes) for the country, and collect reference data for each class. The reference data are split into training data and validation data, and the training data are sampled to get covariate values at each point. *Course:* [Calculating covariates](/bhutan-hfld-training/day-3/covariates/) and [Collecting training data](/bhutan-hfld-training/day-4/training-data/).
+2. **Training data preparation.** Define the land-cover typology (the list of classes) for the country, and collect reference data for each class. The reference data are split into training data and validation data, and the training data are sampled to get covariate values at each point. *Course:* [Calculating covariates](/lulc-mapping-training/day-3/covariates/) and [Collecting training data](/lulc-mapping-training/day-4/training-data/).
 
-3. **Primitive layer generation.** A classifier, trained on the sampled data, produces a primitive for each class: the probability that a pixel is that class. Each primitive's accuracy is assessed. *Course:* [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/).
+3. **Primitive layer generation.** A classifier, trained on the sampled data, produces a primitive for each class: the probability that a pixel is that class. Each primitive's accuracy is assessed. *Course:* [Forest primitives](/lulc-mapping-training/day-3/forest-primitives/).
 
-4. **Assemblage.** A decision tree with user-set thresholds combines the primitives into the final land-cover map. The thresholds come from visual assessment and from plots of each primitive's accuracy against its probability. *Course:* [Assemblage](/bhutan-hfld-training/day-4/assemblage/).
+4. **Assemblage.** A decision tree with user-set thresholds combines the primitives into the final land-cover map. The thresholds come from visual assessment and from plots of each primitive's accuracy against its probability. *Course:* [Assemblage](/lulc-mapping-training/day-4/assemblage/).
 
 </Steps>
 
@@ -65,7 +64,7 @@ Three features make RLCMS practical for a national agency:
 
 **Classifier.** An ML algorithm that sorts data into categories (classes). It learns from training data and predicts the class of new data.
 
-**<Term id="random-forest" /> classifier.** An ML algorithm that uses many decision trees, each built from a random subset of the training data, and takes the majority vote of the trees as the final class. It predicts most classes well, but can struggle with classes whose data look alike. See [Random Forest theory](/bhutan-hfld-training/day-3/random-forest/).
+**<Term id="random-forest" /> classifier.** An ML algorithm that uses many decision trees, each built from a random subset of the training data, and takes the majority vote of the trees as the final class. It predicts most classes well, but can struggle with classes whose data look alike. See [Random Forest theory](/lulc-mapping-training/day-3/random-forest/).
 
 **Training data.** Reference points with known classes, collected in the field or from high-resolution imagery. Reference points are split into **training** and **validation** data. At each training point, the covariate values are read from the image (sampling); the classifier learns from these "known" points and predicts the class of every other ("unknown") pixel.
 
@@ -76,7 +75,7 @@ Three features make RLCMS practical for a national agency:
 **<Term id="assemblage">Assemblage</Term> map.** The land-cover map made by combining the primitives with rules that reflect the user's class definitions and priorities, while keeping the uncertainty information. In the simplest version, each pixel takes the class whose primitive has the highest probability; in practice a decision tree with thresholds and a class order is used.
 
 <Callout type="bhutan">
-Bhutan context: for HFLD, the classes Bhutan reports (forest, cropland, grassland, settlement, wetland and other land) are produced by assembling Bhutan's own primitives, with rules that put Bhutan's forest definition into practice.
+Bhutan context: the classes Bhutan reports (forest, cropland, grassland, settlement, wetland and other land) are produced by assembling Bhutan's own primitives, with rules that put Bhutan's forest definition into practice.
 </Callout>
 
 ## Common mistakes
@@ -115,16 +114,3 @@ For each RLCMS stage, write one line saying what it takes in and what it produce
 ]} />
 
 <References />
-
-<Credit
-  source="D4 RLCMS: General Overview and Terms to Know (slides)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides rewritten as a web lesson; terms linked to the glossary",
-    "Typos corrected (\"preperation\", \"modulalr system architicure\")",
-    "Figures from published RLCMS papers described in text instead of reused",
-    "SERVIR hub named as SERVIR-Mekong (now SERVIR-Southeast Asia), with a citation",
-    "Landsat 9 added to the list of usable imagery",
-  ]}
-/>

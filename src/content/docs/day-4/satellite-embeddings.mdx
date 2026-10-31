@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -34,7 +33,7 @@ import forestChange from '~/assets/day-4/satellite-embeddings/s22-ab7c783328.web
   prerequisites={["Forest primitives with machine learning"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/satellite-embeddings/) give a visual summary (third-party figures removed).
+The [slides for this lesson](/lulc-mapping-training/slides/satellite-embeddings/) give a visual summary (third-party figures removed).
 
 ## A new kind of image collection
 
@@ -148,7 +147,6 @@ def get_year(year):
         .filterDate(f"{year}-01-01", f"{year + 1}-01-01").filterBounds(area).mosaic()
     )
 
-
 stability = get_year(2017).multiply(get_year(2024)).reduce(ee.Reducer.sum())
 m.addLayer(stability.clip(area), {"min": 0.5, "max": 1, "palette": ["d73027", "fee08b", "ffffff"]},
            "Similarity 2017 vs 2024 (low = change)")
@@ -162,7 +160,7 @@ The model was trained to keep embeddings consistent through time, so similarity 
 
 ## Classification and regression
 
-Embeddings work well with simple and tree-based classifiers, because classes tend to be separable in the embedding space. You can use them in place of composites and covariates in an existing workflow, with **no pre-processing**, and scale up with Earth Engine. The next lesson, [Land cover and similarity with embeddings](/bhutan-hfld-training/day-4/embeddings-classification-similarity/), classifies Bhutan's land cover from them.
+Embeddings work well with simple and tree-based classifiers, because classes tend to be separable in the embedding space. You can use them in place of composites and covariates in an existing workflow, with **no pre-processing**, and scale up with Earth Engine. The next lesson, [Land cover and similarity with embeddings](/lulc-mapping-training/day-4/embeddings-classification-similarity/), classifies Bhutan's land cover from them.
 
 Expect good results with fewer training samples, and excellent results with large, high-quality ones. Embeddings also handle rare classes better and support continuous variables (regression), and they don't need wall-to-wall training labels.
 
@@ -174,7 +172,7 @@ Expect good results with fewer training samples, and excellent results with larg
 - **Points are easier than polygons** for mapping; to classify polygons or patches, average the embeddings inside them.
 - **Remember the space is learned and unit-length.** Use dot products (cosine similarity) to compare; don't read single axes as physical quantities.
 
-Explore the 64-dimensional space and cosine similarity in the [embedding similarity visualiser](/bhutan-hfld-training/labs/embedding-similarity/).
+Explore the 64-dimensional space and cosine similarity in the [embedding similarity visualiser](/lulc-mapping-training/labs/embedding-similarity/).
 
 <Callout type="bhutan">
 Bhutan context: cloud cover limits optical composites in the monsoon; embeddings are built from many sensors, including radar, over the whole year, so they can help where Sentinel-2 alone struggles. Check them against your own maps before relying on them for reporting, and document which year's embeddings you used.
@@ -230,14 +228,3 @@ With a forest point, the bright areas move from the town to the forested slopes,
 ]} />
 
 <References />
-
-<Credit
-  source="D4 Effective Use of Google's Satellite Embedding Dataset (slides)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides rewritten as a web lesson; Google DeepMind figures not reused, ideas cited to the AlphaEarth Foundations paper and DeepMind and Earth Engine pages",
-    "New: a Bhutan script for similarity search and year-to-year similarity, with a Python version",
-    "Trainers' own Bhutan results (Thimphu and Paro similarity, forest change) kept as screenshots",
-  ]}
-/>

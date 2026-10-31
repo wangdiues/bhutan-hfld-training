@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -145,7 +144,7 @@ Click **Run** in the **Tasks** tab to start the export. A national 10 m export c
     <CodeBlock script="day-2/sentinel-2-mrv-composite.js" />
   </TabItem>
   <TabItem label="Python (geemap)">
-The full Python port is in [`scripts/gee/day-2/sentinel_2_mrv_composite.py`](https://github.com/wangdiues/bhutan-hfld-training/blob/main/scripts/gee/day-2/sentinel_2_mrv_composite.py). Its core:
+The full Python port is in [`scripts/gee/day-2/sentinel_2_mrv_composite.py`](https://github.com/wangdiues/lulc-mapping-training/blob/main/scripts/gee/day-2/sentinel_2_mrv_composite.py). Its core:
 
 ```python
 def get_s2_collection(start, end):
@@ -155,7 +154,6 @@ def get_s2_collection(start, end):
         .filterBounds(bhutan)
         .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", cloud_cover_max))
     )
-
 
 composites = []
 for season, (start, end) in seasons.items():
@@ -248,15 +246,3 @@ Everything else follows from these two values. A stricter threshold removes more
   "Export one 12-band Int16 image per year with season-named bands and no QA bands.",
   "Use surface reflectance throughout, and inspect each step before exporting.",
 ]} />
-
-<Credit
-  source="D2 Bhutan MRV Sentinel-2 Optical Composite Workflow (manual)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; the manual's full script kept as the course script (the step sections repeat it)",
-    "Main collection changed from COPERNICUS/S2_HARMONIZED (Level-1C) to COPERNICUS/S2_SR_HARMONIZED, as the manual specifies and the TDOM reference requires",
-    "The drawn preview point defaults to Thimphu; asset access and export path explained",
-    "Added the SCS+C correction formula, a Python (geemap) port, practice tasks and a quiz",
-  ]}
-/>

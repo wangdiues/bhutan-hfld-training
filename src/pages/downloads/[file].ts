@@ -11,17 +11,17 @@ const scripts = import.meta.glob('/scripts/gee/**/*.{js,py}', { query: '?raw', i
 	string
 >;
 
-const README = `Bhutan HFLD training: Earth Engine scripts
-https://wangdiues.github.io/bhutan-hfld-training/
+const README = `LULC Mapping Training: Earth Engine scripts
+https://wangdiues.github.io/lulc-mapping-training/
 
 One folder per day. .js files run in the Earth Engine Code Editor; .py files are geemap
 versions (replace <your-project> with your Cloud project ID). Each file starts with a header
-naming its source, its original authors and the changes made for this course.
+with a link to the course and the changes made from the original training scripts.
 
-Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by
-Ate Poortinga and Samuel, Conservation International. Code licence: MIT.
+Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
+Code licence: MIT.
 Many scripts read assets shared with training participants; see
-https://wangdiues.github.io/bhutan-hfld-training/reference/assets/ to make your own.
+https://wangdiues.github.io/lulc-mapping-training/reference/assets/ to make your own.
 `;
 
 function matrixTemplate(): string {

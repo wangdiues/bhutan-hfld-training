@@ -8,7 +8,6 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Callout from '~/components/Callout.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -34,7 +33,7 @@ import drive from '~/assets/day-2/import-and-export/s24-ca6c694d1f.webp';
   prerequisites={["Landsat MRV composite"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/import-and-export/) give a visual summary.
+The [slides for this lesson](/lulc-mapping-training/slides/import-and-export/) give a visual summary.
 
 ## Feature collections
 
@@ -101,7 +100,7 @@ X,Y,plot,dzongkhag,forest_type
 <Image src={tasks} alt="Code Editor showing the Tasks tab with a list of completed asset uploads." />
 
 <Callout type="why">
-Why this matters: the course reads Bhutan's official boundary, training points and reference samples as assets. An asset is stored once and can be shared with colleagues (see [How-to guides](/bhutan-hfld-training/how-to/)), so everyone works from the same data.
+Why this matters: the course reads Bhutan's official boundary, training points and reference samples as assets. An asset is stored once and can be shared with colleagues (see [How-to guides](/lulc-mapping-training/how-to/)), so everyone works from the same data.
 </Callout>
 
 ## Exporting data
@@ -265,7 +264,7 @@ Export a time-lapse of Landsat 5 images (1984–2011, cloud cover below 10%) for
 - **Exporting a huge high-resolution area to Drive.** Start with one Dzongkhag, or export to an asset.
 
 <Callout type="bhutan">
-Bhutan context: for HFLD reporting, keep the official national and Dzongkhag boundaries, training points and reference samples as shared assets in one project, and export every map and composite to that project as well. That keeps a clear record of what was used.
+Bhutan context: for national land-cover mapping, keep the official national and Dzongkhag boundaries, training points and reference samples as shared assets in one project, and export every map and composite to that project as well. That keeps a clear record of what was used.
 </Callout>
 
 ## Practice
@@ -326,18 +325,3 @@ Print `AOI.size()` first: if it is 0, check the spelling of the Dzongkhag in GAU
   "Export images and tables to Drive, assets or Cloud Storage, and videos to Drive or Cloud Storage; each export is a task you start in the Tasks tab.",
   "Use mode() rather than mosaic() for an annual Dynamic World map.",
 ]} />
-
-<Credit
-  source="D2 Importing and Exporting Datasets with Google Earth Engine (slides) and D2 Exercise: Exporting Data"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides and exercise combined into one web lesson; code copied from both",
-    "\"toDrive … your imagery data sets\" on the vector-export slides corrected to vector data",
-    "Exercise blanks filled with a worked Bhutan solution (logged in M2-02)",
-    "New: buffer, clip, merge and union examples (the slides used Esri figures, not reused)",
-    "Notes added on Planet NICFI access, export size, and mode() instead of mosaic() for an annual Dynamic World map",
-    "Slide 19's toAsset example listed a folder parameter, which toAsset does not have; the asset path goes in assetId",
-    "Slide 13 (review question), slide 15 (a training Drive folder) and slide 25 (animation functions) not carried over",
-  ]}
-/>

@@ -9,7 +9,7 @@ import puppeteer from 'puppeteer';
 
 const require = createRequire(import.meta.url);
 const axeSource = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
-const origin = process.env.SITE ?? 'http://localhost:4321/bhutan-hfld-training';
+const origin = process.env.SITE ?? 'http://localhost:4321/lulc-mapping-training';
 const paths = process.argv.slice(2);
 if (paths.length === 0) paths.push('/');
 

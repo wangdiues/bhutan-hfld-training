@@ -17,7 +17,7 @@ Open an issue and include:
 ## Content rules
 - **Credit:** keep the `<Credit>` block on every adapted lesson.
 - **Code:** test any Earth Engine code you change in the Code Editor before submitting.
-- **Facts:** cite a source for standards, thresholds and datasets. For ART-TREES, give the version and section.
+- **Facts:** cite a source for standards, thresholds and datasets, with the version and section where they apply.
 - **Images:** use only images you made or that are openly licensed, with attribution.
 - **Corrections:** list any correction to the original training material in `CHANGELOG.md`.
 

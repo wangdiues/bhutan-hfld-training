@@ -27,7 +27,7 @@ Errors of individual trees then partly cancel out in the vote. The samples a tre
 
 ## Classes or probabilities
 
-The vote can be reported as the winning class or as the share of trees voting for each class. In Earth Engine, `setOutputMode('PROBABILITY')` returns that share for a two-class (yes/no) model. The course trains one yes/no model per class and keeps the probability: these are the RLCMS **primitives** ([RLCMS primitives and assemblage](/bhutan-hfld-training/explanation/rlcms-primitives-and-assemblage/)).
+The vote can be reported as the winning class or as the share of trees voting for each class. In Earth Engine, `setOutputMode('PROBABILITY')` returns that share for a two-class (yes/no) model. The course trains one yes/no model per class and keeps the probability: these are the RLCMS **primitives** ([RLCMS primitives and assemblage](/lulc-mapping-training/explanation/rlcms-primitives-and-assemblage/)).
 
 ## Settings that matter
 
@@ -38,12 +38,12 @@ The vote can be reported as the winning class or as the share of trees voting fo
 | `minLeafPopulation` | larger leaves give smoother, less overfitted results |
 | `bagFraction` | the share of samples each tree sees |
 
-Training data matter far more than these settings. Samples should cover every class across Bhutan's regions, elevations and seasons, and be checked for label errors ([Collecting training data](/bhutan-hfld-training/day-4/training-data/)).
+Training data matter far more than these settings. Samples should cover every class across Bhutan's regions, elevations and seasons, and be checked for label errors ([Collecting training data](/lulc-mapping-training/day-4/training-data/)).
 
 ## Limits
 
 - Random Forest cannot predict well for conditions it has never seen in training, such as a forest type found only at elevations with no samples.
-- Its accuracy on training or out-of-bag data is not the map's accuracy. Map accuracy comes from an independent probability sample ([Area estimation](/bhutan-hfld-training/explanation/area-estimation/)).
+- Its accuracy on training or out-of-bag data is not the map's accuracy. Map accuracy comes from an independent probability sample ([Area estimation](/lulc-mapping-training/explanation/area-estimation/)).
 - Variable importance shows which covariates the trees used most, not which ones cause the differences.
 
 <References />

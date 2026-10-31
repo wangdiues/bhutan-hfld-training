@@ -1,7 +1,7 @@
 /**
  * Change detection and loss strata: stable forest, loss, gain and stable non-forest from two dates
  *
- * Bhutan ART-TREES HFLD Readiness Training, course website (new content, not in the May 2026 materials).
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
  * Code licence: MIT.
  *
  * Part A works anywhere with the open Hansen Global Forest Change data, so it runs without

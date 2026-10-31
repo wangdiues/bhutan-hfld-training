@@ -1,15 +1,15 @@
 ---
-title: Map Bhutan's forests for ART-TREES
-description: An open course on producing ART-TREES HFLD activity data for Bhutan with Google Earth Engine.
+title: LULC Mapping Training
+description: A free, hands-on course in land use and land cover (LULC) mapping with Google Earth Engine, from satellite composites to accuracy and area estimates, using Bhutan as the worked example.
 template: splash
 hero:
-  tagline: A free, hands-on course in Google Earth Engine, from cloud-free satellite composites to land-cover maps and area estimates with 90% confidence intervals, built for Bhutan's HFLD reporting.
+  tagline: A free, hands-on course in land use and land cover mapping with Google Earth Engine, from cloud-free satellite composites to land-cover maps and area estimates with 90% confidence intervals. Bhutan is the worked example.
   actions:
     - text: Start the course
-      link: /bhutan-hfld-training/start-here/
+      link: /lulc-mapping-training/start-here/
       icon: right-arrow
     - text: View on GitHub
-      link: https://github.com/wangdiues/bhutan-hfld-training
+      link: https://github.com/wangdiues/lulc-mapping-training
       icon: github
       variant: minimal
 ---
@@ -20,12 +20,12 @@ import WorkflowMap from '~/components/WorkflowMap.astro';
 ## Five days, one workflow
 
 <CardGrid>
-	<LinkCard title="Day 1 · Earth Engine foundations" description="The Code Editor, JavaScript, image collections, filters and reducers." href="/bhutan-hfld-training/day-1/introduction-to-earth-engine/" />
-	<LinkCard title="Day 2 · Composites" description="Cloud and shadow masking, terrain correction, indices and seasonal composites for Bhutan." href="/bhutan-hfld-training/day-2/remote-sensing-fundamentals/" />
-	<LinkCard title="Day 3 · Classification" description="Covariates and Random Forest probability layers (primitives)." href="/bhutan-hfld-training/day-3/random-forest/" />
-	<LinkCard title="Day 4 · Land cover & embeddings" description="RLCMS assemblage, AlphaEarth satellite embeddings and Collect Earth Online." href="/bhutan-hfld-training/day-4/rlcms-overview/" />
-	<LinkCard title="Day 5 · Accuracy & area" description="Stratified sampling, confusion matrices and area-adjusted estimates with uncertainty." href="/bhutan-hfld-training/day-5/sampling-design/" />
-	<LinkCard title="Capstone" description="Map a Dzongkhag, sample it, interpret it, and report accuracy and adjusted areas." href="/bhutan-hfld-training/capstone/" />
+	<LinkCard title="Day 1 · Earth Engine foundations" description="The Code Editor, JavaScript, image collections, filters and reducers." href="/lulc-mapping-training/day-1/introduction-to-earth-engine/" />
+	<LinkCard title="Day 2 · Composites" description="Cloud and shadow masking, terrain correction, indices and seasonal composites for Bhutan." href="/lulc-mapping-training/day-2/remote-sensing-fundamentals/" />
+	<LinkCard title="Day 3 · Classification" description="Covariates and Random Forest probability layers (primitives)." href="/lulc-mapping-training/day-3/random-forest/" />
+	<LinkCard title="Day 4 · Land cover & embeddings" description="RLCMS assemblage, AlphaEarth satellite embeddings and Collect Earth Online." href="/lulc-mapping-training/day-4/rlcms-overview/" />
+	<LinkCard title="Day 5 · Accuracy & area" description="Stratified sampling, confusion matrices and area-adjusted estimates with uncertainty." href="/lulc-mapping-training/day-5/sampling-design/" />
+	<LinkCard title="Capstone" description="Map a Dzongkhag, sample it, interpret it, and report accuracy and adjusted areas." href="/lulc-mapping-training/capstone/" />
 </CardGrid>
 
 ## The method, step by step
@@ -43,9 +43,9 @@ From satellite images to a reported area with its uncertainty. Choose a step to 
 	<Card title="Copy, run, adapt" icon="seti:javascript">
 		Every exercise comes with its Earth Engine script in JavaScript, and many lessons also show the Python (geemap) version.
 	</Card>
-	<Card title="Current standard" icon="approve-check">
-		Requirements are cited from ART TREES 3.0 (June 2026), expected to apply to Bhutan's next crediting period, with notes where TREES 2.0 differs.
+	<Card title="Accuracy you can defend" icon="approve-check">
+		Areas come from a stratified reference sample with confidence intervals, following good-practice guidance, not from counting map pixels.
 	</Card>
 </CardGrid>
 
-Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. [Credits](/bhutan-hfld-training/about/credits/)
+Built on the materials of a May 2026 training, with the trainers' permission. See [Acknowledgements and credits](/lulc-mapping-training/about/credits/).

@@ -1,10 +1,8 @@
 /**
  * Determining sample size
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D5_ PART 1-DETERMINING SAMPLE SIZE.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
  *
  * Changes: the raster value report example's missing image name is filled in as LULC.

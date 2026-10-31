@@ -4,6 +4,10 @@ All notable changes to this course are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+### Changed (rebrand, 2026-10-31)
+- Renamed to **LULC Mapping Training** (repository and URL `lulc-mapping-training`). The course is now a general land use and land cover mapping course with Bhutan as the worked example; the ART-TREES/HFLD lessons (ART-TREES HFLD requirements, TREES 2.0 → 3.0) and all ART-TREES/HFLD framing were removed.
+- Credits for the original training moved from every lesson and script header to a single [Acknowledgements and credits](https://wangdiues.github.io/lulc-mapping-training/about/credits/) page.
+
 ### Added
 - Site scaffold: Astro + Starlight, configured for GitHub Pages.
 - Repository licences (MIT for code, CC BY 4.0 for content), README, contributing guide and citation file.

@@ -8,7 +8,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -25,9 +24,9 @@ import CodeBlock from '~/components/CodeBlock.astro';
   prerequisites={["Sentinel-2 MRV composite"]}
 />
 
-This workflow follows the [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) step for step, adapted for Landsat 8 and 9. It turns raw imagery into a stable annual product for inter-annual monitoring and model training: masking, scaling, seasonal compositing and one structured export. The aim is not to use as much data as possible, but a consistent, repeatable dataset.
+This workflow follows the [Sentinel-2 MRV composite](/lulc-mapping-training/day-2/sentinel-2-mrv-composite/) step for step, adapted for Landsat 8 and 9. It turns raw imagery into a stable annual product for inter-annual monitoring and model training: masking, scaling, seasonal compositing and one structured export. The aim is not to use as much data as possible, but a consistent, repeatable dataset.
 
-**Why Landsat as well as Sentinel-2?** Landsat has 30 m pixels, but its archive goes back to the 1980s, so it can extend a time series, such as an HFLD reference period, before Sentinel-2 began in 2015. The same method, applied to Landsat 5 or 7 with their own band names (their optical bands are SR_B1–SR_B5 and SR_B7), can produce earlier years.
+**Why Landsat as well as Sentinel-2?** Landsat has 30 m pixels, but its archive goes back to the 1980s, so it can extend a time series back before Sentinel-2 began in 2015. The same method, applied to Landsat 5 or 7 with their own band names (their optical bands are SR_B1–SR_B5 and SR_B7), can produce earlier years.
 
 The workflow:
 
@@ -148,7 +147,7 @@ Training implication: the product gives two seasonal views of the same year, whi
 
 <OpenInGEE script="day-2/landsat-mrv-composite.js" hash="d294311d88eee5ab7cb82a26bbf33640" />
 
-The Python (Earth Engine API / geemap) version is [`scripts/gee/day-2/landsat_mrv_composite.py`](https://github.com/wangdiues/bhutan-hfld-training/blob/main/scripts/gee/day-2/landsat_mrv_composite.py). Its core loop:
+The Python (Earth Engine API / geemap) version is [`scripts/gee/day-2/landsat_mrv_composite.py`](https://github.com/wangdiues/lulc-mapping-training/blob/main/scripts/gee/day-2/landsat_mrv_composite.py). Its core loop:
 
 ```python
 composites = []
@@ -206,17 +205,3 @@ Set `var targetYear = 2024;` and replace the project in `assetId` with your own 
   "TDOM and SCS+C terrain correction handle Bhutan's shadows and slopes.",
   "Export one 12-band Int16 image per year; keep windows and band order fixed across years.",
 ]} />
-
-<Credit
-  source="D2 Bhutan MRV Landsat Optical Composite Workflow (manual)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; code copied from the manual's script",
-    "The drawn preview point defaults to Thimphu",
-    "Export description and asset name built from targetYear (the description said 2024 while the asset said 2025)",
-    "QA mask described as cloud, cloud shadow and snow, as the code does (the manual said cirrus)",
-    "Added band, QA-bit and parameter tables, the SCS+C formula, a Python port, practice and a quiz",
-    "Data-type table gives typical and possible ranges (the manual gave only 0–1 and 0–10,000)",
-  ]}
-/>

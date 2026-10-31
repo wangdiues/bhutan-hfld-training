@@ -1,19 +1,19 @@
 cff-version: 1.2.0
 message: "If you use this course, please cite it as below."
-title: "Bhutan HFLD Training: an open course on ART-TREES HFLD activity data with Google Earth Engine"
+title: "LULC Mapping Training: an open course in land use and land cover mapping with Google Earth Engine"
 type: software
 authors:
   - name: "Wangdi"
     email: "wangdiues@gmail.com"
 license: "CC-BY-4.0"
-repository-code: "https://github.com/wangdiues/bhutan-hfld-training"
-url: "https://wangdiues.github.io/bhutan-hfld-training/"
+repository-code: "https://github.com/wangdiues/lulc-mapping-training"
+url: "https://wangdiues.github.io/lulc-mapping-training/"
 version: "0.1.0"
 date-released: "2026-10-26"
 keywords:
   - Google Earth Engine
-  - ART-TREES
-  - HFLD
+  - LULC
+  - land use
   - REDD+
   - MRV
   - land cover
@@ -21,7 +21,7 @@ keywords:
   - Bhutan
 references:
   - type: generic
-    title: "Bhutan ART-TREES HFLD Readiness Training"
+    title: "Training materials (May 2026)"
     authors:
       - name: "Ate Poortinga"
       - name: "Samuel"

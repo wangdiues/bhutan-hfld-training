@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -30,10 +29,10 @@ import References from '~/components/References.astro';
   prerequisites={["Calculating covariates", "Random Forest theory"]}
 />
 
-A <Term id="primitive" /> is a probability layer for one land-cover class: for every pixel, the likelihood (0 to 1, or 0 to 100) that it belongs to that class. Instead of one classifier choosing among all classes at once, you train a separate **one-class-versus-the-rest** Random Forest for each class, then combine the primitives with rules on Day 4 (the [assemblage](/bhutan-hfld-training/day-4/assemblage/)) <Cite id="saah2020" />. This lesson builds the **forest** primitive; the same script makes the others by changing one word.
+A <Term id="primitive" /> is a probability layer for one land-cover class: for every pixel, the likelihood (0 to 1, or 0 to 100) that it belongs to that class. Instead of one classifier choosing among all classes at once, you train a separate **one-class-versus-the-rest** Random Forest for each class, then combine the primitives with rules on Day 4 (the [assemblage](/lulc-mapping-training/day-4/assemblage/)) <Cite id="saah2020" />. This lesson builds the **forest** primitive; the same script makes the others by changing one word.
 
 <Callout type="mistake" title="Inputs you need">
-The script reads two assets from the training project: the labelled samples `trainingData/Bhutan_labels_multiclass` and a 2025 Landsat composite (one participant's export, `landsatComposite/bhutan_ls89_2025_TashiY`). Without access, use your own composite from the [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/) lesson and your own labelled points with a `class_name` property ([Collecting training data](/bhutan-hfld-training/day-4/training-data/)). Change the export `assetId` to your own project.
+The script reads two assets from the training project: the labelled samples `trainingData/Bhutan_labels_multiclass` and a 2025 Landsat composite (one participant's export, `landsatComposite/bhutan_ls89_2025_TashiY`). Without access, use your own composite from the [Landsat MRV composite](/lulc-mapping-training/day-2/landsat-mrv-composite/) lesson and your own labelled points with a `class_name` property ([Collecting training data](/lulc-mapping-training/day-4/training-data/)). Change the export `assetId` to your own project.
 </Callout>
 
 ## Part 1: The area of interest
@@ -56,7 +55,7 @@ Load the labelled training samples and the seasonal Landsat composite, and look 
 
 ## Part 5: The covariate stack
 
-This is the covariate function from [Calculating covariates](/bhutan-hfld-training/day-3/covariates/), applied to both seasons, plus terrain covariates and, this time, the JRC water covariates (`unmask(0)` fills places that never had water, so they don't mask the whole stack).
+This is the covariate function from [Calculating covariates](/lulc-mapping-training/day-3/covariates/), applied to both seasons, plus terrain covariates and, this time, the JRC water covariates (`unmask(0)` fills places that never had water, so they don't mask the whole stack).
 
 <CodeBlock script="day-3/forest-primitives.js" lines={[85, 215]} />
 
@@ -118,7 +117,7 @@ The script builds a confusion matrix twice: on the **training** samples (how wel
 | Consumer's accuracy | Earth Engine's name for user's accuracy: for each predicted class, the share that is correct (commission errors) |
 
 <Callout type="mistake" title="This is not the accuracy you report">
-The 10% validation samples come from the same training set, often collected in the same places. They show how well the model generalises, but they are not a statistically valid accuracy assessment. For ART-TREES reporting, accuracy and areas come from an independent stratified sample interpreted in Collect Earth Online (Day 5).
+The 10% validation samples come from the same training set, often collected in the same places. They show how well the model generalises, but they are not a statistically valid accuracy assessment. For reporting, accuracy and areas come from an independent stratified sample interpreted in Collect Earth Online (Day 5).
 </Callout>
 
 ## Part 11: Variable importance
@@ -139,7 +138,7 @@ A binary map hides how sure the model is: a pixel at 0.51 and one at 0.99 both b
 
 ## Part 13: Export
 
-Export the binary map and the probability map to Drive, the validation points as a CSV, and the probability layer to an asset. Primitive assets follow one naming convention: a data-source prefix (`ls_` for Landsat, `s2_` for Sentinel-2, `afe_` for AlphaEarth embeddings), then `<Class>_<year>`, for example `ls_Forest_2025`. Keeping the same pattern for every class and year makes the primitives easy to find and load together in the [assemblage](/bhutan-hfld-training/day-4/assemblage/) (which, in the training, used Sentinel-2 primitives, `s2_<Class>_2025`).
+Export the binary map and the probability map to Drive, the validation points as a CSV, and the probability layer to an asset. Primitive assets follow one naming convention: a data-source prefix (`ls_` for Landsat, `s2_` for Sentinel-2, `afe_` for AlphaEarth embeddings), then `<Class>_<year>`, for example `ls_Forest_2025`. Keeping the same pattern for every class and year makes the primitives easy to find and load together in the [assemblage](/lulc-mapping-training/day-4/assemblage/) (which, in the training, used Sentinel-2 primitives, `s2_<Class>_2025`).
 
 <CodeBlock script="day-3/forest-primitives.js" lines={[388, 428]} />
 
@@ -196,7 +195,7 @@ Set `var targetClass = "Grassland";` in Part 2, run, and start the exports in th
 <Quiz id="day-3-forest-primitives" questions={[
   { q: "What is a forest primitive?", options: ["A binary forest/non-forest map", "A per-pixel probability that a pixel is forest", "A set of forest training points", "A covariate"], answer: 1, explain: "A primitive is a probability layer for one class, from a one-versus-rest model." },
   { q: "Why is the training set balanced but the validation set not?", options: ["To make training faster", "So the model doesn't lean to the larger class, while validation still reflects the real mix", "Validation must have equal numbers", "Earth Engine requires it"], answer: 1, explain: "Balancing helps the classifier; an unbalanced validation set keeps its accuracy honest." },
-  { q: "Which accuracy should be reported for ART-TREES?", options: ["Training accuracy", "The 10% validation accuracy", "Accuracy from an independent stratified reference sample", "Kappa from the training matrix"], answer: 2, explain: "Reported accuracy and areas come from an independent stratified sample (Day 5)." },
+  { q: "Which accuracy should be reported for the final map?", options: ["Training accuracy", "The 10% validation accuracy", "Accuracy from an independent stratified reference sample", "Kappa from the training matrix"], answer: 2, explain: "Reported accuracy and areas come from an independent stratified sample (Day 5)." },
   { q: "classifier.explain() shows which covariates the forest relied on most.", answer: true, explain: "Its 'importance' entry gives each covariate's contribution to the splits." },
 ]} />
 
@@ -208,17 +207,3 @@ Set `var targetClass = "Grassland";` in Part 2, run, and start the exports in th
 ]} />
 
 <References />
-
-<Credit
-  source="EXERCISE D3 Part 2: Forest Probability Layers — Calculating Forest Primitives for HFLD Using Machine Learning"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; code copied from the exercise",
-    "Bands divided by 10,000 before computing covariates (the composite stores reflectance × 10,000)",
-    "Tasseled Cap distances and the binary layer's name restored (they had been commented out when the code was extracted)",
-    "Repeated balancing block shown once; trailing list of target classes kept as a comment",
-    "Exports named for 2025 (the composite's year) and written to the training project's primitives folder instead of projects/servir-mekong",
-    "Added explanations, a note on validation versus reported accuracy, a Python sketch, practice and a quiz",
-  ]}
-/>

@@ -32,7 +32,7 @@ import References from '~/components/References.astro';
 This lesson was written for the website; it was not part of the May 2026 training materials. The trainers will review it.
 :::
 
-ART-TREES activity data are about **change**: how much forest was lost (or gained) over a period. A change map comes from comparing forest at the start and at the end of the period. That map is not the final answer. It is used to divide the country into <Term id="stratum">strata</Term> for the reference sample on Day 5, where accuracy and area are estimated <Cite id="olofsson2014" />.
+Land-cover monitoring is often about **change**: how much forest was lost (or gained) over a period. A change map comes from comparing forest at the start and at the end of the period. That map is not the final answer. It is used to divide the country into <Term id="stratum">strata</Term> for the reference sample on Day 5, where accuracy and area are estimated <Cite id="olofsson2014" />.
 
 ## From two forest maps to four strata
 
@@ -68,7 +68,6 @@ ee.Initialize(project="<your-project>")  # your Earth Engine Cloud project ID
 
 bhutan = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Bhutan"))
 
-
 def make_strata(forest_start, forest_end):
     return (
         ee.Image(0)
@@ -80,7 +79,6 @@ def make_strata(forest_start, forest_end):
         .rename("stratum")
         .toByte()
     )
-
 
 gfc = ee.Image("UMD/hansen/global_forest_change_2023_v1_11").clip(bhutan)
 forest2000 = gfc.select("treecover2000").gte(10)
@@ -111,11 +109,11 @@ Hansen's "tree cover" is not a forest definition: it includes plantations and or
 
 ## Part B: strata from your own forest primitives
 
-With forest primitives for two years (from [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/), run once on each year's composite), threshold each probability layer to get forest masks, then use the same function:
+With forest primitives for two years (from [Forest primitives](/lulc-mapping-training/day-3/forest-primitives/), run once on each year's composite), threshold each probability layer to get forest masks, then use the same function:
 
 <CodeBlock script="day-3/change-strata.js" lines={[58, 65]} />
 
-The assets named here are examples; replace them with your own exports. A threshold of 0.5 means "more trees voted forest than not"; the [assemblage](/bhutan-hfld-training/day-4/assemblage/) on Day 4 refines this with rules across all classes.
+The assets named here are examples; replace them with your own exports. A threshold of 0.5 means "more trees voted forest than not"; the [assemblage](/lulc-mapping-training/day-4/assemblage/) on Day 4 refines this with rules across all classes.
 
 <Callout type="why">
 Why this matters: comparing two independently classified maps adds the errors of both. A pixel misclassified in either year looks like change. That is why the loss stratum always contains false change, and why its area must be estimated from a reference sample rather than counted from the map.
@@ -128,7 +126,7 @@ In Bhutan, forest loss covers a small share of the country over a few years (com
 **Stratified sampling** fixes this. Because loss is its own stratum, you can put many more samples there than its area alone would give, for example 100 or more, while the large stable strata get fewer than their share. Each stratum's samples are later weighted by its mapped area, so the estimate stays unbiased <Cite id="olofsson2014" />.
 
 <Theory title="Weights and allocation" more="/explanation/area-estimation/">
-A stratum's weight is its share of the mapped area, $W_h = A_h / A$. With stratified estimation, any allocation of samples to strata gives unbiased area estimates, as long as each stratum's samples are weighted by $W_h$. So you can over-sample the rare loss stratum to make its estimate precise. [Lab: sample size](/bhutan-hfld-training/labs/sample-size-calculator/) computes how many samples you need and compares allocations.
+A stratum's weight is its share of the mapped area, $W_h = A_h / A$. With stratified estimation, any allocation of samples to strata gives unbiased area estimates, as long as each stratum's samples are weighted by $W_h$. So you can over-sample the rare loss stratum to make its estimate precise. [Lab: sample size](/lulc-mapping-training/labs/sample-size-calculator/) computes how many samples you need and compares allocations.
 </Theory>
 
 <Callout type="bhutan">
@@ -184,7 +182,7 @@ Run the grouped area sum on `strata2123`. Its loss stratum (code 2) covers one y
 <Quiz id="day-3-change-strata" questions={[
   { q: "A pixel is forest in 2020 and not forest in 2025. Which stratum is it?", options: ["Stable forest", "Loss", "Stable non-forest", "Gain"], answer: 1, explain: "Forest at the start and not at the end is loss." },
   { q: "Why does forest loss get its own stratum?", options: ["It is the largest class", "It is rare, so a separate stratum lets you put enough samples there to estimate it precisely", "Earth Engine requires it", "To avoid weighting by area"], answer: 1, explain: "Stratification lets you over-sample a rare class; area weights keep the estimate unbiased." },
-  { q: "Why is the mapped area of the loss stratum not reported directly?", options: ["It is too small to measure", "Classification errors in either year create false change, so the map area is biased", "Pixels are too large", "ART-TREES only accepts Hansen data"], answer: 1, explain: "Map errors bias pixel counts; areas are estimated from the stratified reference sample." },
+  { q: "Why is the mapped area of the loss stratum not reported directly?", options: ["It is too small to measure", "Classification errors in either year create false change, so the map area is biased", "Pixels are too large", "Only Hansen data can be used"], answer: 1, explain: "Map errors bias pixel counts; areas are estimated from the stratified reference sample." },
   { q: "Over-sampling the loss stratum makes the area estimate biased.", answer: false, explain: "Not if each stratum's samples are weighted by its area share; any allocation then gives unbiased estimates." },
 ]} />
 
@@ -196,7 +194,3 @@ Run the grouped area sum on `strata2123`. Its loss stratum (code 2) covers one y
 ]} />
 
 <References />
-
----
-
-*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0; code MIT. See [Credits](/bhutan-hfld-training/about/credits/).*

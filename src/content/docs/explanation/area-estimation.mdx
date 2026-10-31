@@ -37,16 +37,16 @@ Producer's and overall accuracy must be weighted by $W_h$: the plain counts of a
 
 ## Sample size
 
-The total sample size follows from the precision you want. With $S_h = \sqrt{p_h(1-p_h)}$, where $p_h$ is the expected share of the target class in stratum $h$ (the expected user's accuracy in the target class's own stratum), $n = \left(\sum_h W_h S_h / SE\right)^2$. This is Eq. 13 in <Cite id="olofsson2014" narrative />, which states it for overall accuracy; the course applies the same formula to the area proportion of the target class. Halving the target standard error multiplies $n$ by four. The sample is then shared out, often with a minimum per stratum so that rare strata get enough samples. Try it in the [sample size calculator](/bhutan-hfld-training/labs/sample-size-calculator/).
+The total sample size follows from the precision you want. With $S_h = \sqrt{p_h(1-p_h)}$, where $p_h$ is the expected share of the target class in stratum $h$ (the expected user's accuracy in the target class's own stratum), $n = \left(\sum_h W_h S_h / SE\right)^2$. This is Eq. 13 in <Cite id="olofsson2014" narrative />, which states it for overall accuracy; the course applies the same formula to the area proportion of the target class. Halving the target standard error multiplies $n$ by four. The sample is then shared out, often with a minimum per stratum so that rare strata get enough samples. Try it in the [sample size calculator](/lulc-mapping-training/labs/sample-size-calculator/).
 
 ## What can still go wrong
 
 The estimators are unbiased only if the sample was drawn as designed and the reference labels are right.
 
-- **Reference errors.** Interpreters can be wrong, especially in shadowed or mixed plots. Use clear rules, good imagery and a second interpreter for some plots ([Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/)).
+- **Reference errors.** Interpreters can be wrong, especially in shadowed or mixed plots. Use clear rules, good imagery and a second interpreter for some plots ([Collect Earth Online](/lulc-mapping-training/day-4/collect-earth-online/)).
 - **Changing the sample afterwards.** Dropping "difficult" plots or adding convenient ones breaks the known selection probabilities.
 - **Using training data as reference.** Training samples weren't drawn with known probabilities and were used to build the map.
 
-Work through a full example in the [accuracy and area estimator](/bhutan-hfld-training/labs/accuracy-area-estimator/) and [Accuracy assessment and area adjustment](/bhutan-hfld-training/day-5/accuracy-and-area/).
+Work through a full example in the [accuracy and area estimator](/lulc-mapping-training/labs/accuracy-area-estimator/) and [Accuracy assessment and area adjustment](/lulc-mapping-training/day-5/accuracy-and-area/).
 
 <References />

@@ -1,10 +1,8 @@
 /**
  * Calculating spectral indices and working with functions
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: D2-Exercise-Calculating spectral indices and working with functions.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - The exercise's sections (each repeated as "full code") are curated into one script.
  *   - `aoi` is a point at Thimphu instead of a drawn `geometry` import.

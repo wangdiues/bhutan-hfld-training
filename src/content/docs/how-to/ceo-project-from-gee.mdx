@@ -8,12 +8,12 @@ sidebar:
 
 **When:** you have drawn a stratified sample in Earth Engine and need reference labels for it.
 
-1. **Export plots and samples as shapefiles.** Run [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) and start its two `Export.table.toDrive` tasks (`fileFormat: 'SHP'`). The plots carry a `plotID`; the samples carry a `plotID` and a `sampleID`.
+1. **Export plots and samples as shapefiles.** Run [Stratified sampling in GEE](/lulc-mapping-training/day-5/stratified-sampling-gee/) and start its two `Export.table.toDrive` tasks (`fileFormat: 'SHP'`). The plots carry a `plotID`; the samples carry a `plotID` and a `sampleID`.
 2. **Zip each shapefile.** Download the files from Drive. Zip the plots' `.shp`, `.shx`, `.dbf` and `.prj` into one file, and the samples' parts into another.
 3. **Create the project.** In [Collect Earth Online](https://collect.earth/), open your institution and create a new project. Choose the imagery, and add high-resolution layers if your institution has access to them.
 4. **Upload the plots and samples.** For the plot design, choose the shapefile option and upload the plots zip; do the same for the sample design with the samples zip.
 5. **Add the survey question.** One question, "Land cover", with one answer per map class, named exactly as in the map, plus "Uninterpretable".
 6. **Publish** the project and give the interpreters access.
-7. When interpretation is done, export the plot data as CSV and join it with your samples on `plotID` to get `map` and `reference` columns for the [accuracy and area estimator](/bhutan-hfld-training/labs/accuracy-area-estimator/).
+7. When interpretation is done, export the plot data as CSV and join it with your samples on `plotID` to get `map` and `reference` columns for the [accuracy and area estimator](/lulc-mapping-training/labs/accuracy-area-estimator/).
 
-The full walk-through, including the response design, is in [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/).
+The full walk-through, including the response design, is in [Collect Earth Online](/lulc-mapping-training/day-4/collect-earth-online/).

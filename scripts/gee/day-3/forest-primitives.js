@@ -1,10 +1,8 @@
 /**
  * Forest probability layers: calculating forest primitives with machine learning
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D3_ Part 2- Forest Probability Layers-CALCULATING FOREST PRIMITIVES FOR HFLD USING MACHINE LEARNING.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - Bands are divided by 10000 before computing covariates (the composite stores reflectance x 10000).
  *   - Restored as in the exercise: the Tasseled Cap distances and the binary layer's name (both had

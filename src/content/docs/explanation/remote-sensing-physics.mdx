@@ -12,7 +12,7 @@ Every map in this course starts from one measurement: how much sunlight a patch 
 
 ## Reflectance
 
-The Sun lights the Earth with a broad range of wavelengths. A surface absorbs some of the light and reflects the rest. **Reflectance** is the share that is reflected, from 0 (all absorbed) to 1 (all reflected). Optical satellites such as Sentinel-2 and Landsat measure it in several **bands**, each a narrow range of wavelengths: blue, green, red, near infrared (NIR) and shortwave infrared (SWIR). The [cheat sheet](/bhutan-hfld-training/reference/cheat-sheet/) lists the bands of each sensor.
+The Sun lights the Earth with a broad range of wavelengths. A surface absorbs some of the light and reflects the rest. **Reflectance** is the share that is reflected, from 0 (all absorbed) to 1 (all reflected). Optical satellites such as Sentinel-2 and Landsat measure it in several **bands**, each a narrow range of wavelengths: blue, green, red, near infrared (NIR) and shortwave infrared (SWIR). The [cheat sheet](/lulc-mapping-training/reference/cheat-sheet/) lists the bands of each sensor.
 
 Before reaching the satellite, light passes through the atmosphere twice, which scatters blue light and adds haze. **Surface reflectance** products (Sentinel-2 Level-2A, Landsat Level-2) remove most of this effect, which is why the course uses them.
 
@@ -26,21 +26,21 @@ The pattern of reflectance across bands, the **spectral signature**, depends on 
 - **Built-up land.** Roofs, roads and concrete reflect fairly evenly across the bands and are often bright in SWIR.
 - **Snow and cloud.** Bright in the visible bands. Snow is dark in SWIR; cloud stays bright.
 
-[Remote sensing fundamentals](/bhutan-hfld-training/day-2/remote-sensing-fundamentals/) draws these curves.
+[Remote sensing fundamentals](/lulc-mapping-training/day-2/remote-sensing-fundamentals/) draws these curves.
 
 ## From signatures to indices
 
-An **index** combines bands to stress one of these differences. NDVI, $(NIR - Red)/(NIR + Red)$, uses the red edge: it is high over dense green vegetation, low (about 0.1–0.2) over bare soil and negative over water <Cite id="tucker1979" />. Because it is a ratio, it also cancels part of the effect of brightness, such as a slope that is lit more or less by the Sun. Other indices use SWIR for moisture (NDMI), burn scars (NBR) or built-up land (NDBI); see [Spectral indices](/bhutan-hfld-training/day-2/spectral-indices/).
+An **index** combines bands to stress one of these differences. NDVI, $(NIR - Red)/(NIR + Red)$, uses the red edge: it is high over dense green vegetation, low (about 0.1–0.2) over bare soil and negative over water <Cite id="tucker1979" />. Because it is a ratio, it also cancels part of the effect of brightness, such as a slope that is lit more or less by the Sun. Other indices use SWIR for moisture (NDMI), burn scars (NBR) or built-up land (NDBI); see [Spectral indices](/lulc-mapping-training/day-2/spectral-indices/).
 
 ## Where it gets hard in Bhutan
 
-- **Terrain.** On steep slopes, the same forest looks bright on a sunlit slope and dark on a shaded one. Terrain correction (see [Compositing and terrain correction](/bhutan-hfld-training/explanation/compositing-and-terrain-correction/)) reduces this.
+- **Terrain.** On steep slopes, the same forest looks bright on a sunlit slope and dark on a shaded one. Terrain correction (see [Compositing and terrain correction](/lulc-mapping-training/explanation/compositing-and-terrain-correction/)) reduces this.
 - **Cloud and monsoon.** Optical sensors cannot see through cloud, so the June–September monsoon gives few clear images. The course composites use January–April and October–December.
 - **Mixed pixels.** A 10 m or 30 m pixel often holds several covers: a field edge, scattered trees, a house. Its signature is a mixture, which is one reason maps make errors at edges.
-- **Similar signatures.** Shrubland, young forest and some orchards can look alike. Using two seasons, terrain variables and other covariates helps a classifier separate them ([Calculating covariates](/bhutan-hfld-training/day-3/covariates/)).
+- **Similar signatures.** Shrubland, young forest and some orchards can look alike. Using two seasons, terrain variables and other covariates helps a classifier separate them ([Calculating covariates](/lulc-mapping-training/day-3/covariates/)).
 
 ## What it means for the method
 
-Reflectance gives a classifier something to learn from, but it never gives a perfect map. That is why the course ends with a reference sample and area estimates that correct for the map's errors ([Area estimation](/bhutan-hfld-training/explanation/area-estimation/)).
+Reflectance gives a classifier something to learn from, but it never gives a perfect map. That is why the course ends with a reference sample and area estimates that correct for the map's errors ([Area estimation](/lulc-mapping-training/explanation/area-estimation/)).
 
 <References />

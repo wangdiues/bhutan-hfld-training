@@ -3,8 +3,8 @@
  "title": "Accuracy Assessment and Area Adjustment",
  "day": 5,
  "lesson": "day-5/accuracy-and-area",
- "source": "Day 5/D5-Accuracy Assessment and Area Adjustment.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
- "credit": "Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International, shown with their permission. Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
+ "source": "the May 2026 training",
+ "credit": "Shown with the trainers' permission (see Acknowledgements). Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
  "slides": [
   {
    "image": "01.webp",
@@ -17,7 +17,7 @@
   {
    "image": "02.webp",
    "source_slide": 3,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Learning Objectives\n- Process reference data collected\n- Understand the process and inputs needed for analysis\n- Conduct accuracy assessment and area adjustment",
    "notes": "",
    "hidden_pictures": 0
@@ -25,7 +25,7 @@
   {
    "image": "03.webp",
    "source_slide": 4,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Why can’t we use land cover maps as they are?\n- Classification errors\n- No indication of over/under-estimation\n- No uncertainty of estimates\n- Objectives of Sampling\n- Estimate areas with characteristics we want in an unbiased manner\n- Assess the accuracy of a land cover map\n- Derive the uncertainty of our estimation",
    "notes": "",
    "hidden_pictures": 0
@@ -33,7 +33,7 @@
   {
    "image": "04.webp",
    "source_slide": 5,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Objectives of Validation\n- Assess the accuracy of a land cover map\n- Derive the uncertainty of our estimation\n- Additional Objectives if required\n- Use our uncertainty to adjust our initial estimate\n- ART-TREES typically requires forest cover maps to have accuracy > 90%\n- Verra Avoided Unplanned Deforestation requires forest cover maps to have uncertainty &lt; 20%\n- AND\n- Use uncertainty to adjust deforestation estimates",
    "notes": "",
    "hidden_pictures": 0
@@ -41,7 +41,7 @@
   {
    "image": "05.webp",
    "source_slide": 6,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "**Note:** in Landis and Koch's scale, 0.81–1.0 is \"almost perfect\" agreement; Olofsson et al. (2014) advise against relying on kappa.\n\n- Confusion Matrix\n- Vertical Axis: What was the sample classified as?\n- Horizontal Axis: What land cover is the sample in reality?\n- Results:\n- User’s Accuracy: Errors of Commission\n  - How wrong is the classification?\n- Producer’s Accuracy: Errors of Omission\n  - How much did the classification miss?\n- Overall Accuracy\n- Kappa Coefficient\n\n| Kappa value | Strength of agreement |\n|---|---|\n| &lt; 0 | Poor agreement |\n| 0–0.20 | Slight agreement |\n| 0.21–0.40 | Fair agreement |\n| 0.41–0.60 | Moderate agreement |\n| 0.61–0.80 | Substantial agreement |\n| 0.81–1.0 | Perfect agreement |",
    "notes": "",
    "hidden_pictures": 0
@@ -49,7 +49,7 @@
   {
    "image": "06.webp",
    "source_slide": 7,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Unbiased Sample-based Area Adjustment\n- Using User Accuracy of each class\n- Adjust our initial area estimate\n- Example\n- With a initial forest estimate of 2,700,000 hectares, 70% forest cover\n- Out of 100 Classified Forest Points\n- 98 points are Forest\n- 98% User Accuracy\n- Our adjusted forest estimate is 98% x 70 = 68.6% forest cover\n- Our adjusted forest area is 2,646\t,000 hectares",
    "notes": "",
    "hidden_pictures": 0
@@ -57,7 +57,7 @@
   {
    "image": "07.webp",
    "source_slide": 8,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "**Correction:** the standard error in this example is 1,495 ha, not 1,435 ha (1.6449 × 1,495 = 2,459).\n\n- Percentage Uncertainty\n- Half-width of 90% Confidence Interval of estimate\n- As a proportion of the estimate\n- Example\n- Initial estimate of 17,000 hectares of deforestation\n- 18/23 classified samples are actually deforestation\n- Our adjusted deforestation area is 13,304 hectares\n- We calculate the standard error is 1,435 hectares\n- We are 90% sure the real deforestation area is ±2,459 of 13,304 hectares\n- We are therefore 18.5% uncertain about our estimate",
    "notes": "",
    "hidden_pictures": 0

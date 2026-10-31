@@ -1,10 +1,8 @@
 /**
- * Calculating covariates for HFLD
+ * Calculating covariates
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D3_ Calculating covariates for HFLD.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - The bands are divided by 10000 before computing covariates: the composite stores
  *     reflectance x 10000 (Int16), and EVI, SAVI (so IBI) and the Tasseled Cap assume 0-1 reflectance.

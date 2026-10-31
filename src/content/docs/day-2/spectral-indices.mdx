@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -100,11 +99,9 @@ s2_collection = (
     .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 5))
 )
 
-
 def calculate_ndvi(image):
     ndvi = image.select("B8").subtract(image.select("B4")).divide(image.select("B8").add(image.select("B4")))
     return image.addBands(ndvi.rename("NDVI"))
-
 
 ndvi_collection = s2_collection.map(calculate_ndvi).select("NDVI")
 ndvi_params = {"min": -1, "max": 1, "palette": ["blue", "white", "green"]}
@@ -160,7 +157,7 @@ For bands $a$ and $b$, $ND = (a - b)/(a + b)$ always lies between −1 and 1, an
 
 ## Try it: the spectral index explorer
 
-Move the sliders to change a surface's reflectance and watch the indices from this lesson respond. The code panel writes the Earth Engine line for any index, for Sentinel-2 or Landsat. The same lab is on its own page: [Lab: Spectral index explorer](/bhutan-hfld-training/labs/spectral-index-explorer/).
+Move the sliders to change a surface's reflectance and watch the indices from this lesson respond. The code panel writes the Earth Engine line for any index, for Sentinel-2 or Landsat. The same lab is on its own page: [Lab: Spectral index explorer](/lulc-mapping-training/labs/spectral-index-explorer/).
 
 <SpectralIndexLab headingLevel={3} />
 
@@ -233,17 +230,3 @@ Map.addLayer(s2.select('EVI').___().clip(paro), {min: 0, max: 0.8, palette: ['wh
 ]} />
 
 <References />
-
-<Credit
-  source="D2 Exercise: Calculating Spectral Indices and Working with Functions"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; the sections (each repeated as full code) curated into one script",
-    "The drawn geometry replaced by a point at Thimphu",
-    "The NIR/SWIR-1 index renamed NDMI to avoid two different indices both called NDWI",
-    "EVI and SAVI computed from reflectance scaled to 0–1 (divide by 10,000)",
-    "Final section repeating the image-collection code from Day 1 left out",
-    "Added an index table, Python (geemap) versions, a fill-in EVI exercise and a quiz",
-  ]}
-/>

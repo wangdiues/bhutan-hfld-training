@@ -8,7 +8,6 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -28,7 +27,7 @@ import DecisionTreeLab from '~/components/labs/DecisionTreeLab.astro';
   prerequisites={["Spectral indices and functions"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/random-forest/) give a visual summary.
+The [slides for this lesson](/lulc-mapping-training/slides/random-forest/) give a visual summary.
 
 ## What is a Random Forest?
 
@@ -97,7 +96,7 @@ A single deep tree fits its training data almost perfectly, noise included (it *
 
 Each tree then votes, and the **majority vote** is the forest's prediction. For regression, the forest averages the trees' predictions. Because the trees' errors are partly independent, they cancel out.
 
-The forest can also report the share of trees voting for each class. That share is a **probability**, and Day 3 uses it to make [forest primitives](/bhutan-hfld-training/day-3/forest-primitives/): a 0–100 probability layer for each class.
+The forest can also report the share of trees voting for each class. That share is a **probability**, and Day 3 uses it to make [forest primitives](/lulc-mapping-training/day-3/forest-primitives/): a 0–100 probability layer for each class.
 
 <Tabs>
   <TabItem label="JavaScript (Code Editor)">
@@ -122,11 +121,11 @@ probability = composite.classify(classifier.setOutputMode("PROBABILITY"))
   </TabItem>
 </Tabs>
 
-These lines are a sketch: `trainingPoints`, `bandNames` and `composite` come from the [covariates](/bhutan-hfld-training/day-3/covariates/) and [forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) exercises.
+These lines are a sketch: `trainingPoints`, `bandNames` and `composite` come from the [covariates](/lulc-mapping-training/day-3/covariates/) and [forest primitives](/lulc-mapping-training/day-3/forest-primitives/) exercises.
 
 ## Try it: the decision tree playground
 
-Grow a tree from the worked example's 10 pixels split by split, then let a forest of trees vote on a pixel of your choice. The same lab, with suggestions of things to try, is on its own page: [Lab: Decision tree playground](/bhutan-hfld-training/labs/decision-tree-playground/).
+Grow a tree from the worked example's 10 pixels split by split, then let a forest of trees vote on a pixel of your choice. The same lab, with suggestions of things to try, is on its own page: [Lab: Decision tree playground](/lulc-mapping-training/labs/decision-tree-playground/).
 
 <DecisionTreeLab headingLevel={3} />
 
@@ -192,14 +191,3 @@ Before: $E_1 = 0.954$. Yes branch (5 forest, 1 grass): $E = 0.650$, weight $6/8$
 ]} />
 
 <References />
-
-<Credit
-  source="D3 Deep Dive into Random Forest Classification: Theory and Advanced Applications (slides)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides rewritten as a web lesson",
-    "The fruit-bowl example (Simplilearn figures) replaced with an original worked example on Bhutan training pixels, with entropy and information gain computed",
-    "Third-party remote-sensing figures described in text; added an Earth Engine code sketch, Lab 4 link, practice and a quiz",
-  ]}
-/>

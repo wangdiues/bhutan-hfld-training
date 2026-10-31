@@ -1,6 +1,6 @@
 ---
 title: "Day 1 recap quiz"
-description: Check what you remember from Day 1 (the ART-TREES HFLD requirements, Earth Engine, the Code Editor and data catalog, JavaScript, image collections and custom functions).
+description: Check what you remember from Day 1 (Earth Engine, the Code Editor and data catalog, JavaScript, image collections and custom functions).
 sidebar:
   order: 7
 ---
@@ -20,18 +20,17 @@ Answer from memory first, then check. Retrieving what you learned, a day after l
 
 ## What Day 1 covered
 
-- [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/): the HFLD Score, the documentation TREES asks for, and how uncertainty reduces credits.
-- [Introduction to Earth Engine](/bhutan-hfld-training/day-1/introduction-to-earth-engine/): what Earth Engine is, and when to use it.
-- [Code editor and data catalog](/bhutan-hfld-training/day-1/code-editor-and-data-catalog/): the panels, the Inspector and Tasks tabs, and finding datasets.
-- [JavaScript basics](/bhutan-hfld-training/day-1/javascript-basics/): variables, lists, objects, functions, and client versus server.
-- [Image collections](/bhutan-hfld-training/day-1/image-collections/): filtering by place and date, reducers, and visualising results.
-- [Custom functions and mapping](/bhutan-hfld-training/day-1/custom-functions/): writing functions and mapping them over collections.
+- [Introduction to Earth Engine](/lulc-mapping-training/day-1/introduction-to-earth-engine/): what Earth Engine is, and when to use it.
+- [Code editor and data catalog](/lulc-mapping-training/day-1/code-editor-and-data-catalog/): the panels, the Inspector and Tasks tabs, and finding datasets.
+- [JavaScript basics](/lulc-mapping-training/day-1/javascript-basics/): variables, lists, objects, functions, and client versus server.
+- [Image collections](/lulc-mapping-training/day-1/image-collections/): filtering by place and date, reducers, and visualising results.
+- [Custom functions and mapping](/lulc-mapping-training/day-1/custom-functions/): writing functions and mapping them over collections.
 
 ## Recap quiz
 
 <Quiz id="day-1-recap" title="Day 1 recap" questions={[
-  { q: "An HFLD participant must have an HFLD Score of at least … in every year of the reference period.", options: ["0.25", "0.9", "1.0", "0.5"], answer: 3, explain: "TREES 3.0, Section 4.2.1. See ART-TREES HFLD requirements." },
-  { q: "Under TREES, uncertainty is the half-width of the … confidence interval, as a percentage of the estimate.", options: ["90%", "68%", "95%", "99%"], answer: 0, explain: "TREES 3.0, Section 8. More uncertainty means a larger deduction." },
+  { q: "Why can Earth Engine process all of Bhutan quickly?", options: ["It downloads the data to your laptop first", "It uses only low-resolution images", "It needs no internet connection", "It splits the work into tiles and runs them in parallel on Google's servers"], answer: 3, explain: "See Introduction to Earth Engine." },
+  { q: "You started an export to Google Drive. Where do you follow its progress?", options: ["Tasks", "Docs", "Scripts", "Inspector"], answer: 0, explain: "See Code editor and data catalog." },
   { q: "Which tab shows the value of a pixel you click on the map?", options: ["Console", "Tasks", "Inspector", "Assets"], answer: 2, explain: "See Code editor and data catalog." },
   { q: "Which line creates a point at Thimphu?", options: ["ee.Geometry.Point([27.47, 89.64])", "ee.Geometry.Point([89.64, 27.47])", "ee.Geometry.Point(89.64)", "ee.Point('Thimphu')"], answer: 1, explain: "Longitude first, then latitude." },
   { q: "filterDate('2025-01-01', '2025-05-01') includes images taken on 1 May 2025.", answer: false, explain: "The end date is exclusive. See Image collections." },
@@ -41,11 +40,10 @@ Answer from memory first, then check. Retrieving what you learned, a day after l
 ]} />
 
 <Callout type="why">
-Why this matters: Day 1 sets up everything that follows. The HFLD requirements explain why the course ends with a reference sample and an uncertainty, and the Earth Engine basics are what you use every day from Day 2.
+Why this matters: Day 1 sets up everything that follows. The Earth Engine basics are what you use every day from Day 2.
 </Callout>
 
 <KeyPoints points={[
-  "HFLD: a score of at least 0.5 in every reference-period year; uncertainty is the 90% CI half-width, and it reduces credits.",
   "Earth Engine runs your instructions on Google's servers; the Inspector, Console and Tasks tabs show what happened.",
   "Filter collections by place and date, reduce them to images, and map functions that return ee.Image objects.",
 ]} />

@@ -10,7 +10,7 @@ export interface AccuracyInput {
 	mappedAreaHa: number[];
 	/** counts[i][j] = samples mapped as class i with reference class j. */
 	matrix: number[][];
-	/** z for the confidence interval: 1.6449 for 90% (ART-TREES), 1.96 for 95%. */
+	/** z for the confidence interval: 1.6449 for 90% (the course default), 1.96 for 95%. */
 	z: number;
 	/**
 	 * Variance rule. 'olofsson' (default) skips only strata with fewer than 2 samples.

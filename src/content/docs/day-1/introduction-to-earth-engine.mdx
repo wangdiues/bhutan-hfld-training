@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -32,7 +31,7 @@ import importsCode from '~/assets/day-1/introduction-to-earth-engine/s10-85465aa
   prerequisites={["Start here (an Earth Engine account)"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/introduction-to-earth-engine/) give a visual summary.
+The [slides for this lesson](/lulc-mapping-training/slides/introduction-to-earth-engine/) give a visual summary.
 
 ## What is Earth Engine?
 
@@ -59,7 +58,7 @@ The [Earth Engine Data Catalog](https://developers.google.com/earth-engine/datas
 | Demographic | population grids |
 | Vector data | administrative and country boundaries, protected areas |
 
-You can also **load your own data**: upload a shapefile or a CSV from your computer as an asset (Day 2, [Importing and exporting](/bhutan-hfld-training/day-2/import-and-export/)), or use the vector datasets in the catalog. The map below shows Bhutan's administrative boundaries loaded this way.
+You can also **load your own data**: upload a shapefile or a CSV from your computer as an asset (Day 2, [Importing and exporting](/lulc-mapping-training/day-2/import-and-export/)), or use the vector datasets in the catalog. The map below shows Bhutan's administrative boundaries loaded this way.
 
 <Image src={adminMap} alt="Code Editor map with Bhutan's administrative boundaries shown in dark grey." />
 
@@ -82,7 +81,7 @@ The [Code Editor](https://code.earthengine.google.com/) is a web-based developme
 3. look at the results on the map and in the Console;
 4. repeat, refining it until it is right.
 
-The next lesson, [Code Editor and data catalog](/bhutan-hfld-training/day-1/code-editor-and-data-catalog/), tours the Code Editor. There is also a Python API, which this course uses through the geemap package.
+The next lesson, [Code Editor and data catalog](/lulc-mapping-training/day-1/code-editor-and-data-catalog/), tours the Code Editor. There is also a Python API, which this course uses through the geemap package.
 
 ### 4. Saving and sharing
 
@@ -123,11 +122,9 @@ print("Images in the collection:", s2.size().getInfo())
 # 2. Get an image.
 image = s2.sort("CLOUDY_PIXEL_PERCENTAGE").first()
 
-
 # 3. Apply an algorithm to an image.
 def add_ndvi(img):
     return img.addBands(img.normalizedDifference(["B8", "B4"]).rename("NDVI"))
-
 
 # 4. Map it over the collection; 5. reduce the collection, then a region.
 median_ndvi = s2.map(add_ndvi).select("NDVI").median()
@@ -164,10 +161,10 @@ It is less suited to:
 
 - **vector-heavy work**, such as editing topology or detailed cartography. Use QGIS or ArcGIS for that.
 - **analyses that depend on spatial relations between pixels across large areas**, such as image segmentation or hydrological modelling. Because the work is split across many computers, these options are limited or experimental.
-- **very large exports or long-running jobs**, which can hit memory and time limits. The [debugging guide](/bhutan-hfld-training/how-to/debug-earth-engine/) covers the common errors.
+- **very large exports or long-running jobs**, which can hit memory and time limits. The [debugging guide](/lulc-mapping-training/how-to/debug-earth-engine/) covers the common errors.
 
 <Callout type="bhutan">
-Bhutan context: for HFLD activity data, Earth Engine does the heavy part, which is composites, covariates, classification and sampling across the whole country. Desktop GIS is still useful for preparing boundaries and for final map layouts.
+Bhutan context: for national land-cover mapping, Earth Engine does the heavy part, which is composites, covariates, classification and sampling across the whole country. Desktop GIS is still useful for preparing boundaries and for final map layouts.
 </Callout>
 
 ## Key functions
@@ -184,7 +181,7 @@ Bhutan context: for HFLD activity data, Earth Engine does the heavy part, which 
 
 - **Expecting a download before you can analyse.** In Earth Engine, the data stays in the cloud. You export only results.
 - **Using Earth Engine for vector editing or map layout.** Do those in desktop GIS and bring the result in as an asset.
-- **Not registering a Cloud project.** Scripts won't run without one. See [Start here](/bhutan-hfld-training/start-here/).
+- **Not registering a Cloud project.** Scripts won't run without one. See [Start here](/lulc-mapping-training/start-here/).
 
 ## Practice
 
@@ -220,15 +217,3 @@ The end date is exclusive, so `'2026-01-01'` includes all of 31 December 2025.
 ]} />
 
 <References />
-
-<Credit
-  source="D1 Introduction to GEE: Features, Capabilities, and Access (slides)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides rewritten as a web lesson",
-    "Third-party figures (Google, SERVIR) replaced with text and the trainers' own screenshots",
-    "New: a Bhutan script showing the five Earth Engine operations, with a geemap version",
-    "Sign-up link updated to Cloud project registration (see Start here)",
-  ]}
-/>

@@ -1,10 +1,8 @@
 /**
  * Exporting data
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: D2-Exercise-Exporting Data.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
  *
  * Changes: the exercise's ?? blanks are filled with a worked solution for Bhutan.

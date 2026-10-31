@@ -8,7 +8,6 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Callout from '~/components/Callout.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -41,7 +40,7 @@ import dzongkhags from '~/assets/day-1/code-editor-and-data-catalog/s21-a9059671
   prerequisites={["Introduction to Earth Engine", "An Earth Engine account (Start here)"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/code-editor-and-data-catalog/) give a visual summary.
+The [slides for this lesson](/lulc-mapping-training/slides/code-editor-and-data-catalog/) give a visual summary.
 
 ## Step 1: Find your way around the Code Editor
 
@@ -77,7 +76,7 @@ The right panel's three tabs look like this. Use the **Inspector** to check valu
 
 ## Step 2: Your first lines of JavaScript
 
-The Code Editor runs JavaScript. These few building blocks are enough for this lesson; [JavaScript basics](/bhutan-hfld-training/day-1/javascript-basics/) covers them in depth.
+The Code Editor runs JavaScript. These few building blocks are enough for this lesson; [JavaScript basics](/lulc-mapping-training/day-1/javascript-basics/) covers them in depth.
 
 A **comment** starts with `//`. Earth Engine ignores it, so you can explain your code or leave notes. Ctrl+/ (Cmd+/ on a Mac) comments or uncomments the selected lines. **`print()`** writes to the Console:
 
@@ -218,7 +217,6 @@ print(l8col.first())
 // filter by the least cloud cover
 var cloudfreeImg = l8col.sort("CLOUD_COVER", true).first() // true, false
 print('cloud free image',cloudfreeImg)
-
 
 var vis = {
   bands: ['B4', 'B3', 'B2'], // Landsat RGB
@@ -417,18 +415,3 @@ Map.addLayer(best, {bands: ['B4', 'B3', 'B2'], min: 0, max: 3000}, 'Least cloudy
   "Filter collections by location, date and metadata, then count, sort and pick images.",
   "Geometries drawn on the map appear under Imports and can be used in code.",
 ]} />
-
-<Credit
-  source="D1 Exploring Data Archive in GEE (slides)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides rewritten as a web lesson; code copied from the slides",
-    "Malaysian examples (Johor, Kedah, Kelantan, Melaka) and Manila replaced with Bhutanese places",
-    "Thimphu's longitude corrected from 83.63 to 89.64; population written as 114551 (a comma inside a number is a JavaScript error)",
-    "The area of interest is defined in code around Thimphu instead of drawn on the map",
-    "GAUL feature collection filtered to Bhutan and displayed",
-    "Deprecated Sentinel-2 IDs (COPERNICUS/S2, COPERNICUS/S2_SR) replaced with the harmonized collections",
-    "Image ID explanation tables rewritten as text to match the IDs in the code",
-  ]}
-/>

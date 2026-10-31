@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -34,7 +33,7 @@ import mainScript from '~/assets/day-2/mosaics-and-composites/s15-9733f2be5a.web
   prerequisites={["Spectral indices and functions"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/mosaics-and-composites/) give a visual summary. The next lesson, [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/), builds the full composite step by step.
+The [slides for this lesson](/lulc-mapping-training/slides/mosaics-and-composites/) give a visual summary. The next lesson, [Sentinel-2 MRV composite](/lulc-mapping-training/day-2/sentinel-2-mrv-composite/), builds the full composite step by step.
 
 ## Sentinel-2 in brief
 
@@ -206,17 +205,3 @@ The mosaic shows the most recent image on top, cloud and all. The median removes
   "Atmospheric, radiometric (BRDF) and topographic corrections make pixel values comparable across a mountainous country.",
   "The course composite is built from modules loaded with require().",
 ]} />
-
-<Credit
-  source="D2 Creating Mosaics and Composites from Image Collections (slides)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides rewritten as a web lesson",
-    "New: a script comparing a mosaic, a median composite and a greenest-pixel mosaic over Thimphu (with geemap)",
-    "Sentinel-2 repeat cycle given as 10 days per satellite and 5 with two",
-    "The shadow-masking module's description on the slide repeated the import module's; replaced with what the module does",
-    "Spelling of Patrick Burns corrected (slide: Patrik)",
-    "The rendered module diagram cropped to remove the slide title, logo and footer; slide 16 links given as text",
-  ]}
-/>

@@ -11,7 +11,7 @@ import Theory from '~/components/Theory.astro';
 import Cite from '~/components/Cite.astro';
 import References from '~/components/References.astro';
 
-This lab does by hand what Earth Engine's Random Forest does thousands of times. It starts from the 10 training pixels of the worked example in [What is a Random Forest?](/bhutan-hfld-training/day-3/random-forest/#a-worked-example-10-training-pixels): 5 forest, 3 grassland and 2 water. The pixel values are illustrative, not measurements.
+This lab does by hand what Earth Engine's Random Forest does thousands of times. It starts from the 10 training pixels of the worked example in [What is a Random Forest?](/lulc-mapping-training/day-3/random-forest/#a-worked-example-10-training-pixels): 5 forest, 3 grassland and 2 water. The pixel values are illustrative, not measurements.
 
 <DecisionTreeLab />
 
@@ -37,5 +37,3 @@ Each tree is grown on a bootstrap sample and sees one random covariate per split
 The lab's maths is in `src/lib/stats/trees.ts`, with automated tests that reproduce the lesson's worked example. Part 2 is a teaching model. Each of its trees gets a bootstrap sample (as many pixels as the training set, drawn with replacement) and one covariate per split. Earth Engine's Random Forest grows larger trees and by default gives each tree half of the samples (`bagFraction` 0.5) and the square root of the number of covariates at each split.
 
 <References />
-
-*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*

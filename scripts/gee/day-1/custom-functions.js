@@ -1,10 +1,8 @@
 /**
  * Writing custom functions and mapping across image collections
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D1_ Writing Custom Functions and Mapping Across Image Collections.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
  *
  * Changes: the step-by-step snippets are merged into one script that runs top to bottom;

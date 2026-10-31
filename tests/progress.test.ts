@@ -3,10 +3,10 @@ import { countDone, isLessonKey, loadDone, pageKey } from '../src/lib/progress';
 
 describe('lesson progress (M6-01)', () => {
 	it('turns page paths into keys without the base', () => {
-		expect(pageKey('/bhutan-hfld-training/day-1/javascript-basics/', '/bhutan-hfld-training')).toBe('day-1/javascript-basics/');
-		expect(pageKey('/bhutan-hfld-training/start-here/', '/bhutan-hfld-training/')).toBe('start-here/');
-		expect(pageKey('/bhutan-hfld-training/day-2/recap', '/bhutan-hfld-training')).toBe('day-2/recap/');
-		expect(pageKey('/bhutan-hfld-training/', '/bhutan-hfld-training')).toBe('');
+		expect(pageKey('/lulc-mapping-training/day-1/javascript-basics/', '/lulc-mapping-training')).toBe('day-1/javascript-basics/');
+		expect(pageKey('/lulc-mapping-training/start-here/', '/lulc-mapping-training/')).toBe('start-here/');
+		expect(pageKey('/lulc-mapping-training/day-2/recap', '/lulc-mapping-training')).toBe('day-2/recap/');
+		expect(pageKey('/lulc-mapping-training/', '/lulc-mapping-training')).toBe('');
 	});
 
 	it('counts only lesson pages', () => {

@@ -1,7 +1,7 @@
 /**
  * Hello Bhutan: a first Earth Engine script
  *
- * Bhutan ART-TREES HFLD Readiness Training, course website ("Start here" page).
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
  * Written for the website; not part of the May 2026 source materials.
  * Code licence: MIT.
  */

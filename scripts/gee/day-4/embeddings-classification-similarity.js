@@ -1,10 +1,8 @@
 /**
  * Land cover classification and cosine similarity using AlphaEarth Foundations embeddings
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D4_ Land Cover Classification and Cosine Simarity Using AFE.docx ("Similarity" in the title)
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - The exercise's two scripts run one after the other: Part A (a primitive from embeddings with
  *     Gradient Tree Boost) and Part B (cosine similarity search). Part C (change between years) was

@@ -6,6 +6,8 @@ Task M0-06 · 2026-10-26 · Sources: the training agenda's daily objectives; WEB
 
 ---
 
+> Rebrand (2026-10-31): the course became LULC Mapping Training; the ART-TREES/HFLD lessons M4-01 and M4-38 were removed.
+
 ## 1. Learners
 
 | Persona | Background | Goal | What this means for design |
@@ -47,7 +49,6 @@ Assessed by: **the capstone** (M6-03). Each group makes a 6-class 2025 map for o
 ### Day 1 — GEE foundations
 | ID | Lesson | Obj | Assess | Time |
 |---|---|---|---|---|
-| M4-01 | ART-TREES HFLD requirements *(new)* | (1) state TREES 3.0 HFLD eligibility and what HFLD participants must document; (2) explain why activity data needs a forest definition put into practice and temporal consistency; (3) describe how uncertainty affects crediting (Section 8, deductions in Section 10) | Q×4 (with section citations); K: capstone report cites the relevant sections (capstone checklist and Documentation rubric line) | 30+0 |
 | M4-02 | Introduction to GEE | (1) name the four parts of Earth Engine (catalog, compute, IDE, sharing); (2) choose when EE is the right tool and when it isn't | Q×4; C(complete): change the date window of the five-operations script | 20+5 |
 | M4-03 | Code Editor & data archive | (1) find a dataset in the catalog and import it; (2) use the Inspector, Console and Tasks tabs; (3) draw a geometry | C(complete): import S2 and centre on Thimphu; Q×2 | 15+15 |
 | M4-04 | JavaScript basics | (1) declare variables, lists and objects; (2) write and call a function; (3) print to the Console | C(fill-in): an object and point for Paro with coordinates read from the Inspector; C(scratch): a list function; Q×4 | 15+20 |
@@ -106,7 +107,6 @@ These pages are for consulting rather than studying, so they have no quiz. Expla
 | M4-35 | Asset catalogue | Reference |
 | M4-36 | Glossary | Reference |
 | M4-37 | Cheat sheet & further reading | Reference |
-| M4-38 | TREES 2.0 → 3.0 for HFLD | Explanation (Q×2 optional) |
 | M4-39 | Explanation pages (RS physics, compositing, RF, RLCMS, embeddings, Olofsson estimator) | Explanation |
 | M4-40 | How-to guides | How-to |
 

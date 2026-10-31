@@ -1,5 +1,5 @@
 /**
- * The May 2026 training timetable (source: "Bhutan ART-TREES HFLD Readiness Training.docx"),
+ * The May 2026 training timetable (source: the training agenda),
  * mapped to the lessons that now teach each session, plus short facilitator notes. Used by
  * trainer mode (task M6-04). No answer keys here: the repository is public.
  */
@@ -8,7 +8,6 @@ export interface Session {
 	title: string;
 	/** Lesson keys (paths without the base), e.g. "day-1/javascript-basics/". */
 	lessons: string[];
-	led?: string;
 }
 
 export interface AgendaDay {
@@ -22,12 +21,11 @@ export const AGENDA: AgendaDay[] = [
 		day: 1,
 		sessions: [
 			{ time: '09:00–09:30', title: 'Welcome and introductions', lessons: ['start-here/'] },
-			{ time: '09:30–10:30', title: 'Bhutan ART-TREES HFLD submission and data requirements', lessons: ['day-1/art-trees-hfld-requirements/'] },
-			{ time: '11:00–11:30', title: 'Introduction to Google Earth Engine: features, capabilities and access', lessons: ['day-1/introduction-to-earth-engine/'], led: 'Ate' },
-			{ time: '11:30–13:00', title: 'GEE setup, interface and exploring data', lessons: ['day-1/code-editor-and-data-catalog/'], led: 'Ate' },
-			{ time: '14:00–14:30', title: 'GEE fundamentals: data access, visualisation and basic JavaScript', lessons: ['day-1/javascript-basics/'], led: 'Ate & Samuel' },
-			{ time: '14:30–15:30', title: 'Time series of images, image stacks and filtering image collections', lessons: ['day-1/image-collections/'], led: 'Ate' },
-			{ time: '16:00–17:00', title: 'Time series and image collections (continued); custom functions', lessons: ['day-1/image-collections/', 'day-1/custom-functions/'], led: 'Ate & Samuel' },
+			{ time: '11:00–11:30', title: 'Introduction to Google Earth Engine: features, capabilities and access', lessons: ['day-1/introduction-to-earth-engine/'] },
+			{ time: '11:30–13:00', title: 'GEE setup, interface and exploring data', lessons: ['day-1/code-editor-and-data-catalog/'] },
+			{ time: '14:00–14:30', title: 'GEE fundamentals: data access, visualisation and basic JavaScript', lessons: ['day-1/javascript-basics/'] },
+			{ time: '14:30–15:30', title: 'Time series of images, image stacks and filtering image collections', lessons: ['day-1/image-collections/'] },
+			{ time: '16:00–17:00', title: 'Time series and image collections (continued); custom functions', lessons: ['day-1/image-collections/', 'day-1/custom-functions/'] },
 		],
 		notes: [
 			'Before the course, check that every participant has a Google account with a Cloud project registered for Earth Engine. Registration can take time, so do it a week ahead.',
@@ -38,13 +36,13 @@ export const AGENDA: AgendaDay[] = [
 	{
 		day: 2,
 		sessions: [
-			{ time: '09:00–09:30', title: 'Recap of Day 1', lessons: ['day-1/recap/'], led: 'Ate' },
-			{ time: '09:30–10:00', title: 'Fundamentals of remote sensing', lessons: ['day-2/remote-sensing-fundamentals/'], led: 'Ate' },
-			{ time: '10:00–13:00', title: 'Calculating spectral indices and working with functions (with a break 10:30–11:00)', lessons: ['day-2/spectral-indices/'], led: 'Ate & Samuel' },
-			{ time: '14:00–14:30', title: 'Creating annual and seasonal composites for HFLD', lessons: ['day-2/mosaics-and-composites/'], led: 'Ate' },
-			{ time: '14:30–15:30', title: 'Cloud and shadow masking; exporting composites', lessons: ['day-2/sentinel-2-mrv-composite/'], led: 'Ate & Samuel' },
-			{ time: '16:00–16:30', title: 'Creating annual and seasonal Landsat composites', lessons: ['day-2/landsat-mrv-composite/'], led: 'Ate & Samuel' },
-			{ time: '16:30–17:00', title: 'Importing and exporting datasets with GEE', lessons: ['day-2/import-and-export/'], led: 'Ate & Samuel' },
+			{ time: '09:00–09:30', title: 'Recap of Day 1', lessons: ['day-1/recap/'] },
+			{ time: '09:30–10:00', title: 'Fundamentals of remote sensing', lessons: ['day-2/remote-sensing-fundamentals/'] },
+			{ time: '10:00–13:00', title: 'Calculating spectral indices and working with functions (with a break 10:30–11:00)', lessons: ['day-2/spectral-indices/'] },
+			{ time: '14:00–14:30', title: 'Creating annual and seasonal composites', lessons: ['day-2/mosaics-and-composites/'] },
+			{ time: '14:30–15:30', title: 'Cloud and shadow masking; exporting composites', lessons: ['day-2/sentinel-2-mrv-composite/'] },
+			{ time: '16:00–16:30', title: 'Creating annual and seasonal Landsat composites', lessons: ['day-2/landsat-mrv-composite/'] },
+			{ time: '16:30–17:00', title: 'Importing and exporting datasets with GEE', lessons: ['day-2/import-and-export/'] },
 		],
 		notes: [
 			'A national 10 m composite export can take an hour or more. Start exports before a break, or have participants export one Dzongkhag.',
@@ -54,10 +52,10 @@ export const AGENDA: AgendaDay[] = [
 	{
 		day: 3,
 		sessions: [
-			{ time: '09:00–09:30', title: 'Recap of Day 2', lessons: ['day-2/recap/'], led: 'Ate' },
-			{ time: '09:30–10:00', title: 'Introduction to machine learning', lessons: ['day-3/random-forest/'], led: 'Ate' },
-			{ time: '10:00–10:30', title: 'Calculating covariates for HFLD', lessons: ['day-3/covariates/'], led: 'Ate & Samuel' },
-			{ time: '11:00–13:00', title: 'Forest primitives with machine learning: composites, training data, primitive layers', lessons: ['day-3/forest-primitives/', 'day-4/training-data/'], led: 'Ate & Samuel' },
+			{ time: '09:00–09:30', title: 'Recap of Day 2', lessons: ['day-2/recap/'] },
+			{ time: '09:30–10:00', title: 'Introduction to machine learning', lessons: ['day-3/random-forest/'] },
+			{ time: '10:00–10:30', title: 'Calculating covariates', lessons: ['day-3/covariates/'] },
+			{ time: '11:00–13:00', title: 'Forest primitives with machine learning: composites, training data, primitive layers', lessons: ['day-3/forest-primitives/', 'day-4/training-data/'] },
 		],
 		notes: [
 			'The primitives script reads trainer assets; check read access first.',
@@ -68,14 +66,14 @@ export const AGENDA: AgendaDay[] = [
 	{
 		day: 4,
 		sessions: [
-			{ time: '09:00–09:30', title: 'Recap of Day 3', lessons: ['day-3/recap/'], led: 'Ate' },
-			{ time: '09:30–10:00', title: 'An RLCMS approach to land-cover mapping for HFLD', lessons: ['day-4/rlcms-overview/'], led: 'Ate' },
-			{ time: '10:00–10:30', title: 'Building a categorical land-cover map with Sentinel-2 (assemblage)', lessons: ['day-4/assemblage/'], led: 'Ate & Samuel' },
-			{ time: '11:00–11:15', title: 'Calculating and exporting primitives (continued)', lessons: ['day-3/forest-primitives/'], led: 'Ate & Samuel' },
-			{ time: '11:15–13:00', title: 'Building a land-cover map from primitives (assemblage)', lessons: ['day-4/assemblage/'], led: 'Ate & Samuel' },
-			{ time: '14:00–14:30', title: 'Introduction to AlphaEarth embeddings', lessons: ['day-4/satellite-embeddings/'], led: 'Ate' },
-			{ time: '14:30–15:30', title: 'Mapping change with AlphaEarth embeddings', lessons: ['day-4/embeddings-classification-similarity/'], led: 'Ate & Samuel' },
-			{ time: '16:00–17:00', title: 'Collect Earth Online: demonstration, response design, setting up a project and interpreting samples', lessons: ['day-4/collect-earth-online/'], led: 'Samuel' },
+			{ time: '09:00–09:30', title: 'Recap of Day 3', lessons: ['day-3/recap/'] },
+			{ time: '09:30–10:00', title: 'An RLCMS approach to land-cover mapping', lessons: ['day-4/rlcms-overview/'] },
+			{ time: '10:00–10:30', title: 'Building a categorical land-cover map with Sentinel-2 (assemblage)', lessons: ['day-4/assemblage/'] },
+			{ time: '11:00–11:15', title: 'Calculating and exporting primitives (continued)', lessons: ['day-3/forest-primitives/'] },
+			{ time: '11:15–13:00', title: 'Building a land-cover map from primitives (assemblage)', lessons: ['day-4/assemblage/'] },
+			{ time: '14:00–14:30', title: 'Introduction to AlphaEarth embeddings', lessons: ['day-4/satellite-embeddings/'] },
+			{ time: '14:30–15:30', title: 'Mapping change with AlphaEarth embeddings', lessons: ['day-4/embeddings-classification-similarity/'] },
+			{ time: '16:00–17:00', title: 'Collect Earth Online: demonstration, response design, setting up a project and interpreting samples', lessons: ['day-4/collect-earth-online/'] },
 		],
 		notes: [
 			'Create Collect Earth Online accounts and an institution for the group before the afternoon session.',
@@ -85,12 +83,12 @@ export const AGENDA: AgendaDay[] = [
 	{
 		day: 5,
 		sessions: [
-			{ time: '09:00–09:30', title: 'Recap of Day 4', lessons: ['day-4/recap/'], led: 'Samuel' },
-			{ time: '09:30–10:00', title: 'Designing stratified random samples', lessons: ['day-5/sampling-design/'], led: 'Samuel' },
-			{ time: '10:00–10:30', title: 'Creating a stratified sample: sample size and drawing it in GEE', lessons: ['day-5/sample-size/', 'day-5/stratified-sampling-gee/'], led: 'Ate & Samuel' },
-			{ time: '11:00–13:00', title: 'Accuracy assessment and area estimation', lessons: ['day-5/accuracy-and-area/'], led: 'Ate & Samuel' },
-			{ time: '14:00–15:30', title: 'Group work: land-cover map stratification and image interpretation', lessons: ['capstone/'], led: 'Ate & Samuel' },
-			{ time: '16:00–16:45', title: 'Group presentations', lessons: ['capstone/'], led: 'Groups' },
+			{ time: '09:00–09:30', title: 'Recap of Day 4', lessons: ['day-4/recap/'] },
+			{ time: '09:30–10:00', title: 'Designing stratified random samples', lessons: ['day-5/sampling-design/'] },
+			{ time: '10:00–10:30', title: 'Creating a stratified sample: sample size and drawing it in GEE', lessons: ['day-5/sample-size/', 'day-5/stratified-sampling-gee/'] },
+			{ time: '11:00–13:00', title: 'Accuracy assessment and area estimation', lessons: ['day-5/accuracy-and-area/'] },
+			{ time: '14:00–15:30', title: 'Group work: land-cover map stratification and image interpretation', lessons: ['capstone/'] },
+			{ time: '16:00–16:45', title: 'Group presentations', lessons: ['capstone/'] },
 			{ time: '16:45–17:00', title: 'Closing', lessons: [] },
 		],
 		notes: [

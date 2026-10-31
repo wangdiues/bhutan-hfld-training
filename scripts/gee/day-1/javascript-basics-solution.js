@@ -1,9 +1,9 @@
 /**
  * JavaScript basics: solution to the "fill in the blanks" practice
  *
- * Bhutan ART-TREES HFLD Readiness Training, course website.
- * Adapted from "EXERCISE D1_ JAVASCRIPT BASICS IN GOOGLE EARTH ENGINE" by Ate Poortinga & Samuel,
- * Conservation International (May 2026). Code licence: MIT.
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
+ * Code licence: MIT.
  */
 
 var paroData = {

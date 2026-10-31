@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -30,7 +29,7 @@ import References from '~/components/References.astro';
 
 In machine learning for maps, <Term id="covariate">covariates</Term> are variables derived from the data that describe the land surface. They are the inputs (features) to classifiers such as Random Forest, Gradient Boosted Trees or Support Vector Machines. Raw bands alone often can't separate similar classes; covariates make the differences explicit.
 
-For HFLD mapping, covariates capture:
+For land-cover mapping, covariates capture:
 
 | Property | Examples |
 |---|---|
@@ -45,7 +44,7 @@ Better covariates mean better predictions: they help distinguish similar classes
 **Inputs:** the Landsat 8/9 seasonal composite from Day 2 (the function uses Landsat band names: B5 is NIR, B6 and B7 SWIR; for the Sentinel-2 composite, use B8, B11 and B12 instead, because B5–B7 are red-edge bands there), the [SRTM DEM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003), and the [JRC Global Surface Water](https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater) dataset.
 
 <Callout type="mistake" title="Inputs you need">
-The script loads `projects/bhutan-hfld-readiness-training/assets/landsatComposite/bhutan_ls89_2025_TashiY`, one participant's export from the training. Replace it with your own export from the [Landsat MRV composite](/bhutan-hfld-training/day-2/landsat-mrv-composite/) lesson. Part 7 also needs two point imports drawn in the Code Editor, `forest` and `nonForest`, each with a numeric property `class` (forest = 1, other = 0); [Collecting training data](/bhutan-hfld-training/day-4/training-data/) shows how.
+The script loads `projects/bhutan-hfld-readiness-training/assets/landsatComposite/bhutan_ls89_2025_TashiY`, one participant's export from the training. Replace it with your own export from the [Landsat MRV composite](/lulc-mapping-training/day-2/landsat-mrv-composite/) lesson. Part 7 also needs two point imports drawn in the Code Editor, `forest` and `nonForest`, each with a numeric property `class` (forest = 1, other = 0); [Collecting training data](/lulc-mapping-training/day-4/training-data/) shows how.
 </Callout>
 
 ## Part 1: Load and look at the composite
@@ -126,7 +125,7 @@ The [JRC Global Surface Water](https://developers.google.com/earth-engine/datase
 
 <CodeBlock script="day-3/covariates.js" lines={[211, 223]} />
 
-In the exercise, adding these to the stack is left commented out (`//.addBands(jrcCov)`): add them if water or shadow confusion is a problem, but as `jrcCov.unmask(0)`. Most bands are masked wherever water was never seen, and a masked band masks the whole stack there, dropping most training samples. ([Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) uses `unmask(0)`.) Some bands, such as `transition`, are categories rather than measurements; Random Forest can still use them, but treat their importance with care.
+In the exercise, adding these to the stack is left commented out (`//.addBands(jrcCov)`): add them if water or shadow confusion is a problem, but as `jrcCov.unmask(0)`. Most bands are masked wherever water was never seen, and a masked band masks the whole stack there, dropping most training samples. ([Forest primitives](/lulc-mapping-training/day-3/forest-primitives/) uses `unmask(0)`.) Some bands, such as `transition`, are categories rather than measurements; Random Forest can still use them, but treat their importance with care.
 
 ## Part 6: Build the stack and check it
 
@@ -140,7 +139,7 @@ Why this matters: the quality of this stack directly limits the classification. 
 
 ## Part 7: A first Random Forest (preview)
 
-The exercise ends by sampling the covariates at forest and non-forest training points, training a 100-tree Random Forest, and mapping the probability of forest. The next lesson, [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/), covers this step in full.
+The exercise ends by sampling the covariates at forest and non-forest training points, training a 100-tree Random Forest, and mapping the probability of forest. The next lesson, [Forest primitives](/lulc-mapping-training/day-3/forest-primitives/), covers this step in full.
 
 <CodeBlock script="day-3/covariates.js" lines={[257, 295]} />
 
@@ -221,17 +220,3 @@ Built-up areas and bare ground appear red (NDBI above 0), vegetation green.
 ]} />
 
 <References />
-
-<Credit
-  source="EXERCISE D3: Calculating Covariates for HFLD"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; code copied from the exercise",
-    "Bands divided by 10,000 before computing covariates (EVI, SAVI, IBI and Tasseled Cap assume 0–1 reflectance)",
-    "Tasseled Cap distances and terrain covariates restored (they had been commented out when the code was extracted)",
-    "Probability export renamed from urban to forest, to match the forest / non-forest training classes",
-    "Tasseled Cap coefficients credited to Baig et al. (2014, top-of-atmosphere); NDSI described as a snow index; duplicate covariates and the JRC masking issue explained",
-    "Added covariate tables, a Python version of the terrain covariates, practice and a quiz",
-  ]}
-/>

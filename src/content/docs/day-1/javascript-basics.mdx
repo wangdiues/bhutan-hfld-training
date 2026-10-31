@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -135,7 +134,7 @@ m
 The point at 90.43° E, 27.51° N is in central Bhutan. `sort("CLOUD_COVER")` orders the images from least to most cloud, and `first()` takes the least cloudy. The visualisation parameters show bands 4, 3 and 2 (red, green, blue) as a true-colour image, stretched from 0 to 0.3 reflectance, with a slightly different `gamma` per band to balance the colours. Data: [Landsat 8 Collection 2 Tier 1 TOA](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_TOA).
 
 <Theory title="Client and server">
-`l8col` is not the images themselves. It is a *description* of a computation that runs on Google's servers. `print()` and `Map.addLayer()` ask the server for a result. This is why Earth Engine objects use methods such as `.size()` and `.first()` instead of plain JavaScript loops. [Custom functions](/bhutan-hfld-training/day-1/custom-functions/) covers this in more detail.
+`l8col` is not the images themselves. It is a *description* of a computation that runs on Google's servers. `print()` and `Map.addLayer()` ask the server for a result. This is why Earth Engine objects use methods such as `.size()` and `.first()` instead of plain JavaScript loops. [Custom functions](/lulc-mapping-training/day-1/custom-functions/) covers this in more detail.
 </Theory>
 
 ## Part 3: Filtering a feature collection
@@ -184,7 +183,7 @@ m
 `aggregate_histogram("ADM0_NAME")` counts the features per country, which shows how many level-2 units each country has. Filtering on `ADM0_NAME` keeps only Bhutan's. Data: [FAO GAUL simplified 500 m, 2015, level 2](https://developers.google.com/earth-engine/datasets/catalog/FAO_GAUL_SIMPLIFIED_500m_2015_level2).
 
 <Callout type="bhutan">
-Bhutan context: GAUL 2015 boundaries are old and simplified. For reporting, use the official Dzongkhag boundaries from the National Land Commission, uploaded as an asset (Day 2, [Importing and exporting](/bhutan-hfld-training/day-2/import-and-export/)), or the newer GAUL 2024 used in [Code editor and data catalog](/bhutan-hfld-training/day-1/code-editor-and-data-catalog/).
+Bhutan context: GAUL 2015 boundaries are old and simplified. For reporting, use the official Dzongkhag boundaries from the National Land Commission, uploaded as an asset (Day 2, [Importing and exporting](/lulc-mapping-training/day-2/import-and-export/)), or the newer GAUL 2024 used in [Code editor and data catalog](/lulc-mapping-training/day-1/code-editor-and-data-catalog/).
 </Callout>
 
 ## The full script
@@ -266,14 +265,3 @@ print(countCities(cities));
   "print() writes to the Console; Map.addLayer() and Map.centerObject() show results on the map.",
   "Filter feature collections by a property with ee.Filter.eq().",
 ]} />
-
-<Credit
-  source="EXERCISE D1: JavaScript Basics in Google Earth Engine"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; code copied from the exercise",
-    "Thimphu's population corrected from 787000 to 114551 (Thimphu Thromde, 2017 census) and the unexplained land_area replaced by coordinates",
-    "Added explanations, Python (geemap) versions, practice exercises and a quiz",
-  ]}
-/>

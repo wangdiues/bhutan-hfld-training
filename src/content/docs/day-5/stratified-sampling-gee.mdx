@@ -8,7 +8,6 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Callout from '~/components/Callout.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -25,11 +24,11 @@ import CodeBlock from '~/components/CodeBlock.astro';
   prerequisites={["Determining sample size"]}
 />
 
-This exercise turns the design into points: a stratified random sample of the stratification map, with the number of samples per stratum that you chose in [Determining sample size](/bhutan-hfld-training/day-5/sample-size/). The samples are then interpreted in [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/).
+This exercise turns the design into points: a stratified random sample of the stratification map, with the number of samples per stratum that you chose in [Determining sample size](/lulc-mapping-training/day-5/sample-size/). The samples are then interpreted in [Collect Earth Online](/lulc-mapping-training/day-4/collect-earth-online/).
 
 ## Part 1: Start from the previous script
 
-Open your script from [Determining sample size](/bhutan-hfld-training/day-5/sample-size/) and save a copy (for example `Exercise2_D5/D5-stratified-sampling`): make a small edit and undo it so the Code Editor lets you save. You need its `mapSelect`, `AOI`, `scale` and `proj` variables. Stratified sampling is computationally heavy, so remove the strata-report block and run sampling as a separate step.
+Open your script from [Determining sample size](/lulc-mapping-training/day-5/sample-size/) and save a copy (for example `Exercise2_D5/D5-stratified-sampling`): make a small edit and undo it so the Code Editor lets you save. You need its `mapSelect`, `AOI`, `scale` and `proj` variables. Stratified sampling is computationally heavy, so remove the strata-report block and run sampling as a separate step.
 
 ## Part 2: Remap to the sampling strata
 
@@ -59,7 +58,7 @@ print(stratified_sample.aggregate_histogram("lc_no").getInfo())
 </Tabs>
 
 <Callout type="mistake" title="Use your own numbers">
-828 and 80 came from the exercise text's allocation (908 samples), which differs from what the spreadsheet gives for its stated inputs (see [Determining sample size](/bhutan-hfld-training/day-5/sample-size/)). Put your own forest and deforestation sample sizes in `classPoints`. It is good practice to ask for a few more than you need and trim later, because some samples may turn out to be uninterpretable (cloud, no imagery).
+828 and 80 came from the exercise text's allocation (908 samples), which differs from what the spreadsheet gives for its stated inputs (see [Determining sample size](/lulc-mapping-training/day-5/sample-size/)). Put your own forest and deforestation sample sizes in `classPoints`. It is good practice to ask for a few more than you need and trim later, because some samples may turn out to be uninterpretable (cloud, no imagery).
 </Callout>
 
 ## Part 4: Index the samples
@@ -163,15 +162,3 @@ The Console histogram of `lc_no` should show 1,650 samples in class 1 and 150 in
   "Index samples with plotID and sampleID, and make plots that match the map's pixel size.",
   "Export plots and samples as shapefiles for Collect Earth Online, and keep a copy as assets.",
 ]} />
-
-<Credit
-  source="EXERCISE D5 Part 2: Creating a Stratified Sampling Design in Google Earth Engine"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; code copied from the exercise",
-    "Histograms printed by lc_no (the exercise used lc_name, which the samples don't have, so they came out empty)",
-    "Script names and paths with \"D4\" corrected to Day 5; note that the sample sizes should come from your own calculation",
-    "Added a Python version, practice and a quiz",
-  ]}
-/>

@@ -1,7 +1,7 @@
 """Introduction to Google Earth Engine: the five things Earth Engine does (geemap version).
 
-Bhutan ART-TREES HFLD Readiness Training, May 2026. Adapted from "D1 Introduction to GEE_
-Features, Capabilities, and Access.pptx" by Ate Poortinga & Samuel, Conservation International.
+LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
 Code licence: MIT.
 """
 import ee

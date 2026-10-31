@@ -1,10 +1,8 @@
 /**
  * Exploring the data archive in Google Earth Engine
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: D1 EXPLORING DATA ARCHIVE IN GEE.pptx (slides 9-21).
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - Malaysian city examples replaced with Bhutanese ones; Thimphu's longitude 83.63 -> 89.64;
  *     population 114,551 -> 114551 (a comma inside a number is a JavaScript error).

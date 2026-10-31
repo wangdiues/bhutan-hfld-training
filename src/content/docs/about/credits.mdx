@@ -1,49 +1,84 @@
 ---
-title: "About and credits"
-description: Who made this course, where its material comes from, the licences that apply, how to cite it, and how to report a mistake.
+title: "Acknowledgements and credits"
+description: Who this course is built on, where each lesson comes from, the licences that apply, and how to cite the course.
 sidebar:
+  label: Acknowledgements
   order: 1
 ---
 
-## About this course
-
-This website is a free, self-paced version of the **Bhutan ART-TREES HFLD Readiness Training**, a five-day workshop held in May 2026. It teaches how to produce the activity data for an ART-TREES high forest cover, low deforestation (HFLD) submission with Google Earth Engine: seasonal composites, land-cover primitives and maps, a stratified reference sample, and area estimates with 90% confidence intervals.
-
-The course is not an official product of ART, Winrock International, Conservation International or the Royal Government of Bhutan. Its certificate records self-paced study; it is not an accreditation.
-
 ## Acknowledgements
 
-**The training.** The course is built on the slides, exercises, scripts and calculators of the May 2026 training by **Ate Poortinga** and **Samuel** of **Conservation International**, adapted with their permission (granted October 2026). Each adapted lesson ends with a credit naming its source file and listing what was changed.
+**LULC Mapping Training** is built on the materials of a five-day training held in Bhutan in May 2026 (*Bhutan ART-TREES HFLD Readiness Training*), designed and taught by:
 
-**Changes to the source.** Every correction to the original material (code fixes, renamed assets, Bhutan examples, corrected numbers and claims) is listed in the [changelog](https://github.com/wangdiues/bhutan-hfld-training/blob/main/CHANGELOG.md) under "Corrections to source material". Lessons marked *new content* were written for the website and are not part of the training.
+- **Ate Poortinga**, Conservation International
+- **Samuel**, Conservation International
 
-**Standards and methods.** Requirements are cited from the ART TREES standard (Version 3.0, June 2026, with notes on Version 2.0), published by Architecture for REDD+ Transactions. The area-estimation methods follow Olofsson et al. (2014) and the RLCMS approach of Saah et al. (2020). Each page lists its references.
+Their slides, exercises, Earth Engine scripts and calculators are the foundation of this course. They are adapted here **with their permission** (granted October 2026). We are grateful to them, and to the participants of the May 2026 training, whose exercises and assets appear throughout.
 
-**Data.** The lessons use public datasets from the Google Earth Engine catalog: Sentinel-2 (Copernicus, ESA), Landsat (NASA/USGS), Cloud Score+, SRTM, JRC Global Surface Water, Hansen Global Forest Change, the Satellite Embedding dataset (Google DeepMind's AlphaEarth Foundations), Dynamic World, Open Buildings and FAO GAUL boundaries. Each is linked to its catalog page where it is used; see the [asset catalogue](/bhutan-hfld-training/reference/assets/). Project assets made during the training belong to their owners.
+This website is an independent adaptation. It is not an official product of Conservation International or of any other organisation named here, and its certificate is not an accreditation.
 
-**Software.** Built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/); maths with [KaTeX](https://katex.org/); tested with [Vitest](https://vitest.dev/), axe and pa11y. The course was developed with the help of Claude Code, an AI coding assistant; content was checked against the source material and the standards before publication.
+## Where each lesson comes from
+
+Lessons are adapted from the training documents below. Every change made to the original material (code fixes, renamed assets, corrected numbers and claims) is listed in the [changelog](https://github.com/wangdiues/lulc-mapping-training/blob/main/CHANGELOG.md) under "Corrections to source material". Pages not listed here (some lessons, the labs, explanations, how-to guides and reference pages) were written for this website.
+
+| Lesson | Adapted from |
+|---|---|
+| [Start here](/lulc-mapping-training/start-here/) | the training agenda |
+| [Introduction to Earth Engine](/lulc-mapping-training/day-1/introduction-to-earth-engine/) | D1 Introduction to GEE: Features, Capabilities, and Access (slides) |
+| [Code Editor and data catalog](/lulc-mapping-training/day-1/code-editor-and-data-catalog/) | D1 Exploring Data Archive in GEE (slides) |
+| [JavaScript basics](/lulc-mapping-training/day-1/javascript-basics/) | Exercise D1: JavaScript Basics in Google Earth Engine |
+| [Image collections](/lulc-mapping-training/day-1/image-collections/) | D1 Working with Time-Series of Images and Image Stacks (slides) |
+| [Custom functions and mapping](/lulc-mapping-training/day-1/custom-functions/) | Exercise D1: Writing Custom Functions and Mapping Across Image Collections |
+| [Fundamentals of remote sensing](/lulc-mapping-training/day-2/remote-sensing-fundamentals/) | D2 Fundamentals of Remote Sensing (slides) |
+| [Spectral indices and functions](/lulc-mapping-training/day-2/spectral-indices/) | D2 Exercise: Calculating Spectral Indices and Working with Functions |
+| [Mosaics and composites](/lulc-mapping-training/day-2/mosaics-and-composites/) | D2 Creating Mosaics and Composites from Image Collections (slides) |
+| [Sentinel-2 MRV composite](/lulc-mapping-training/day-2/sentinel-2-mrv-composite/) | D2 Bhutan MRV Sentinel-2 Optical Composite Workflow (manual) |
+| [Landsat MRV composite](/lulc-mapping-training/day-2/landsat-mrv-composite/) | D2 Bhutan MRV Landsat Optical Composite Workflow (manual) |
+| [Importing and exporting data](/lulc-mapping-training/day-2/import-and-export/) | D2 Importing and Exporting Datasets with GEE (slides) and D2 Exercise: Exporting Data |
+| [Random Forest theory](/lulc-mapping-training/day-3/random-forest/) | D3 Deep Dive into Random Forest Classification (slides) |
+| [Calculating covariates](/lulc-mapping-training/day-3/covariates/) | Exercise D3: Calculating Covariates |
+| [Forest primitives](/lulc-mapping-training/day-3/forest-primitives/) | Exercise D3 Part 2: Forest Probability Layers |
+| [RLCMS overview](/lulc-mapping-training/day-4/rlcms-overview/) | D4 RLCMS: General Overview and Terms to Know (slides) |
+| [Collecting training data](/lulc-mapping-training/day-4/training-data/) | Exercise D3 Part 1: Collecting Training Data |
+| [Assemblage](/lulc-mapping-training/day-4/assemblage/) | Exercise D3 Final: Assemblage, Decision Tree Rule |
+| [Satellite embeddings](/lulc-mapping-training/day-4/satellite-embeddings/) | D4 Effective Use of Google's Satellite Embedding Dataset (slides) |
+| [Land cover and similarity with embeddings](/lulc-mapping-training/day-4/embeddings-classification-similarity/) | Exercise D4: Land Cover Classification and Cosine Similarity Using AlphaEarth Embeddings |
+| [Designing a stratified sampling frame](/lulc-mapping-training/day-5/sampling-design/) | D5 Designing a Stratified Random Sampling Frame (slides) |
+| [Determining sample size](/lulc-mapping-training/day-5/sample-size/) | Exercise D5 Part 1: Determining Sample Size |
+| [Stratified sampling in GEE](/lulc-mapping-training/day-5/stratified-sampling-gee/) | Exercise D5 Part 2: Creating a Stratified Sampling Design in GEE |
+| [Accuracy assessment and area adjustment](/lulc-mapping-training/day-5/accuracy-and-area/) | D5 Accuracy Assessment and Area Adjustment (slides) |
+| [Capstone project](/lulc-mapping-training/capstone/) | Exercise D5: Group Activity |
+| [Lab: Sample size calculator](/lulc-mapping-training/labs/sample-size-calculator/) | Exercise D5 Sample Size Calculator (workbook) |
+| [Lab: Accuracy and area estimator](/lulc-mapping-training/labs/accuracy-area-estimator/) | Exercise D5 Confusion Matrix, Accuracy Assessment, Area Adjustment (workbook) |
+| [Slides](/lulc-mapping-training/slides/) and [trainer mode](/lulc-mapping-training/about/trainer-mode/) | the training slide decks and agenda |
+
+The Earth Engine scripts in the [script library](/lulc-mapping-training/reference/script-library/) come from the same exercises; each links back to this page. The Landsat terrain-correction functions are by Patrick Burns and Matt Macander.
+
+## Methods, data and software
+
+**Methods.** Area estimation follows Olofsson et al. (2014); the land-cover method follows the RLCMS approach of Saah et al. (2020). Each page lists its references.
+
+**Data.** The lessons use public datasets from the Google Earth Engine catalog: Sentinel-2 (Copernicus, ESA), Landsat (NASA/USGS), Cloud Score+, SRTM, JRC Global Surface Water, Hansen Global Forest Change, the Satellite Embedding dataset (Google DeepMind's AlphaEarth Foundations), Dynamic World, Open Buildings and FAO GAUL boundaries. Each is linked to its catalog page where it is used; see the [asset catalogue](/lulc-mapping-training/reference/assets/). Project assets made during the training belong to their owners.
+
+**Software.** Built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/); maths with [KaTeX](https://katex.org/); tested with [Vitest](https://vitest.dev/), axe and pa11y. The course was developed with the help of Claude Code, an AI coding assistant; content was checked against the source material before publication.
 
 ## Licences
 
 | What | Licence |
 |---|---|
 | Lesson text, diagrams, quizzes and other written content | [Creative Commons Attribution 4.0 (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) |
-| Website code, labs and the Earth Engine scripts in `scripts/gee/` | [MIT](https://github.com/wangdiues/bhutan-hfld-training/blob/main/LICENSE) |
-| Slides in the [slide player](/bhutan-hfld-training/slides/) | Shown with the trainers' permission. Pictures on the slides belong to their owners and are **not** covered by CC BY 4.0. |
+| Website code, labs and the Earth Engine scripts in `scripts/gee/` | [MIT](https://github.com/wangdiues/lulc-mapping-training/blob/main/LICENSE) |
+| Slides in the [slide player](/lulc-mapping-training/slides/) | Shown with the trainers' permission. Pictures on the slides belong to their owners and are **not** covered by CC BY 4.0. |
 | Public datasets | the terms of each dataset's provider, linked from its catalog page |
 
-When you reuse the content, credit it as: *"Bhutan HFLD Training (wangdiues.github.io/bhutan-hfld-training), adapted from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. CC BY 4.0."*
+When you reuse the content, credit it as: *"LULC Mapping Training (wangdiues.github.io/lulc-mapping-training), built on training materials by Ate Poortinga and Samuel, Conservation International. CC BY 4.0."*
 
 ## How to cite
 
-> Wangdi (2026). *Bhutan HFLD Training: an open course on ART-TREES HFLD activity data with Google Earth Engine.* https://wangdiues.github.io/bhutan-hfld-training/
+> Wangdi (2026). *LULC Mapping Training: an open course in land use and land cover mapping with Google Earth Engine.* https://wangdiues.github.io/lulc-mapping-training/
 
-The repository has a [CITATION.cff](https://github.com/wangdiues/bhutan-hfld-training/blob/main/CITATION.cff) file, so GitHub's "Cite this repository" button gives the same citation in other formats.
+The repository has a [CITATION.cff](https://github.com/wangdiues/lulc-mapping-training/blob/main/CITATION.cff) file, so GitHub's "Cite this repository" button gives the same citation in other formats.
 
 ## Report a mistake or suggest a change
 
-Found an error in a lesson, a script that no longer runs, or a broken link? Open an issue on [GitHub](https://github.com/wangdiues/bhutan-hfld-training/issues), or use the "Edit page" link at the bottom of any page. See [CONTRIBUTING](https://github.com/wangdiues/bhutan-hfld-training/blob/main/CONTRIBUTING.md) for how changes are reviewed.
-
-## Changelog
-
-What changed and when: [CHANGELOG.md](https://github.com/wangdiues/bhutan-hfld-training/blob/main/CHANGELOG.md).
+Found an error in a lesson, a script that no longer runs, or a broken link? Open an issue on [GitHub](https://github.com/wangdiues/lulc-mapping-training/issues), or use the "Edit page" link at the bottom of any page. See [CONTRIBUTING](https://github.com/wangdiues/lulc-mapping-training/blob/main/CONTRIBUTING.md) for how changes are reviewed. What changed and when: [CHANGELOG.md](https://github.com/wangdiues/lulc-mapping-training/blob/main/CHANGELOG.md).

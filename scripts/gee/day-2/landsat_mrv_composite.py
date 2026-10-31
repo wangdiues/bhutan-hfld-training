@@ -3,9 +3,9 @@
 Two seasonal median composites (Jan-Apr and Oct-Dec) of six bands, after QA and TDOM masking and
 SCS+C terrain correction, exported as one 12-band Int16 image.
 
-Bhutan ART-TREES HFLD Readiness Training, May 2026. Adapted from "D2-Bhutan_MRV_Landsat_Optical_Composite"
-by Ate Poortinga & Samuel, Conservation International. Terrain correction functions by Patrick Burns
-and Matt Macander. Code licence: MIT.
+LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
+Terrain correction functions by Patrick Burns and Matt Macander. Code licence: MIT.
 """
 import math
 

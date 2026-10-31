@@ -1,10 +1,8 @@
 /**
  * Bhutan MRV Sentinel-2 composite: two seasonal composites (Jan-Apr, Oct-Dec) in one Int16 image
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: D2-Bhutan_MRV_S2_Composite_Manual.docx (section 16, "Full script").
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - Only the manual's full script is kept (the step-by-step sections repeat it).
  *   - The main collection is COPERNICUS/S2_SR_HARMONIZED (surface reflectance), as the manual's

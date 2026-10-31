@@ -6,7 +6,7 @@ sidebar:
   order: 7
 ---
 
-**When:** you need the mapped area of each class, for example the strata areas for [Determining sample size](/bhutan-hfld-training/day-5/sample-size/).
+**When:** you need the mapped area of each class, for example the strata areas for [Determining sample size](/lulc-mapping-training/day-5/sample-size/).
 
 1. Multiply a class mask by the area of each pixel (in m²) and convert to hectares:
 
@@ -42,5 +42,5 @@ sidebar:
 `ee.Image.pixelArea()` gives each pixel's area on the ground, so the result is correct whatever the map's projection.
 
 :::caution[Mapped area is not the reported area]
-This gives the **mapped** area, which includes the map's errors. For reporting, use it for the stratum weights and estimate the area from the reference sample: see [Accuracy assessment and area adjustment](/bhutan-hfld-training/day-5/accuracy-and-area/).
+This gives the **mapped** area, which includes the map's errors. For reporting, use it for the stratum weights and estimate the area from the reference sample: see [Accuracy assessment and area adjustment](/lulc-mapping-training/day-5/accuracy-and-area/).
 :::

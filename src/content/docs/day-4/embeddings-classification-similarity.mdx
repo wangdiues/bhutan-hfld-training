@@ -8,7 +8,6 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Callout from '~/components/Callout.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -33,17 +32,17 @@ import EmbeddingLab from '~/components/labs/EmbeddingLab.astro';
   prerequisites={["Satellite embeddings (AlphaEarth)", "Forest primitives with machine learning"]}
 />
 
-This exercise uses the [Satellite Embedding dataset](/bhutan-hfld-training/day-4/satellite-embeddings/) in two ways. **Part A** trains a classifier on the 64 <Term id="embedding" /> bands, instead of composites and covariates, to make a probability layer (a primitive) for one class. **Part B** searches for places similar to a few reference points using cosine similarity. **Part C** maps change between two years. The script runs top to bottom; switch layers on and off in the Layers menu.
+This exercise uses the [Satellite Embedding dataset](/lulc-mapping-training/day-4/satellite-embeddings/) in two ways. **Part A** trains a classifier on the 64 <Term id="embedding" /> bands, instead of composites and covariates, to make a probability layer (a primitive) for one class. **Part B** searches for places similar to a few reference points using cosine similarity. **Part C** maps change between two years. The script runs top to bottom; switch layers on and off in the Layers menu.
 
 <Callout type="mistake" title="Assets you need">
-Part A reads the trainers' labelled samples (`projects/bhutan-hfld-readiness-training/assets/trainingData/Bhutan_labels_multiclass`). Without access, use your own points with a `class_name` property ([Collecting training data](/bhutan-hfld-training/day-4/training-data/)). Parts B and C need no private assets.
+Part A reads the trainers' labelled samples (`projects/bhutan-hfld-readiness-training/assets/trainingData/Bhutan_labels_multiclass`). Without access, use your own points with a `class_name` property ([Collecting training data](/lulc-mapping-training/day-4/training-data/)). Parts B and C need no private assets.
 </Callout>
 
 ## Part A: a primitive from embeddings
 
 ### Setup: area, target class, samples and embeddings
 
-Set the target class, load the labelled samples, and load the 2024 embedding image (a mosaic of the annual tiles covering the samples). Compare this with the [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/) workflow: the embedding image takes the place of the whole composite-plus-covariates stack, with no pre-processing.
+Set the target class, load the labelled samples, and load the 2024 embedding image (a mosaic of the annual tiles covering the samples). Compare this with the [Forest primitives](/lulc-mapping-training/day-3/forest-primitives/) workflow: the embedding image takes the place of the whole composite-plus-covariates stack, with no pre-processing.
 
 <CodeBlock script="day-4/embeddings-classification-similarity.js" lines={[20, 67]} />
 
@@ -126,11 +125,9 @@ For each reference point, turn its 64 values into a constant image and take the 
 band_names = mosaic.bandNames()
 sample_embeddings = mosaic.sampleRegions(collection=samples, scale=10, geometries=True)
 
-
 def similarity_to(f):
     vec = ee.Image.constant(f.toArray(band_names)).arrayFlatten([band_names]).toFloat()
     return vec.multiply(mosaic).reduce(ee.Reducer.sum()).rename("similarity")
-
 
 mean_similarity = ee.ImageCollection(sample_embeddings.map(similarity_to)).mean().clip(small_aoi)
 similarity_mask = mean_similarity.gt(0.80)
@@ -163,10 +160,8 @@ The same dot product, between one pixel's embeddings in two years, measures how 
 # Assumes `aoi`, the search area geometry.
 emb = ee.ImageCollection("GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL")
 
-
 def embedding_for(y, aoi):
     return emb.filterDate(f"{y}-01-01", f"{y + 1}-01-01").filterBounds(aoi).mosaic().select("A.*")
-
 
 change = embedding_for(2023, aoi).multiply(embedding_for(2024, aoi)).reduce(ee.Reducer.sum())
 ```
@@ -177,7 +172,7 @@ Low similarity can also come from a wet year against a dry one, so check flagged
 
 ## Try it: embedding similarity
 
-See similarity as an angle, rank places by how alike their embeddings are, and set the threshold that flags change between two years. The vectors in this lab are synthetic, made to behave like real embeddings. The same lab is on its own page: [Lab: Embedding similarity](/bhutan-hfld-training/labs/embedding-similarity/).
+See similarity as an angle, rank places by how alike their embeddings are, and set the threshold that flags change between two years. The vectors in this lab are synthetic, made to behave like real embeddings. The same lab is on its own page: [Lab: Embedding similarity](/lulc-mapping-training/labs/embedding-similarity/).
 
 <EmbeddingLab headingLevel={3} />
 
@@ -250,16 +245,3 @@ Red pixels are places whose embeddings changed most between the two years; check
   "Cosine similarity (dot product) to a few reference samples finds similar places; average several samples for robustness.",
   "Similarity between years flags change, which must be checked.",
 ]} />
-
-<Credit
-  source="EXERCISE D4: Land Cover Classification and Cosine Similarity Using AlphaEarth Foundation Embeddings"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Title typo corrected (\"Simarity\")",
-    "Converted to a web lesson; the exercise's two scripts run as Parts A and B; new Part C maps change between years",
-    "Exercise text said a Random Forest model with a 0/1 class attribute; the code (followed here) uses Gradient Tree Boost and the multiclass class_name labels",
-    "Binary layer name restored (commented out when the code was extracted); the similarity mask exports to your own project instead of projects/servir-mekong/temp",
-    "Added explanations, Python versions, practice and a quiz",
-  ]}
-/>

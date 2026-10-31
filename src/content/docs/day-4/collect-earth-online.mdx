@@ -30,7 +30,7 @@ import References from '~/components/References.astro';
 This lesson was written for the website; the May 2026 training demonstrated Collect Earth Online live. The trainers will review it. Menus in CEO change from time to time: if a button has moved, look for the same step nearby.
 :::
 
-<Term id="ceo" /> ([collect.earth](https://collect.earth)) is a free, web-based tool for interpreting sample plots on high-resolution imagery. Several interpreters can work on the same project, and the results are exported as tables. Here it turns the stratified sample from [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) into **reference data**: the "true" class of each sample, which is compared with the map on Day 5.
+<Term id="ceo" /> ([collect.earth](https://collect.earth)) is a free, web-based tool for interpreting sample plots on high-resolution imagery. Several interpreters can work on the same project, and the results are exported as tables. Here it turns the stratified sample from [Stratified sampling in GEE](/lulc-mapping-training/day-5/stratified-sampling-gee/) into **reference data**: the "true" class of each sample, which is compared with the map on Day 5.
 
 ## The response design
 
@@ -41,7 +41,7 @@ Before anyone interprets a plot, write down the **response design**: the rules t
 3. **The labelling protocol.** The class definitions and the rules for hard cases.
 4. **The definition of agreement.** How a reference label is compared with the map: here, how the start and end land-cover answers become a reference **stratum class** (forest, non-forest or deforestation) to set against the map's stratum.
 
-For Bhutan's HFLD work, the protocol should include:
+For Bhutan's land-cover work, the protocol should include:
 
 | Rule | Example |
 |---|---|
@@ -61,11 +61,11 @@ Why this matters: the reference labels are treated as truth. If two interpreters
 
 1. **Sign in** at [collect.earth](https://collect.earth) and create (or join) an **institution** for your team.
 
-2. **Create a project** in the institution. Give it a clear name, for example *Bhutan HFLD reference sample 2020–2025*, and a description of the period and the map being assessed.
+2. **Create a project** in the institution. Give it a clear name, for example *Bhutan land-cover reference sample 2020–2025*, and a description of the period and the map being assessed.
 
 3. **Choose the imagery.** Add the basemaps interpreters will use: high-resolution imagery, plus Sentinel-2 or Landsat imagery for the start and end of the reporting period, so change can be seen.
 
-4. **Upload the plots and samples.** Use the shapefiles exported in [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/): the plot file (each feature with a `plotID`) and the sample file (each point with a `plotID` and a `sampleID`). Zip each shapefile's parts (.shp, .shx, .dbf, .prj) before uploading. CEO also accepts CSV files with coordinates.
+4. **Upload the plots and samples.** Use the shapefiles exported in [Stratified sampling in GEE](/lulc-mapping-training/day-5/stratified-sampling-gee/): the plot file (each feature with a `plotID`) and the sample file (each point with a `plotID` and a `sampleID`). Zip each shapefile's parts (.shp, .shx, .dbf, .prj) before uploading. CEO also accepts CSV files with coordinates.
 
 5. **Write the survey questions** from the response design. For example:
    - *Land cover at the end of the period?* Forest, Cropland, Grassland, Settlement, Wetland, Other land.
@@ -80,7 +80,7 @@ Why this matters: the reference labels are treated as truth. If two interpreters
 </Steps>
 
 <Callout type="mistake" title="Keep the sample unchanged">
-Don't move, add or delete plots after the sample is drawn: that breaks the probability design. If a plot can't be interpreted, record that and report how many there were. Leaving them out of the analysis can bias the estimates if they differ from the rest, which is why [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/) suggests drawing a few spare samples per stratum.
+Don't move, add or delete plots after the sample is drawn: that breaks the probability design. If a plot can't be interpreted, record that and report how many there were. Leaving them out of the analysis can bias the estimates if they differ from the rest, which is why [Stratified sampling in GEE](/lulc-mapping-training/day-5/stratified-sampling-gee/) suggests drawing a few spare samples per stratum.
 </Callout>
 
 ## Interpret the plots
@@ -102,7 +102,7 @@ To analyse them, you need, for each sample, its **map class** (the stratum from 
 2. Turn the map stratum codes into names: 1 = Forest, 2 = Non-forest, 3 = Deforestation.
 3. Turn each sample's start and end answers into a reference stratum class: forest at both dates = Forest; forest at the start and not at the end = Deforestation; not forest at the end (and not deforestation) = Non-forest.
 4. Make a table with two columns, `map` and `reference`, using these names.
-3. Paste it into the [accuracy and area calculator](/bhutan-hfld-training/labs/accuracy-area-estimator/), with the mapped area of each stratum.
+3. Paste it into the [accuracy and area calculator](/lulc-mapping-training/labs/accuracy-area-estimator/), with the mapped area of each stratum.
 
 The trainers' Code Editor script for the CEO demonstration is [code.earthengine.google.com/0cbd5b45585eaf7252becc41c417ae6e](https://code.earthengine.google.com/0cbd5b45585eaf7252becc41c417ae6e).
 
@@ -144,7 +144,3 @@ A complete answer has: a short response design document; a CEO project with your
 ]} />
 
 <References />
-
----
-
-*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*

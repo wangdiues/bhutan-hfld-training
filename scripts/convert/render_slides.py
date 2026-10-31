@@ -69,9 +69,8 @@ TITLES = {
 }
 CREDIT = ("Adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026) "
           "by Ate Poortinga and Samuel, Conservation International. Third-party pictures removed. CC BY 4.0.")
-CREDIT_ORIGINAL = ("Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and "
-                   "Samuel, Conservation International, shown with their permission. Pictures on the slides "
-                   "belong to their owners and are not covered by this site's CC BY 4.0 licence.")
+CREDIT_ORIGINAL = ("Shown with the trainers' permission (see Acknowledgements). Pictures on the slides belong to "
+                   "their owners and are not covered by this site's CC BY 4.0 licence.")
 KEEP_PICTURES = False
 
 
@@ -218,7 +217,7 @@ def render(slug, app):
             title = old["title"]
         data = {
             "deck": slug, "title": title, "day": day, "lesson": lesson,
-            "source": f"{src_rel} (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
+            "source": "the May 2026 training" if KEEP_PICTURES else f"{src_rel} (May 2026 training)",
             "credit": CREDIT_ORIGINAL if KEEP_PICTURES else CREDIT,
             "slides": [{"image": s["image"], "source_slide": s["n"], "title": s["title"], "text": s["text"],
                         "notes": s["notes"], "hidden_pictures": len(s["hide"])} for s in slides],

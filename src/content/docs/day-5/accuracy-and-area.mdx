@@ -7,7 +7,6 @@ sidebar:
 import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -32,9 +31,9 @@ import matrixImg from '~/assets/day-5/accuracy-and-area/s06-19cb3093c5.webp';
   prerequisites={["Stratified sampling in GEE", "Collect Earth Online"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/accuracy-and-area/) give a visual summary.
+The [slides for this lesson](/lulc-mapping-training/slides/accuracy-and-area/) give a visual summary.
 
-After the stratified sample has been interpreted in [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/), each sample has two labels: the **map class** (its stratum) and the **reference class** (what the interpreter saw). This lesson turns those pairs into accuracy measures and area estimates <Cite id="olofsson2014" />.
+After the stratified sample has been interpreted in [Collect Earth Online](/lulc-mapping-training/day-4/collect-earth-online/), each sample has two labels: the **map class** (its stratum) and the **reference class** (what the interpreter saw). This lesson turns those pairs into accuracy measures and area estimates <Cite id="olofsson2014" />.
 
 <Image src={ceoMap} alt="Collect Earth Online plot over the sampling frame map, with sample points inside a circular plot and the class legend." />
 
@@ -48,8 +47,8 @@ Maps contain classification errors, give no sign of over- or under-estimation, a
 2. derives the uncertainty of the estimates;
 3. if required, uses that information to **adjust** the area estimates.
 
-<Callout type="mistake" title="Thresholds: what the standard actually says">
-The training slide stated that "ART-TREES typically requires forest cover maps to have accuracy > 90%". Neither TREES 2.0 nor TREES 3.0 sets a map-accuracy threshold. TREES asks for a probability sample, the error matrix, user's and producer's accuracy and area estimates with 90% confidence intervals <Cite id="trees3" at="Section 5.1.1.1" />. It handles uncertainty through a deduction that grows with the half-width of the 90% confidence interval <Cite id="trees3" at="Section 8" />. See [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/). The slide's second rule of thumb, that "Verra Avoided Unplanned Deforestation requires forest cover maps to have uncertainty < 20%", concerns a different standard and has not been checked here.
+<Callout type="mistake" title="Thresholds: check the programme you report to">
+The training slides quoted rules of thumb such as "accuracy > 90%" and "uncertainty < 20%". There is no universal threshold: each reporting programme or standard sets its own rules, and many handle uncertainty through deductions rather than pass marks. Check the requirements of the programme you report to. Whatever they are, the same evidence is needed: a probability sample, the error matrix, user's and producer's accuracy, and area estimates with confidence intervals <Cite id="olofsson2014" />.
 </Callout>
 
 ## The confusion matrix
@@ -105,7 +104,7 @@ The calculator reproduces the training's confusion-matrix spreadsheet. It opens 
 <AccuracyLab />
 
 <Callout type="bhutan">
-Bhutan context: in the training example, the Non-Forest stratum had no samples, so its area could not be adjusted. Every stratum with mapped area needs samples; for HFLD, the deforestation stratum's uncertainty usually decides how precise the result is.
+Bhutan context: in the training example, the Non-Forest stratum had no samples, so its area could not be adjusted. Every stratum with mapped area needs samples; for forest change, the deforestation stratum's uncertainty usually decides how precise the result is.
 </Callout>
 
 ## Common mistakes
@@ -151,16 +150,3 @@ Recompute the worked example: mapped deforestation 17,000 ha, 18 of 23 samples c
 ]} />
 
 <References />
-
-<Credit
-  source="D5 Data Analysis: Accuracy Assessment and Area Adjustment (slides)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides rewritten as a web lesson; Lab 2 (the confusion-matrix spreadsheet as a calculator) embedded",
-    "Standard error in the uncertainty example corrected to 1,495 ha (the slide said 1,435; its ±2,459 ha and 18.5% are right)",
-    "The \">90% accuracy\" ART-TREES rule of thumb corrected: neither TREES 2.0 nor 3.0 sets a map-accuracy threshold (uncertainty is handled by deductions, Section 8); the Verra \"<20% uncertainty\" claim is left unchecked",
-    "Kappa scale's top category given as \"almost perfect\" (Landis and Koch); note that Olofsson et al. advise against kappa",
-    "Simple user's-accuracy adjustment explained as removing commission only",
-  ]}
-/>

@@ -1,10 +1,9 @@
 /**
  * Mosaics and composites: what the difference looks like
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
  * Accompanies: D2-Creating Mosaics and Composites from Image Collections.pptx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * The slides explain these ideas without code; this script was written for the website.
  * Code licence: MIT.
  */

@@ -3,13 +3,13 @@
  "title": "Designing a Stratified Random Sampling Frame",
  "day": 5,
  "lesson": "day-5/sampling-design",
- "source": "Day 5/D5-Designing a Stratified Random Sampling Frame.pptx (Bhutan ART-TREES HFLD Readiness Training, May 2026)",
- "credit": "Slides from the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International, shown with their permission. Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
+ "source": "the May 2026 training",
+ "credit": "Shown with the trainers' permission (see Acknowledgements). Pictures on the slides belong to their owners and are not covered by this site's CC BY 4.0 licence.",
  "slides": [
   {
    "image": "01.webp",
    "source_slide": 2,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Key Considerations for Response Design\n- Data Collection Requirements\n- Type of Sampling Design\n- Sample size from Sampling Strategy\n- Will Determine:\n- Amount of time and effort\n- Complexity of response design",
    "notes": "",
    "hidden_pictures": 0
@@ -25,7 +25,7 @@
   {
    "image": "03.webp",
    "source_slide": 4,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Learning Objectives\n- Understand the key considerations when designing your sampling frame\n- Assess the pros and cons of different sampling designs\n- Determine the sampling size, allocate samples",
    "notes": "",
    "hidden_pictures": 0
@@ -33,7 +33,7 @@
   {
    "image": "04.webp",
    "source_slide": 5,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "Predicted: Deforestation\n\n- Why can’t we use land cover maps as they are?\n- Classification errors\n- No indication of over/under-estimation\n- No uncertainty of estimates\n- Objectives of Sampling\n- Estimate areas with characteristics we want in an unbiased manner\n- Assess the accuracy of a land cover map\n- Derive the uncertainty of our estimation\n\nActually: Forest Edge",
    "notes": "",
    "hidden_pictures": 0
@@ -41,7 +41,7 @@
   {
    "image": "05.webp",
    "source_slide": 6,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Using Strata\n- Difference in detection accuracy between land cover types\n- Difference in demanded accuracy for analysis (eg. minimum accuracy requirements for forest)\n- Accounting for rare land cover types that would not be sampled if not stratified\n- Considerations\n- Methodology requirements for stratification (eg by deforestation risk and forest type)",
    "notes": "",
    "hidden_pictures": 0
@@ -49,7 +49,7 @@
   {
    "image": "06.webp",
    "source_slide": 7,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Case Study: Estimating Deforestation\n- Stratify land cover map by Forest Type and Deforestation Risk\n\nProject Area Stratification\n\n- Simple Random\n- Every sampling unit (pixel) has an equal chance of being sampled.\n- Advantages:\n- Maximum potential sampling units (if sample size needs to be increased)\n- Disadvantages:\n- Difficult to locate in the field\n\n- Simple Systematic\n- Samples are at fixed distance and heading from each other\n- Advantages:\n- Easy to locate in the field\n- Disadvantages:\n- Fewer potential sampling units\n- Confounding spatial patterns must be identified and stratified (eg. Terrain, Farmland)\n\n- Clustered\n- Cluster of samples generated around initial selected unit\n- *Can be used with Simple Random or Simple Systematic\n- Advantages:\n- High confidence with interpretation data\n- Disadvantages:\n- Data within sampling group is correlated\n- High LOE, time-intensive",
    "notes": "",
    "hidden_pictures": 0
@@ -57,7 +57,7 @@
   {
    "image": "07.webp",
    "source_slide": 8,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- Useful Resources\n- OpenMRV: Sampling design for estimation of area and map accuracy\n- Basic Concepts\n- Area proportions determines sample allocation\n- Expected accuracy determines sample size*\n- Balance between minimum accuracy requirements and LOE",
    "notes": "",
    "hidden_pictures": 0
@@ -65,7 +65,7 @@
   {
    "image": "08.webp",
    "source_slide": 9,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "- What it affects\n- Larger: Estimated accuracy is closer to actual accuracy\n- Smaller: Less effort, less time, less QAQC\n- Considerations\n- Larger samples won’t increase accuracy\n- Stratification quality is critical\n  - Modularity [easy to divide strata]\n  - Representative of reality\n- Increase sampling strategically if your initial assumptions result in inaccuracies",
    "notes": "",
    "hidden_pictures": 0
@@ -81,7 +81,7 @@
   {
    "image": "10.webp",
    "source_slide": 11,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "Project Area\n\nStratification Layer 1\n\nStratification Layer 𝑥\n\nGeospatial Data (Input)\n\nArea Proportions\n\nDecision\n\nIntermediate Calculations\n\nSample Size of Strata 1\n\nSample Size of Strata 𝑥\n\nGeospatial Data (Output)\n\n- Sampling Design\n- (Simple Random/ Simple Stratified/ Clustered)\n\nSampling Units of Strata 1\n\nSampling Units of Strata 𝑥",
    "notes": "",
    "hidden_pictures": 0
@@ -89,7 +89,7 @@
   {
    "image": "11.webp",
    "source_slide": 12,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "Geospatial Data (Input)\n\nProject Area\n\n- 3 Forest Types\n- Evergreen\n- Semi-evergreen\n- Deciduous\n\n- 3 Deforestation Risk\n- High\n- Medium\n- Low\n\nDecision\n\nIntermediate Calculations\n\n- Area Proportions\n- High Risk Evergreen\n- …\n- Low Risk Deciduous\n\nGeospatial Data (Output)\n\nSample Size of Strata 1\n\nSample Size of Strata 𝑥\n\nTotal: 2100 Samples\n\n- Sampling Design\n- Clustered Simple Random\n\nSampling Units of Strata 1\n\nSampling Units of Strata 𝑥\n\nTotal: 18900 Sample Units for 2100 Reference data points",
    "notes": "",
    "hidden_pictures": 0
@@ -97,7 +97,7 @@
   {
    "image": "12.webp",
    "source_slide": 13,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "| Function | Use |\n|---|---|\n| .reduceRegion | Uses a geometry to calculate from the input raster a statistic defined by a Reducer Useful to calculate area proportions |\n| ee.Reducer | Defines a statistic for the .reduceRegion function |\n| ee.Image.pixelArea() | Dynamically calculates the projection-defined area of each pixel of a raster, turning each pixel into the area in square meters Divide the resulting raster by 10000 to convert it to hectares Useful to calculate area proportions |\n| .updateMask | Eliminating areas with another raster value mask from being sampled |\n| .stratifiedSample | Accepts a list of sample sizes [Sample Size List] Accepts a list of raster values for the land cover map [Classified Map List] For each value of the raster listed in the Classified Map List, selects the number of pixels listed in the Sample Size List and creates a point at the center of the selected pixels. Recommended to assign a sample size larger than designed, then trim the samples by strata later |",
    "notes": "",
    "hidden_pictures": 0
@@ -105,7 +105,7 @@
   {
    "image": "13.webp",
    "source_slide": 14,
-   "title": "HFLD Readiness Training",
+   "title": "",
    "text": "| Function | Use |\n|---|---|\n| .buffer | Transforms a point into a circular polygon Useful to create clustered samples Useful to detect spatially overlapping samples |\n| .bounds | Transforms a circular polygon into a square polygon Useful to create square sampling plots |\n| .iterate | Runs a iterative function that returns the results of the function to a first element (a List or FeatureCollection) Useful to check for overlaps iteratively between samples within a specified distance Computationally intensive and needs to be run in a separate step Less computationally intensive than running a .function with filters |\n| .limit | Trims a FeatureCollection down to a specified size Useful within a function to trim a sample within a strata down to the desired sample size. |",
    "notes": "",
    "hidden_pictures": 0

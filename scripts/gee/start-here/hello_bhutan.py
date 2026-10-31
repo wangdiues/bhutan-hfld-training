@@ -1,6 +1,6 @@
 """Hello Bhutan: a first Earth Engine script, Python (geemap) version.
 
-Bhutan ART-TREES HFLD Readiness Training, course website ("Start here" page).
+LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
 Code licence: MIT.
 """
 import ee

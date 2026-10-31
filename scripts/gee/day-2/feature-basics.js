@@ -1,10 +1,8 @@
 /**
  * Feature collections and basic vector analysis: buffer, clip, merge, union
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: D2-Importing and Exporting Datasets with Google Earth Engine (GEE).pptx (slides 3-7, 14).
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Slide 14's code is copied as is; the buffer, clip, merge and union examples were written for the
  * website (the slides explain them with figures only). Code licence: MIT.
  */

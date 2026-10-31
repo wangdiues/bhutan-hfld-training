@@ -1,10 +1,8 @@
 /**
  * Bhutan MRV Landsat optical composite
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: D2-Bhutan_MRV_Landsat_Optical_Composite.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - `geometry` (a drawn point used only for the preview layers) defaults to Thimphu.
  *   - The export description used 2024 while the year and asset were 2025; both now use targetYear,

@@ -33,8 +33,6 @@ A normalised difference $(a-b)/(a+b)$ is unchanged when both bands are multiplie
 - **Reading one value as a class.** Typical values overlap between surfaces. Use indices as covariates for a classifier, not as fixed thresholds.
 </Callout>
 
-The formulas are in `src/lib/stats/indices.ts`, with automated tests, and match the course's [covariates script](/bhutan-hfld-training/day-3/covariates/). IBI, which that script also computes, is left out here: in the index form it uses, the denominator can cross zero, so its values are unbounded and can't be compared on one scale. Values beyond ±10, which only a near-zero denominator produces, are shown as —. The [cheat sheet](/bhutan-hfld-training/reference/cheat-sheet/) lists the bands of each sensor.
+The formulas are in `src/lib/stats/indices.ts`, with automated tests, and match the course's [covariates script](/lulc-mapping-training/day-3/covariates/). IBI, which that script also computes, is left out here: in the index form it uses, the denominator can cross zero, so its values are unbounded and can't be compared on one scale. Values beyond ±10, which only a near-zero denominator produces, are shown as —. The [cheat sheet](/lulc-mapping-training/reference/cheat-sheet/) lists the bands of each sensor.
 
 <References />
-
-*Written for this website by the course maintainers, building on the Bhutan ART-TREES HFLD Readiness Training (May 2026) by Ate Poortinga and Samuel, Conservation International. Content CC BY 4.0. See [Credits](/bhutan-hfld-training/about/credits/).*

@@ -1,10 +1,8 @@
 /**
  * Working with image collections: filtering, visualising and reducing
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: D1 WORKING WITH IMAGE COLLECTIONS.pptx (slides 9-20).
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - The slides show snippets only; this script joins them into one runnable example for Paro.
  *   - The region reduction uses a Paro valley rectangle instead of `santaCruz` (not defined, not Bhutan).

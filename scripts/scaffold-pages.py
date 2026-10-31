@@ -15,7 +15,6 @@ DESIGN = os.path.join(ROOT, "docs", "learning-design.md")
 # (task id, path under src/content/docs without extension, title, sidebar order, diataxis type)
 PAGES = [
     ("M4-00", "start-here", "Start here", 0, "tutorial"),
-    ("M4-01", "day-1/art-trees-hfld-requirements", "ART-TREES HFLD requirements", 1, "tutorial"),
     ("M4-02", "day-1/introduction-to-earth-engine", "Introduction to Earth Engine", 2, "tutorial"),
     ("M4-03", "day-1/code-editor-and-data-catalog", "The Code Editor and data catalog", 3, "tutorial"),
     ("M4-04", "day-1/javascript-basics", "JavaScript basics", 4, "tutorial"),
@@ -49,7 +48,6 @@ PAGES = [
     ("M4-32", "day-5/recap", "Day 5 recap quiz", 6, "tutorial"),
     ("M4-33", "how-to/debug-earth-engine", "Debug Earth Engine errors", 1, "how-to"),
     ("M4-40", "how-to/index", "How-to guides", 0, "how-to"),
-    ("M4-38", "explanation/trees-2-to-3", "TREES 2.0 → 3.0 for HFLD", 1, "explanation"),
     ("M4-39", "explanation/index", "Explanation", 0, "explanation"),
     ("M4-34", "reference/script-library", "Script library", 1, "reference"),
     ("M4-35", "reference/assets", "Asset catalogue", 2, "reference"),
@@ -87,7 +85,7 @@ def objectives():
 
 
 def body(tid, kind, objs):
-    status = ":::note[Coming soon]\nThis page is being written. Follow progress on [GitHub](https://github.com/wangdiues/bhutan-hfld-training).\n:::\n"
+    status = ":::note[Coming soon]\nThis page is being written. Follow progress on [GitHub](https://github.com/wangdiues/lulc-mapping-training).\n:::\n"
     if tid in objs and objs[tid][0] and kind == "tutorial":
         items, time = objs[tid]
         teach, _, practice = time.partition("+")

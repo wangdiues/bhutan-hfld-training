@@ -52,23 +52,23 @@ jobs:
       - name: Accessibility scan (axe, WCAG 2 AA) of every page
         run: |
           npx astro preview --port 4321 &
-          npx wait-on --timeout 60000 http://localhost:4321/bhutan-hfld-training/
-          npm run check:a11y -- --sitemap http://localhost:4321/bhutan-hfld-training/sitemap-0.xml \
+          npx wait-on --timeout 60000 http://localhost:4321/lulc-mapping-training/
+          npm run check:a11y -- --sitemap http://localhost:4321/lulc-mapping-training/sitemap-0.xml \
             --sitemap-find "https://wangdiues.github.io" --sitemap-replace "http://localhost:4321"
 
       - name: Stage the site under its base path for link checking
-        run: mkdir -p _site && cp -r dist _site/bhutan-hfld-training
+        run: mkdir -p _site && cp -r dist _site/lulc-mapping-training
 
       - name: Link check (internal and external)
         uses: lycheeverse/lychee-action@v2
         with:
-          # Root-relative links (/bhutan-hfld-training/...) resolve against _site, like on GitHub Pages.
+          # Root-relative links (/lulc-mapping-training/...) resolve against _site, like on GitHub Pages.
           args: >-
             --no-progress
             --root-dir ${{ github.workspace }}/_site
             --exclude '^https://code\.earthengine\.google\.com'
             --exclude '^https://wangdiues\.github\.io'
-            --exclude '^https://github\.com/wangdiues/bhutan-hfld-training/edit/'
+            --exclude '^https://github\.com/wangdiues/lulc-mapping-training/edit/'
             --accept '200..=299,403,429'
             '_site/**/*.html'
           fail: true

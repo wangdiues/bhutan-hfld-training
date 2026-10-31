@@ -108,7 +108,7 @@ export function certificatePdf(input: CertificateInput): Uint8Array {
 	line('This certifies that', 420, 14, 'F3', 0.35);
 	line(input.name, 375, 28, 'F2', 0.08);
 	line('completed the self-paced online course', 335, 14, 'F3', 0.35);
-	line('Map Bhutan\'s forests for ART-TREES: Bhutan HFLD Training', 305, 16, 'F2', 0.15);
+	line('LULC Mapping Training', 305, 16, 'F2', 0.15);
 	line('and passed the quizzes for:', 270, 12, 'F1', 0.35);
 	input.days.forEach((d, i) => line(`Day ${d.day}: ${d.title}`, 245 - i * 18, 12, 'F1', 0.2));
 	line(`Date: ${input.date}`, 120, 12, 'F1', 0.2);
@@ -121,7 +121,7 @@ export function certificatePdf(input: CertificateInput): Uint8Array {
 		0.4,
 	);
 	line(
-		'Course adapted, with permission, from the Bhutan ART-TREES HFLD Readiness Training (May 2026). Content CC BY 4.0.',
+		'Course materials used with permission; see the Acknowledgements page. Content CC BY 4.0.',
 		56,
 		9,
 		'F3',
@@ -136,7 +136,7 @@ export function certificatePdf(input: CertificateInput): Uint8Array {
 		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
 		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>',
 		`<< /Length ${latin1Length(content)} >>\nstream\n${content}\nendstream`,
-		`<< /Title ${pdfString('Certificate of completion')} /Producer ${pdfString('Bhutan HFLD Training website')} >>`,
+		`<< /Title ${pdfString('Certificate of completion')} /Producer ${pdfString('LULC Mapping Training website')} >>`,
 	];
 	let pdf = '%PDF-1.4\n';
 	const offsets: number[] = [];

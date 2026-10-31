@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://wangdiues.github.io/bhutan-hfld-training/sitemap-index.xml
+Sitemap: https://wangdiues.github.io/lulc-mapping-training/sitemap-index.xml

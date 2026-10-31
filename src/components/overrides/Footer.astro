@@ -27,7 +27,6 @@ const days = [...new Set(slots.map((s) => s.day))];
 				{slots.map(({ day, session }) => (
 					<li>
 						Day {day}, {session.time}: {session.title}
-						{session.led && ` (${session.led})`}
 					</li>
 				))}
 			</ul>

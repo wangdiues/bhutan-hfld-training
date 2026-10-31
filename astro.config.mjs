@@ -8,7 +8,7 @@ import offline from './integrations/offline.mjs';
 
 // GitHub Pages project site: https://<user>.github.io/<repo>/
 const GITHUB_USER = 'wangdiues';
-const REPO = 'bhutan-hfld-training';
+const REPO = 'lulc-mapping-training';
 
 // https://astro.build/config
 export default defineConfig({
@@ -21,9 +21,9 @@ export default defineConfig({
 	},
 	integrations: [
 		starlight({
-			title: 'Bhutan HFLD Training',
+			title: 'LULC Mapping Training',
 			description:
-				'An open course on producing ART-TREES HFLD activity data for Bhutan with Google Earth Engine.',
+				'A free course in land use and land cover (LULC) mapping with Google Earth Engine, using Bhutan as the worked example.',
 			logo: {
 				light: './src/assets/logo-light.svg',
 				dark: './src/assets/logo-dark.svg',
@@ -48,7 +48,7 @@ export default defineConfig({
 				{ tag: 'meta', attrs: { property: 'og:image', content: `https://${GITHUB_USER}.github.io/${REPO}/og-image.png` } },
 				{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
 				{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
-				{ tag: 'meta', attrs: { property: 'og:image:alt', content: "Map Bhutan's forests for ART-TREES: a free course in Google Earth Engine" } },
+				{ tag: 'meta', attrs: { property: 'og:image:alt', content: 'LULC Mapping Training: a free course in land-cover mapping with Google Earth Engine' } },
 				{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
 				{ tag: 'meta', attrs: { name: 'twitter:image', content: `https://${GITHUB_USER}.github.io/${REPO}/og-image.png` } },
 				// Trainer mode (task M6-04): set before the page draws, so trainer notes don't flash.
@@ -68,7 +68,7 @@ export default defineConfig({
 				Sidebar: './src/components/overrides/Sidebar.astro',
 			},
 			// /slides/ pages are custom routes (src/pages/slides/), which the validator cannot see.
-			plugins: [starlightLinksValidator({ exclude: ['/bhutan-hfld-training/slides/', '/bhutan-hfld-training/slides/**'] })],
+			plugins: [starlightLinksValidator({ exclude: ['/lulc-mapping-training/slides/', '/lulc-mapping-training/slides/**'] })],
 			sidebar: [
 				{
 					label: 'Learn',

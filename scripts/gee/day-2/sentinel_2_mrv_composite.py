@@ -3,8 +3,9 @@
 Two seasonal median composites (Jan-Apr and Oct-Dec) of six bands, after Cloud Score+ masking,
 TDOM shadow cleaning and terrain correction, exported as one 12-band Int16 image.
 
-Bhutan ART-TREES HFLD Readiness Training, May 2026. Adapted from "D2-Bhutan_MRV_S2_Composite_Manual"
-by Ate Poortinga & Samuel, Conservation International. Code licence: MIT.
+LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
+Code licence: MIT.
 """
 import math
 

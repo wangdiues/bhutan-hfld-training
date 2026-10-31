@@ -1,10 +1,8 @@
 /**
  * Collecting training data and supervised Random Forest classification (six classes)
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D3_ Part 1-Collecting Training Data-Supervised Classification Method - Random Forest Model.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - This file is the exercise's "Full Supervised Classification Workflow Script"; the Part 4-5
  *     snippets (sampling your own drawn points and exporting them) are shown in the lesson.

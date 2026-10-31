@@ -10,13 +10,11 @@ import { Steps, Tabs, TabItem, LinkCard } from '@astrojs/starlight/components';
 import Callout from '~/components/Callout.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
 import CodeBlock from '~/components/CodeBlock.astro';
 import Term from '~/components/Term.astro';
-import VersionNote from '~/components/VersionNote.astro';
 import Cite from '~/components/Cite.astro';
 import References from '~/components/References.astro';
 
@@ -33,20 +31,17 @@ import References from '~/components/References.astro';
 
 ## What this course is
 
-This is a free, self-paced version of the **Bhutan ART-TREES HFLD Readiness Training** held in May 2026. Over five days you learn to produce the <Term id="activity-data" /> that Bhutan needs for its <Term id="hfld" /> submission under <Term id="art-trees" />: a land-cover map made in Google Earth Engine, and an area estimate for each class with a 90% confidence interval <Cite id="trees3" at="Section 8" />, based on a stratified reference sample <Cite id="olofsson2014" />.
+**LULC Mapping Training** is a free, self-paced course in land use and land cover (LULC) mapping with Google Earth Engine, using Bhutan as the worked example. Over five days you learn to make a land-cover map from satellite images and to estimate the area of each class, with a 90% confidence interval, from a stratified reference sample <Cite id="olofsson2014" />.
 
 By the end you can make a land-cover map for any Dzongkhag and report its accuracy and adjusted areas in a way a technical reviewer can check and repeat.
 
-<VersionNote standard="TREES 3.0">
-The training used TREES 2.0. TREES 3.0 was approved in June 2026, after the training, so this site cites TREES 3.0 and flags any differences from 2.0.
-</VersionNote>
 
 ### Who it is for
 
 - **GIS officers** (for example in the Department of Forests and Park Services) who know Bhutan's forests and GIS software but are new to coding. This is the main audience.
 - **Forestry and environment graduates** who know remote-sensing theory and want hands-on Earth Engine and MRV skills.
 - **Trainers and reviewers** who want to teach the course or check its methods.
-- **Practitioners in other HFLD countries** who want to adapt the workflow.
+- **Practitioners in other countries** who want to adapt the workflow to their own area.
 
 No programming experience is needed. Day 1 teaches the JavaScript you need.
 
@@ -58,7 +53,7 @@ You need a Google account and an Earth Engine Cloud project. Non-commercial use 
 
 1. **Sign in.** Use a Google account that you can keep using after the course, such as your work account.
 
-2. **Register a Cloud project for Earth Engine.** Go to [code.earthengine.google.com/register](https://code.earthengine.google.com/register) and follow the steps: create a new Google Cloud project (or pick an existing one), choose **non-commercial use**, and describe your work, for example "forest monitoring for Bhutan's HFLD reporting". Write down the **project ID**. The Python examples need it.
+2. **Register a Cloud project for Earth Engine.** Go to [code.earthengine.google.com/register](https://code.earthengine.google.com/register) and follow the steps: create a new Google Cloud project (or pick an existing one), choose **non-commercial use**, and describe your work, for example "land-cover mapping for Bhutan". Write down the **project ID**. The Python examples need it.
 
 3. **Open the Code Editor.** Go to [code.earthengine.google.com](https://code.earthengine.google.com/). If it asks for a project, choose the one you just registered. The Code Editor opens with an empty script, a map below it and the Console on the right.
 
@@ -116,40 +111,40 @@ Why this matters: every lesson builds on this pattern. Load a collection, filter
 
 ## The workflow in nine stages
 
-The course follows one workflow. Each stage produces the input for the next, and each day covers one to three stages. The interactive version is on the [home page](/bhutan-hfld-training/).
+The course follows one workflow. Each stage produces the input for the next, and each day covers one to three stages. The interactive version is on the [home page](/lulc-mapping-training/).
 
 <Steps>
 
-1. **Define the area and the forest definition.** Set the area of interest and decide how Bhutan's forest definition becomes map classes. *Day 1:* [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/).
+1. **Define the area and the forest definition.** Set the area of interest and decide how Bhutan's forest and land-cover definitions become map classes. *This page and Day 4:* [RLCMS overview](/lulc-mapping-training/day-4/rlcms-overview/).
 
-2. **Build cloud-free composites.** Mask clouds and shadows, correct for terrain, and take a seasonal median of Sentinel-2 or Landsat images. *Day 2:* [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/).
+2. **Build cloud-free composites.** Mask clouds and shadows, correct for terrain, and take a seasonal median of Sentinel-2 or Landsat images. *Day 2:* [Sentinel-2 MRV composite](/lulc-mapping-training/day-2/sentinel-2-mrv-composite/).
 
-3. **Compute covariates.** Add indices, terrain and seasonal layers that help separate classes. *Day 3:* [Calculating covariates](/bhutan-hfld-training/day-3/covariates/).
+3. **Compute covariates.** Add indices, terrain and seasonal layers that help separate classes. *Day 3:* [Calculating covariates](/lulc-mapping-training/day-3/covariates/).
 
-4. **Collect training data.** Place labelled points for each class. *Days 3 and 4:* [Collecting training data](/bhutan-hfld-training/day-4/training-data/).
+4. **Collect training data.** Place labelled points for each class. *Days 3 and 4:* [Collecting training data](/lulc-mapping-training/day-4/training-data/).
 
-5. **Make primitives.** Train a Random Forest for each class and output a probability layer (a <Term id="primitive" />). *Day 3:* [Forest primitives](/bhutan-hfld-training/day-3/forest-primitives/).
+5. **Make primitives.** Train a Random Forest for each class and output a probability layer (a <Term id="primitive" />). *Day 3:* [Forest primitives](/lulc-mapping-training/day-3/forest-primitives/).
 
-6. **Assemble the land-cover map.** Combine the primitives with decision rules into one categorical map. *Day 4:* [Assemblage](/bhutan-hfld-training/day-4/assemblage/).
+6. **Assemble the land-cover map.** Combine the primitives with decision rules into one categorical map. *Day 4:* [Assemblage](/lulc-mapping-training/day-4/assemblage/).
 
-7. **Design a stratified sample.** Decide the sample size and allocate it across map classes. *Day 5:* [Designing a sampling frame](/bhutan-hfld-training/day-5/sampling-design/).
+7. **Design a stratified sample.** Decide the sample size and allocate it across map classes. *Day 5:* [Designing a sampling frame](/lulc-mapping-training/day-5/sampling-design/).
 
-8. **Interpret the reference sample.** Label each sample point from high-resolution imagery in Collect Earth Online. *Day 4:* [Collect Earth Online](/bhutan-hfld-training/day-4/collect-earth-online/).
+8. **Interpret the reference sample.** Label each sample point from high-resolution imagery in Collect Earth Online. *Day 4:* [Collect Earth Online](/lulc-mapping-training/day-4/collect-earth-online/).
 
-9. **Estimate accuracy and area.** Build the confusion matrix, then the area-adjusted estimates and their 90% confidence intervals, and document everything. *Day 5:* [Accuracy and area](/bhutan-hfld-training/day-5/accuracy-and-area/).
+9. **Estimate accuracy and area.** Build the confusion matrix, then the area-adjusted estimates and their 90% confidence intervals, and document everything. *Day 5:* [Accuracy and area](/lulc-mapping-training/day-5/accuracy-and-area/).
 
 </Steps>
 
 <Callout type="bhutan">
-Bhutan context: the Constitution of Bhutan requires that at least 60% of the country stays under forest (Article 5(3)) <Cite id="constitution2008" />, so forest maps matter for national policy as well as for ART-TREES. Steep terrain and long monsoon cloud cover make mapping hard. That is why the course uses dry-season composites (January to April and October to December) and terrain correction.
+Bhutan context: the Constitution of Bhutan requires that at least 60% of the country stays under forest (Article 5(3)) <Cite id="constitution2008" />, so forest maps matter for national policy. Steep terrain and long monsoon cloud cover make mapping hard. That is why the course uses dry-season composites (January to April and October to December) and terrain correction.
 </Callout>
 
 ## How to use this site
 
 - **Learn (Days 1 to 5)** are the tutorials. Work through them in order. Each one has the code, a quiz and practice at three levels: complete the code, fill in the blanks, and write it from scratch.
-- **[Slides](/bhutan-hfld-training/slides/)** play the original training decks in the browser, for a quick visual summary.
+- **[Slides](/lulc-mapping-training/slides/)** play the original training decks in the browser, for a quick visual summary.
 - **Labs** are calculators and explorers, such as the sample-size and accuracy calculators, that reproduce the workshop spreadsheets.
-- **Explanation** pages give the theory behind a step. **How-to guides** are short recipes. **Reference** has the script library, the asset list and the [glossary](/bhutan-hfld-training/reference/glossary/).
+- **Explanation** pages give the theory behind a step. **How-to guides** are short recipes. **Reference** has the script library, the asset list and the [glossary](/lulc-mapping-training/reference/glossary/).
 - Every code example has a JavaScript version for the Code Editor and a Python (geemap) version. Use whichever you prefer.
 - Quiz scores are saved only in your browser. Nothing is sent anywhere.
 
@@ -182,10 +177,3 @@ Does the number of images in the Console change? Why might it?
 ]} />
 
 <References />
-
-<Credit
-  source="Bhutan ART-TREES HFLD Readiness Training: training agenda"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={["Course overview, audience and workflow written for the website from the agenda's daily objectives", "New: Earth Engine set-up steps and the Hello Bhutan script"]}
-/>

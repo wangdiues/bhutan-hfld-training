@@ -15,12 +15,12 @@ The course's land-cover map is built in two stages, following the Regional Land 
 A single multi-class model gives one label per pixel and hides how the classes compete. Splitting the job has three advantages:
 
 - **Each class can get the training data, and if needed the covariates, that suit it.** Wetland may benefit from water-related covariates; settlement from texture or SWIR. The course uses one covariate stack for every primitive, but each primitive is trained and checked on its own.
-- **Primitives are reusable.** The same forest primitive can feed a national land-cover map, a forest/non-forest map for ART-TREES, and a change analysis.
+- **Primitives are reusable.** The same forest primitive can feed a national land-cover map, a forest/non-forest map, and a change analysis.
 - **Users can see and adjust the decisions.** Thresholds and priorities are written down as rules, which can be discussed with national experts and documented for verification.
 
 ## Primitives
 
-Each primitive comes from a yes/no Random Forest model ([How Random Forest works](/bhutan-hfld-training/explanation/random-forest/)): samples of the class against samples of everything else. Its output is a probability from 0 to 1 (some exports store it as integers from 0 to 100). A pixel can be high in more than one primitive (for example, forest and cropland in agroforestry), or low in all of them.
+Each primitive comes from a yes/no Random Forest model ([How Random Forest works](/lulc-mapping-training/explanation/random-forest/)): samples of the class against samples of everything else. Its output is a probability from 0 to 1 (some exports store it as integers from 0 to 100). A pixel can be high in more than one primitive (for example, forest and cropland in agroforestry), or low in all of them.
 
 ## Assemblage
 
@@ -30,16 +30,16 @@ The assemblage is a **decision tree** written by the analyst, applied pixel by p
 2. Otherwise, is the cropland probability above its threshold? If so, cropland.
 3. … and so on through the classes, ending with a default class.
 
-The tree stops at the **first** rule a pixel passes. So the **order** sets which class wins where primitives overlap, and each **threshold** sets how sure the model must be. In Earth Engine, the course writes the tree as text for `ee.Classifier.decisionTree` ([Assemblage](/bhutan-hfld-training/day-4/assemblage/)).
+The tree stops at the **first** rule a pixel passes. So the **order** sets which class wins where primitives overlap, and each **threshold** sets how sure the model must be. In Earth Engine, the course writes the tree as text for `ee.Classifier.decisionTree` ([Assemblage](/lulc-mapping-training/day-4/assemblage/)).
 
 ## Choosing thresholds and order
 
-- Put the classes that matter most for the purpose first, or those with the most reliable primitives. For HFLD activity data, forest usually comes first.
+- Put the classes that matter most for the purpose first, or those with the most reliable primitives. For forest monitoring, forest usually comes first.
 - Choose each threshold by checking it against samples that were not used for training, and by looking at the map in places you know.
-- Record every threshold and the order in the assumptions log ([Reporting and documentation](/bhutan-hfld-training/day-5/reporting/)), and keep them fixed across years so that maps stay comparable.
+- Record every threshold and the order in the assumptions log ([Reporting and documentation](/lulc-mapping-training/day-5/reporting/)), and keep them fixed across years so that maps stay comparable.
 
 ## Limits
 
-Thresholds are judgements, and changing them changes the mapped areas. This is one more reason why reported areas come from a reference sample rather than from the map alone ([Area estimation](/bhutan-hfld-training/explanation/area-estimation/)).
+Thresholds are judgements, and changing them changes the mapped areas. This is one more reason why reported areas come from a reference sample rather than from the map alone ([Area estimation](/lulc-mapping-training/explanation/area-estimation/)).
 
 <References />

@@ -22,19 +22,19 @@ The 64 values of each pixel form a vector of length 1 (a **unit vector**). For t
 
 $$\mathbf{a}\cdot\mathbf{b} = \sum_{i=0}^{63} a_i b_i = \cos\theta$$
 
-is the **cosine similarity**: 1 for vectors pointing the same way (very similar), 0 for unrelated ones and −1 for opposite ones. In Earth Engine it is a multiplication followed by a sum over the bands ([Satellite embeddings](/bhutan-hfld-training/day-4/satellite-embeddings/)).
+is the **cosine similarity**: 1 for vectors pointing the same way (very similar), 0 for unrelated ones and −1 for opposite ones. In Earth Engine it is a multiplication followed by a sum over the bands ([Satellite embeddings](/lulc-mapping-training/day-4/satellite-embeddings/)).
 
 ## Three uses in the course
 
-1. **Classification.** Use the 64 bands as covariates, alone or with spectral indices. Because the embeddings already summarise a year of data, a classifier often needs fewer training samples ([Embeddings: classification and similarity](/bhutan-hfld-training/day-4/embeddings-classification-similarity/)).
+1. **Classification.** Use the 64 bands as covariates, alone or with spectral indices. Because the embeddings already summarise a year of data, a classifier often needs fewer training samples ([Embeddings: classification and similarity](/lulc-mapping-training/day-4/embeddings-classification-similarity/)).
 2. **Similarity search.** Take the embedding of a few known pixels (for example, a cardamom plantation) and map the similarity of every other pixel to them.
-3. **Change.** Compare the same pixel's embeddings in two years. A similarity well below 1 marks a pixel whose land surface changed, which helps target samples for rare classes such as deforestation ([Determining sample size](/bhutan-hfld-training/day-5/sample-size/)).
+3. **Change.** Compare the same pixel's embeddings in two years. A similarity well below 1 marks a pixel whose land surface changed, which helps target samples for rare classes such as deforestation ([Determining sample size](/lulc-mapping-training/day-5/sample-size/)).
 
 ## Limits
 
 - **Not directly interpretable.** You can't read a land-cover class from the numbers; you need labelled samples or reference pixels.
 - **Annual.** One embedding per year: changes within a year are blended, and the year must match your reporting period.
 - **Model versions.** If the model or dataset is updated, embeddings can change. Record the dataset version you used.
-- **Not a substitute for reference data.** A low similarity shows that something changed, not what changed or whether it counts as deforestation. Map accuracy and areas still come from a reference sample ([Area estimation](/bhutan-hfld-training/explanation/area-estimation/)).
+- **Not a substitute for reference data.** A low similarity shows that something changed, not what changed or whether it counts as deforestation. Map accuracy and areas still come from a reference sample ([Area estimation](/lulc-mapping-training/explanation/area-estimation/)).
 
 <References />

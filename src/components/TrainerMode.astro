@@ -29,7 +29,6 @@ const titleOf = (key: string) => key.replace(/\/$/, '').split('/').pop()!.replac
 						<tr>
 							<th scope="col">Time</th>
 							<th scope="col">Session</th>
-							<th scope="col">Led by</th>
 							<th scope="col">Lesson</th>
 						</tr>
 					</thead>
@@ -38,7 +37,6 @@ const titleOf = (key: string) => key.replace(/\/$/, '').split('/').pop()!.replac
 							<tr>
 								<th scope="row">{s.time}</th>
 								<td>{s.title}</td>
-								<td>{s.led ?? ''}</td>
 								<td>
 									{s.lessons.map((l, i) => (
 										<>

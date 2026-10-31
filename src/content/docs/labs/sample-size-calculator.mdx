@@ -9,7 +9,6 @@ import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import Cite from '~/components/Cite.astro';
 import References from '~/components/References.astro';
-import Credit from '~/components/Credit.astro';
 
 This lab does what the Day 5 workbook *Exercise D5-Sample Size Calculator.xlsx* does. It starts with Bhutan's strata from the training: the Forest class split into three strata (70%, 20% and 10% of its area), one Non Forest stratum, and a Deforestation stratum, which is the class whose area you want to estimate. Change any number and the results update. Your inputs are saved in this browser only.
 
@@ -34,16 +33,9 @@ Why this matters: the rare change class drives the sample size. Olofsson et al. 
 <Callout type="mistake" title="Common mistakes">
 - **Expected proportion of 0 or 1 everywhere.** A stratum with p = 0 or 1 has no variance and adds nothing to the sample size. Use realistic guesses, for example a little deforestation inside the forest strata.
 - **Using map proportions as the margin of error.** The margin of error is a percentage of the target-class area, not of the whole country.
-- **Rounding each stratum separately.** The workbook rounds only the total, so stratum counts can have decimals. Round them when you draw the sample in Earth Engine (see [Stratified sampling in GEE](/bhutan-hfld-training/day-5/stratified-sampling-gee/)).
+- **Rounding each stratum separately.** The workbook rounds only the total, so stratum counts can have decimals. Round them when you draw the sample in Earth Engine (see [Stratified sampling in GEE](/lulc-mapping-training/day-5/stratified-sampling-gee/)).
 </Callout>
 
 The lab's maths is in `src/lib/stats/sampleSizeLab.ts`. An automated test checks that, with the preloaded inputs, it reproduces every output of the workbook to within one part in a million.
 
 <References />
-
-<Credit
-  source="Exercise D5-Sample Size Calculator.xlsx"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={["Rebuilt as an interactive web calculator with the same formulas", "Any number of strata; the role of each stratum in the minimum allocation can be changed", "Added input checks, a chart and CSV export"]}
-/>

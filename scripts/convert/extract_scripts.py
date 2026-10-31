@@ -140,7 +140,7 @@ def header(src_rel, title, links):
         " * Bhutan ART-TREES HFLD Readiness Training, May 2026.",
         f" * Source: {os.path.basename(src_rel)}",
         " * Original authors: Ate Poortinga & Samuel (Conservation International).",
-        " * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/",
+        " * Adapted with the trainers' permission for https://wangdiues.github.io/lulc-mapping-training/",
         " * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.",
     ]
     if links:

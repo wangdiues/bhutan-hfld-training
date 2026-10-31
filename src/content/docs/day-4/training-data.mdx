@@ -8,7 +8,6 @@ import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 import Callout from '~/components/Callout.astro';
 import OpenInGEE from '~/components/OpenInGEE.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -63,12 +62,12 @@ The exercise text names the property `land_class`, but every script that follows
 
 ## Part 2: The annual composite
 
-Use the composite from Day 2 as the input. It can be Landsat, Sentinel-2, or the AlphaEarth satellite embeddings ([Satellite embeddings](/bhutan-hfld-training/day-4/satellite-embeddings/)). To use your own export, click **Import** next to the asset in the Assets tab, or change the asset path in the script. The script below uses the trainers' prepared 2025 Sentinel-2 composite, and also shows the 2024 AlphaEarth embedding for comparison.
+Use the composite from Day 2 as the input. It can be Landsat, Sentinel-2, or the AlphaEarth satellite embeddings ([Satellite embeddings](/lulc-mapping-training/day-4/satellite-embeddings/)). To use your own export, click **Import** next to the asset in the Assets tab, or change the asset path in the script. The script below uses the trainers' prepared 2025 Sentinel-2 composite, and also shows the 2024 AlphaEarth embedding for comparison.
 
 <CodeBlock script="day-4/training-data.js" lines={[24, 72]} />
 
 <Callout type="mistake" title="Assets you need">
-The composite (`projects/servir-mekong/bhutan_primitives/s2_2025_janapr_octdec_int16`) and the labels (`projects/bhutan-hfld-readiness-training/assets/trainingData/…`) were shared with training participants. Without access, use your own composite from the [Sentinel-2 MRV composite](/bhutan-hfld-training/day-2/sentinel-2-mrv-composite/) lesson and the points you collect.
+The composite (`projects/servir-mekong/bhutan_primitives/s2_2025_janapr_octdec_int16`) and the labels (`projects/bhutan-hfld-readiness-training/assets/trainingData/…`) were shared with training participants. Without access, use your own composite from the [Sentinel-2 MRV composite](/lulc-mapping-training/day-2/sentinel-2-mrv-composite/) lesson and the points you collect.
 </Callout>
 
 ## Part 3: Collect the samples
@@ -123,7 +122,7 @@ Now train **one** Random Forest on all six classes at once. Each step of the ful
 
 ### Covariates
 
-The covariate function is the one from [Calculating covariates](/bhutan-hfld-training/day-3/covariates/), adapted to Sentinel-2 band names (B8 = NIR, B11 and B12 = SWIR), plus terrain and JRC water layers:
+The covariate function is the one from [Calculating covariates](/lulc-mapping-training/day-3/covariates/), adapted to Sentinel-2 band names (B8 = NIR, B11 and B12 = SWIR), plus terrain and JRC water layers:
 
 <CodeBlock script="day-4/training-data.js" lines={[73, 152]} />
 
@@ -240,18 +239,3 @@ After drawing six layers with `class` 1–6: `var sample = cropland.merge(forest
   "Merge drawn points with existing samples, sample the covariates, and drop rows with missing values.",
   "One Random Forest can classify all six classes; primitives give more control and keep uncertainty.",
 ]} />
-
-<Credit
-  source="EXERCISE D3 Part 1: Collecting Training Data — Supervised Classification Method (Random Forest Model)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Converted to a web lesson; code copied from the exercise; the full workflow is the course script",
-    "Property name for drawn points given as class (the text said land_class, the code reads class)",
-    "EVI, SAVI, NDBI, MNDWI and IBI restored in the covariate stack (commented out when extracted) and computed from reflectance scaled to 0–1",
-    "alphaEarth defined from the 2024 Satellite Embedding dataset; trailing space removed from an asset path",
-    "Class codes follow the exercise's code (CropLand = 1, Forest = 2); its table said Forest = 1",
-    "Part 2's separate Landsat and Sentinel-2 display snippets replaced by the full script's display lines",
-    "Added a merge example, a comparison table, a Python version, practice and a quiz",
-  ]}
-/>

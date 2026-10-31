@@ -1,10 +1,8 @@
 /**
  * Introduction to Google Earth Engine: the five things Earth Engine does
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: D1 Introduction to GEE_ Features, Capabilities, and Access.pptx (slides 20-24).
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * The slides describe these steps without code; this script was written for the website.
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md.
  */

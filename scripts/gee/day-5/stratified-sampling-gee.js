@@ -1,10 +1,8 @@
 /**
  * Creating a stratified sampling design in Google Earth Engine
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D5_ PART 2-CREATING A STRATIFIED SAMPLING DESIGN IN GOOGLE EARTH ENGINE.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - The two print(...aggregate_histogram('lc_name')...) lines use 'lc_no': the samples carry no
  *     'lc_name' property, so the exercise's histograms came out empty.

@@ -1,10 +1,8 @@
 /**
  * Assemblage: decision-tree rules
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
- * Source: EXERCISE D3_ Final- Assemblage-DECISION TREE RULE.docx
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * Code licence: MIT. Changes from the source are listed in CHANGELOG.md:
  *   - init(), called but not defined in the exercise, is written here: a panel with one threshold
  *     slider per primitive, buttons to re-run the assemblage and the areas, and export tools.

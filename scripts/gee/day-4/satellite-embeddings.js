@@ -1,10 +1,9 @@
 /**
  * Satellite embeddings: similarity search and year-to-year similarity
  *
- * Bhutan ART-TREES HFLD Readiness Training, May 2026.
+ * LULC Mapping Training: https://wangdiues.github.io/lulc-mapping-training/
  * Accompanies: D4-Use of Google_s Satellite Embedding dataset.pptx (slides 12-22).
- * Original authors: Ate Poortinga & Samuel (Conservation International).
- * Adapted with the trainers' permission for https://wangdiues.github.io/bhutan-hfld-training/
+ * Acknowledgements and sources: https://wangdiues.github.io/lulc-mapping-training/about/credits/
  * The slides show these steps as figures and linked scripts; this script was written for the website.
  * Code licence: MIT.
  */

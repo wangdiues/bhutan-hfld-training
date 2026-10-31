@@ -29,12 +29,6 @@
 		"url": "https://doi.org/10.1016/j.jag.2019.101979"
 	},
 	{
-		"id": "trees3",
-		"short": "ART 2026",
-		"text": "Architecture for REDD+ Transactions (2026). The REDD+ Environmental Excellence Standard (TREES), Version 3.0, June 2026. ART Secretariat, Winrock International.",
-		"url": "https://www.artredd.org/wp-content/uploads/2026/06/TREES-3.0-Final-Version-English.pdf"
-	},
-	{
 		"id": "tucker1979",
 		"short": "Tucker 1979",
 		"text": "Tucker, C. J. (1979). Red and photographic infrared linear combinations for monitoring vegetation. Remote Sensing of Environment, 8(2), 127–150.",
@@ -74,23 +68,5 @@
 		"short": "Huete et al. 2002",
 		"text": "Huete, A., Didan, K., Miura, T., Rodriguez, E. P., Gao, X., & Ferreira, L. G. (2002). Overview of the radiometric and biophysical performance of the MODIS vegetation indices. Remote Sensing of Environment, 83(1–2), 195–213.",
 		"url": "https://doi.org/10.1016/S0034-4257(02)00096-2"
-	},
-	{
-		"id": "trees2",
-		"short": "ART 2021",
-		"text": "Architecture for REDD+ Transactions (2021). The REDD+ Environmental Excellence Standard (TREES), Version 2.0, August 2021. ART Secretariat, Winrock International.",
-		"url": "https://www.artredd.org/wp-content/uploads/2021/12/TREES-2.0-August-2021-Clean.pdf"
-	},
-	{
-		"id": "trees3changes",
-		"short": "ART 2026b",
-		"text": "Architecture for REDD+ Transactions (2026). Summary of Changes from TREES 2.0 to 3.0, June 2026.",
-		"url": "https://www.artredd.org/wp-content/uploads/2026/06/TREES-3.0-Summary-of-Changes-English.pdf"
-	},
-	{
-		"id": "art2026bhutan",
-		"short": "ART 2026c",
-		"text": "Architecture for REDD+ Transactions (2026, 7 April). ART accepts TREES documents submitted by Bhutan. News release.",
-		"url": "https://www.artredd.org/art-accepts-trees-documents-submitted-by-bhutan/"
 	}
 ]

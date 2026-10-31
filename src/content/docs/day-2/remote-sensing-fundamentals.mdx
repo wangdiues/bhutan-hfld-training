@@ -7,7 +7,6 @@ sidebar:
 import Callout from '~/components/Callout.astro';
 import Theory from '~/components/Theory.astro';
 import Quiz from '~/components/Quiz.astro';
-import Credit from '~/components/Credit.astro';
 import LessonHeader from '~/components/LessonHeader.astro';
 import KeyPoints from '~/components/KeyPoints.astro';
 import Challenge from '~/components/Challenge.astro';
@@ -25,7 +24,7 @@ import ReflectanceCurves from '~/components/diagrams/ReflectanceCurves.astro';
   prerequisites={["Day 1"]}
 />
 
-The [slides for this lesson](/bhutan-hfld-training/slides/remote-sensing-fundamentals/) give a visual summary. The deck draws on NASA's Applied Remote Sensing Training Program (ARSET).
+The [slides for this lesson](/lulc-mapping-training/slides/remote-sensing-fundamentals/) give a visual summary. The deck draws on NASA's Applied Remote Sensing Training Program (ARSET).
 
 ## What is remote sensing?
 
@@ -56,7 +55,7 @@ Each kind of surface reflects a different share of each wavelength. This pattern
 Light from the sun passes through the atmosphere twice: on the way down and on the way back up to the sensor. Gases and aerosols absorb and scatter part of it. **Atmospheric correction** removes these effects to give **surface reflectance**, which describes the surface itself. This is why the course uses surface-reflectance products such as `COPERNICUS/S2_SR_HARMONIZED`.
 
 <Theory title="From signature to index" more="/explanation/remote-sensing-physics/">
-Because vegetation reflects little red and a lot of NIR, the normalised difference $\text{NDVI} = (NIR - Red)/(NIR + Red)$ is high (about 0.6–0.9) for dense forest, low (about 0.1–0.2) for bare soil and negative for water. The next lesson, [Spectral indices](/bhutan-hfld-training/day-2/spectral-indices/), builds NDVI and other indices in Earth Engine.
+Because vegetation reflects little red and a lot of NIR, the normalised difference $\text{NDVI} = (NIR - Red)/(NIR + Red)$ is high (about 0.6–0.9) for dense forest, low (about 0.1–0.2) for bare soil and negative for water. The next lesson, [Spectral indices](/lulc-mapping-training/day-2/spectral-indices/), builds NDVI and other indices in Earth Engine.
 </Theory>
 
 ## Satellites and sensors
@@ -198,17 +197,3 @@ Forest should show low B4 (red) and high B8 (NIR), so NDVI around 0.6–0.9. The
   "Spatial, spectral, temporal and radiometric resolution trade off against each other; choose the sensor for the task.",
   "Use surface-reflectance (Level-2) products to compare images across dates.",
 ]} />
-
-<Credit
-  source="D2 Fundamentals of Remote Sensing (slides)"
-  authors="Ate Poortinga & Samuel (Conservation International)"
-  date="May 2026"
-  changes={[
-    "Slides rewritten as a web lesson; text adapted from the deck, which draws on NASA ARSET materials",
-    "NASA ARSET and NASA Earth Observatory figures replaced with an original reflectance diagram and tables",
-    "Added Sentinel-2 to the resolution and revisit tables, a Bhutan context note and links to data sources",
-    "Temporal resolution defined as revisit time (the slide equated it with one orbit cycle)",
-    "Sun-synchronous orbit: same local time at each pass, not a daily pass (the slide's Paris example)",
-    "Multispectral given as about 3 to 15 bands (slide: 3 to 10); MODIS revisit 1–2 days (slide: 2); commercial revisit daily or better (slide: OrbView 1–2 days)",
-  ]}
-/>

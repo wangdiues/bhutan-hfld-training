@@ -39,7 +39,7 @@ The Code Editor marks these with a red icon next to the line number before you c
 
 ## 2. Client and server mix-ups
 
-Earth Engine objects (`ee.Number`, `ee.Image`, …) are instructions sent to Google's servers. Your browser cannot see their values, so ordinary JavaScript tests on them silently go wrong. See [JavaScript basics](/bhutan-hfld-training/day-1/javascript-basics/).
+Earth Engine objects (`ee.Number`, `ee.Image`, …) are instructions sent to Google's servers. Your browser cannot see their values, so ordinary JavaScript tests on them silently go wrong. See [JavaScript basics](/lulc-mapping-training/day-1/javascript-basics/).
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -54,7 +54,7 @@ Earth Engine objects (`ee.Number`, `ee.Image`, …) are instructions sent to Goo
 |---|---|---|
 | `Image.select: Pattern 'B8' did not match any bands` | a band name that the image doesn't have (wrong sensor, already renamed, or a typo) | `print(image.bandNames())` |
 | `Image.bandNames: Parameter 'image' is required`, or `print(collection.size())` shows 0 | the filters removed every image (dates in the wrong order, area outside the tiles, cloud filter too strict) | `print(collection.size())` after each filter |
-| `Image asset '…' not found (does not exist or caller does not have access)` | the path is wrong, or the asset belongs to a project you can't read | check the path; see the [asset catalogue](/bhutan-hfld-training/reference/assets/) for how to make your own |
+| `Image asset '…' not found (does not exist or caller does not have access)` | the path is wrong, or the asset belongs to a project you can't read | check the path; see the [asset catalogue](/lulc-mapping-training/reference/assets/) for how to make your own |
 | a layer shows nothing on the map | the image is fully masked, or the `min`/`max` stretch is wrong (for example 0–3000 on reflectance scaled 0–1) | click it with the Inspector; check the values and fix `visParams` |
 | `Dictionary.get: Dictionary does not contain key` | the key name differs, often because a reducer names its output after the band (`B8_mean`, not `mean`) | `print()` the dictionary to see its keys |
 
