@@ -48,8 +48,8 @@ Maps contain classification errors, give no sign of over- or under-estimation, a
 2. derives the uncertainty of the estimates;
 3. if required, uses that information to **adjust** the area estimates.
 
-<Callout type="mistake" title="Thresholds: check the current standard">
-The training slide stated two rules of thumb: "ART-TREES typically requires forest cover maps to have accuracy > 90%" and "Verra Avoided Unplanned Deforestation requires forest cover maps to have uncertainty < 20%, and uses uncertainty to adjust deforestation estimates". This course has not yet verified either against the current standards (TREES 3.0, June 2026, and the current Verra methodology), so treat them as unconfirmed. The [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/) lesson will give the exact TREES 3.0 provisions, which address uncertainty mainly through deductions <Cite id="trees3" at="Sections 8 and 10" />.
+<Callout type="mistake" title="Thresholds: what the standard actually says">
+The training slide stated that "ART-TREES typically requires forest cover maps to have accuracy > 90%". Neither TREES 2.0 nor TREES 3.0 sets a map-accuracy threshold. TREES asks for a probability sample, the error matrix, user's and producer's accuracy and area estimates with 90% confidence intervals <Cite id="trees3" at="Section 5.1.1.1" />. It handles uncertainty through a deduction that grows with the half-width of the 90% confidence interval <Cite id="trees3" at="Section 8" />. See [ART-TREES HFLD requirements](/bhutan-hfld-training/day-1/art-trees-hfld-requirements/). The slide's second rule of thumb, that "Verra Avoided Unplanned Deforestation requires forest cover maps to have uncertainty < 20%", concerns a different standard and has not been checked here.
 </Callout>
 
 ## The confusion matrix
@@ -159,7 +159,7 @@ Recompute the worked example: mapped deforestation 17,000 ha, 18 of 23 samples c
   changes={[
     "Slides rewritten as a web lesson; Lab 2 (the confusion-matrix spreadsheet as a calculator) embedded",
     "Standard error in the uncertainty example corrected to 1,495 ha (the slide said 1,435; its ±2,459 ha and 18.5% are right)",
-    "The \">90% accuracy\" and \"<20% uncertainty\" rules of thumb flagged as unverified against TREES 3.0 and the current Verra methodology",
+    "The \">90% accuracy\" ART-TREES rule of thumb corrected: neither TREES 2.0 nor 3.0 sets a map-accuracy threshold (uncertainty is handled by deductions, Section 8); the Verra \"<20% uncertainty\" claim is left unchecked",
     "Kappa scale's top category given as \"almost perfect\" (Landis and Koch); note that Olofsson et al. advise against kappa",
     "Simple user's-accuracy adjustment explained as removing commission only",
   ]}
