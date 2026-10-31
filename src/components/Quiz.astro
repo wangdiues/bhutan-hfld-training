@@ -116,10 +116,11 @@ const items = questions.map((qn) => {
 	.hfld-quiz {
 		display: block;
 		margin-block: 2rem;
-		padding: 1rem 1.25rem;
-		border: 1px solid var(--sl-color-gray-5);
-		border-radius: 0.5rem;
+		padding: 1.25rem 1.5rem;
+		border: var(--clay-edge);
+		border-radius: var(--clay-radius);
 		background: var(--sl-color-gray-6);
+		box-shadow: var(--clay-raised);
 	}
 	.hfld-quiz__title {
 		margin: 0 0 0.75rem;
@@ -136,7 +137,7 @@ const items = questions.map((qn) => {
 		padding: 0.75rem 1rem;
 		border: 1px solid var(--sl-color-gray-5);
 		border-inline-start-width: 0.25rem;
-		border-radius: 0.375rem;
+		border-radius: var(--clay-radius-sm);
 	}
 	.hfld-quiz__q[data-state='right'] {
 		border-inline-start-color: var(--sl-color-green);
@@ -158,9 +159,19 @@ const items = questions.map((qn) => {
 		display: flex;
 		gap: 0.5rem;
 		align-items: flex-start;
-		padding: 0.375rem 0.25rem;
+		margin-top: 0.5rem;
+		padding: 0.5rem 0.875rem;
+		border: var(--clay-edge);
+		border-radius: var(--clay-radius-sm);
+		background: var(--sl-color-black);
+		box-shadow: var(--clay-raised-sm);
 		color: var(--sl-color-gray-1);
 		cursor: pointer;
+	}
+	/* The chosen option is pressed into the clay. */
+	.hfld-quiz__opt:has(input:checked) {
+		background: var(--sl-color-accent-low);
+		box-shadow: var(--clay-pressed);
 	}
 	.hfld-quiz__opt input {
 		margin-top: 0.3rem;
@@ -186,8 +197,9 @@ const items = questions.map((qn) => {
 		min-height: 2.75rem;
 		padding: 0.5rem 1rem;
 		border: 1px solid var(--sl-color-accent);
-		border-radius: 0.375rem;
+		border-radius: var(--clay-radius-pill);
 		background: var(--sl-color-accent);
+		box-shadow: var(--clay-raised-sm);
 		color: var(--sl-color-black);
 		font: inherit;
 		font-weight: 600;
@@ -196,8 +208,11 @@ const items = questions.map((qn) => {
 	:root[data-theme='light'] .hfld-quiz button:not(.hfld-quiz__secondary) {
 		color: #ffffff;
 	}
+	.hfld-quiz button:active {
+		box-shadow: var(--clay-pressed);
+	}
 	.hfld-quiz button.hfld-quiz__secondary {
-		background: transparent;
+		background: var(--sl-color-black);
 		color: var(--sl-color-accent-high);
 	}
 	.hfld-quiz button:focus-visible,

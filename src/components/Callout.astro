@@ -44,11 +44,12 @@ const id = `callout-${Math.random().toString(36).slice(2, 9)}`;
 		--c-border: var(--sl-color-accent);
 		--c-bg: var(--sl-color-accent-low);
 		--c-title: var(--sl-color-accent-high);
-		border-inline-start: 0.25rem solid var(--c-border);
+		border: var(--clay-edge);
 		background: var(--c-bg);
 		color: var(--sl-color-white);
-		padding: 0.75rem 1rem;
-		border-radius: 0 0.375rem 0.375rem 0;
+		padding: 1rem 1.25rem;
+		border-radius: var(--clay-radius);
+		box-shadow: var(--clay-raised);
 	}
 	.hfld-callout--implication {
 		--c-border: var(--sl-color-blue);
@@ -86,7 +87,6 @@ const id = `callout-${Math.random().toString(36).slice(2, 9)}`;
 	}
 	@media (forced-colors: active) {
 		.hfld-callout {
-			border: 1px solid CanvasText;
 			border-inline-start-width: 0.25rem;
 		}
 	}

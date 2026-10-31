@@ -22,6 +22,8 @@ PAIRS = {
         ("--sl-color-accent-low", "--sl-color-accent-high", 4.5, "text on accent button"),
         ("--hfld-saffron-text", "--hfld-saffron-bg", 4.5, "saffron callout text"),
         ("--hfld-saffron", "--sl-color-black", 3.0, "saffron rule / non-text graphic"),
+        ("--sl-color-gray-1", "--sl-color-accent-low", 4.5, "chosen quiz option (clay, pressed)"),
+        ("--sl-color-gray-1", "--sl-color-gray-6", 4.5, "text on clay panel (quiz, overview)"),
     ],
     "light": [
         ("--sl-color-white", "--sl-color-black", 4.5, "headings on page"),
@@ -34,6 +36,8 @@ PAIRS = {
         ("--sl-color-accent-high", "--sl-color-accent-low", 4.5, "text on accent-low (badges, highlights)"),
         ("--hfld-saffron-text", "--hfld-saffron-bg", 4.5, "saffron callout text"),
         ("--hfld-saffron", "--sl-color-black", 3.0, "saffron rule / non-text graphic"),
+        ("--sl-color-gray-1", "--sl-color-accent-low", 4.5, "chosen quiz option (clay, pressed)"),
+        ("--sl-color-gray-1", "--sl-color-gray-6", 4.5, "text on clay panel (quiz, overview)"),
     ],
 }
 
