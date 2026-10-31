@@ -110,3 +110,9 @@ h1#_top::after {
 	background: var(--sl-color-accent-low);
 	border-radius: 0.375rem;
 }
+
+/* Keep the page width the same when a lab renders tall results and the scrollbar appears
+   (task M7-02: no layout shift). */
+html {
+	scrollbar-gutter: stable;
+}

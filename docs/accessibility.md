@@ -12,3 +12,17 @@
 Re-run: `npm run build`, `npx astro preview &`, then
 `node scripts/check-themes.mjs $(find dist -name index.html | sed 's|^dist||; s|index.html$||')`
 (on Git Bash, prefix with `MSYS_NO_PATHCONV=1`).
+
+## Performance measurements (task M7-02, 2026-10-31)
+
+Measured with Puppeteer against `astro preview` (cache disabled; sizes uncompressed). Lighthouse itself was not run: downloading it needs the user's approval.
+
+| Page | JS | CSS | Fonts | LCP | CLS |
+|---|---|---|---|---|---|
+| Home | 99 KB | 113 KB | 136 KB | 1.2 s | 0.018 |
+| Random Forest lesson (with Lab 4) | 116 KB | 137 KB | 261 KB | 0.3 s | 0.024 |
+| Lab 2 accuracy and area | 119 KB | 114 KB | 136 KB | 0.3 s | 0.086 |
+| Embeddings lesson (with Lab 6) | 115 KB | 137 KB | 136 KB | 0.2 s | — |
+| Glossary | 103 KB | 108 KB | 97 KB | 0.1 s | 0.004 |
+
+All pages are under 200 KB of JavaScript. Images are WebP (slides, screenshots) or SVG. Layout shift was cut from 0.30 to under 0.1 by rendering the sidebar progress panel at build time and reserving the scrollbar gutter.

@@ -1,14 +1,43 @@
 ---
 /**
- * Starlight Sidebar override (task M6-01): the default sidebar, plus a progress bar on each day's
- * group ("3 of 6 done") and a tick on completed lessons. Added in the browser from saved progress,
- * so the static pages stay the same for everyone.
+ * Starlight Sidebar override (task M6-01): a "Your progress" panel with one bar per day, then the
+ * default sidebar with a tick on completed lessons. The panel is rendered at build time with the
+ * lesson counts, and the browser only fills in the numbers from saved progress, so nothing in the
+ * sidebar moves when the page loads (task M7-02, layout shift).
  */
+import { getCollection } from 'astro:content';
 import Default from '@astrojs/starlight/components/Sidebar.astro';
+
+const docs = await getCollection('docs');
+const days = [1, 2, 3, 4, 5].map((d) => ({
+	day: d,
+	keys: docs
+		.map((e) => e.id.replace(/(\/index)?(\.mdx?)?$/, ''))
+		.filter((id) => id.startsWith(`day-${d}/`))
+		.map((id) => `${id}/`)
+		.sort(),
+}));
 ---
 
+<hfld-sidebar-progress class="hfld-progress" data-base={import.meta.env.BASE_URL}>
+	<p class="hfld-progress__title" id="hfld-progress-title">Your progress</p>
+	<ul aria-labelledby="hfld-progress-title">
+		{
+			days.map((d) => (
+				<li data-day-keys={d.keys.join(' ')}>
+					<span class="hfld-progress__label">Day {d.day}</span>
+					<span class="hfld-progress__track" aria-hidden="true">
+						<span class="hfld-progress__fill" />
+					</span>
+					<span class="hfld-progress__text">
+						<span data-done>0</span> of {d.keys.length}
+					</span>
+				</li>
+			))
+		}
+	</ul>
+</hfld-sidebar-progress>
 <Default />
-<hfld-sidebar-progress data-base={import.meta.env.BASE_URL}></hfld-sidebar-progress>
 
 <script>
 	import { countDone, loadDone, pageKey, PROGRESS_EVENT } from '~/lib/progress';
@@ -23,35 +52,22 @@ import Default from '@astrojs/starlight/components/Sidebar.astro';
 
 		private update() {
 			const base = this.dataset.base ?? '/';
-			const nav = this.parentElement;
-			if (!nav) return;
 			const done = loadDone();
-			nav.querySelectorAll<HTMLDetailsElement>('details').forEach((group) => {
-				const label = group.querySelector(':scope > summary .group-label');
-				const title = label?.querySelector('.large')?.textContent?.trim() ?? '';
-				if (!label || !/^Day [1-5]\b/.test(title)) return;
-				const links = [...group.querySelectorAll<HTMLAnchorElement>('a[href]')];
-				const keys = links.map((a) => pageKey(new URL(a.href).pathname, base));
-				links.forEach((a, i) => {
-					let tick = a.querySelector<HTMLElement>('.hfld-tick');
-					if (!tick) {
-						tick = document.createElement('span');
-						tick.className = 'hfld-tick';
-						a.append(tick);
-					}
-					tick.innerHTML = done.has(keys[i]) ? '<span aria-hidden="true"> ✓</span><span class="sr-only"> (completed)</span>' : '';
-				});
-				const c = countDone(keys, done);
-				let bar = label.querySelector<HTMLElement>('.hfld-day-progress');
-				if (!bar) {
-					bar = document.createElement('span');
-					bar.className = 'hfld-day-progress';
-					label.append(bar);
-				}
-				const pct = c.total ? Math.round((100 * c.done) / c.total) : 0;
-				bar.innerHTML =
-					`<span class="hfld-day-progress__track" aria-hidden="true"><span class="hfld-day-progress__fill" style="width:${pct}%"></span></span>` +
-					`<span class="hfld-day-progress__text">${c.done} of ${c.total} done</span>`;
+			this.querySelectorAll<HTMLElement>('[data-day-keys]').forEach((li) => {
+				const c = countDone(li.dataset.dayKeys!.split(' '), done);
+				li.querySelector('[data-done]')!.textContent = String(c.done);
+				li.querySelector<HTMLElement>('.hfld-progress__fill')!.style.width = `${c.total ? (100 * c.done) / c.total : 0}%`;
+			});
+			// Ticks on completed lessons: inline, after the link text.
+			this.parentElement?.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
+				const isDone = done.has(pageKey(new URL(a.href).pathname, base));
+				let tick = a.querySelector<HTMLElement>('.hfld-tick');
+				if (isDone && !tick) {
+					tick = document.createElement('span');
+					tick.className = 'hfld-tick';
+					tick.innerHTML = '<span aria-hidden="true"> ✓</span><span class="sr-only"> (completed)</span>';
+					a.append(tick);
+				} else if (!isDone && tick) tick.remove();
 			});
 		}
 	}
@@ -59,27 +75,46 @@ import Default from '@astrojs/starlight/components/Sidebar.astro';
 </script>
 
 <style is:global>
-	.hfld-day-progress {
-		display: flex;
+	.hfld-progress {
+		display: block;
+		margin-bottom: 1rem;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.5rem;
+		font-size: var(--sl-text-xs);
+	}
+	.hfld-progress__title {
+		margin: 0 0 0.25rem;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.hfld-progress ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.hfld-progress li {
+		display: grid;
+		grid-template-columns: 3.2rem 1fr 3.5rem;
 		align-items: center;
 		gap: 0.4rem;
-		margin-top: 0.2rem;
-		font-size: var(--sl-text-xs);
-		font-weight: 400;
 		color: var(--sl-color-gray-2);
 	}
-	.hfld-day-progress__track {
-		flex: 1;
-		max-width: 6rem;
+	.hfld-progress__track {
 		height: 0.35rem;
 		border-radius: 0.2rem;
 		background: var(--sl-color-gray-5);
 		overflow: hidden;
 	}
-	.hfld-day-progress__fill {
+	.hfld-progress__fill {
 		display: block;
 		height: 100%;
+		width: 0;
 		background: var(--sl-color-accent);
+	}
+	.hfld-progress__text {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
 	}
 	.hfld-tick {
 		color: var(--sl-color-accent);
