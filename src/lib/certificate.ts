@@ -11,22 +11,9 @@ export interface DayRequirement {
 	quizzes: string[];
 }
 
-/**
- * Day 1 has no recap quiz yet (task M4-07, waiting for M4-01), so its five lesson quizzes count
- * instead. Replace them with 'day-1-recap' when that page is written.
- */
+/** Each day's recap quiz. */
 export const REQUIREMENTS: DayRequirement[] = [
-	{
-		day: 1,
-		title: 'Earth Engine foundations',
-		quizzes: [
-			'day-1-introduction-to-earth-engine',
-			'day-1-code-editor-and-data-catalog',
-			'day-1-javascript-basics',
-			'day-1-image-collections',
-			'day-1-custom-functions',
-		],
-	},
+	{ day: 1, title: 'Earth Engine foundations', quizzes: ['day-1-recap'] },
 	{ day: 2, title: 'Composites', quizzes: ['day-2-recap'] },
 	{ day: 3, title: 'Classification', quizzes: ['day-3-recap'] },
 	{ day: 4, title: 'Land cover and embeddings', quizzes: ['day-4-recap'] },

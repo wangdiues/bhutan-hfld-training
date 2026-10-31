@@ -10,9 +10,9 @@ describe('completion certificate (M6-02)', () => {
 		expect(dayStatus(all(7)).every((d) => d.passed)).toBe(true);
 		expect(dayStatus(all(6)).some((d) => d.passed)).toBe(false);
 		const scores = all(10);
-		delete scores['day-1-javascript-basics'];
+		delete scores['day-1-recap'];
 		const s = dayStatus(scores);
-		expect(s[0]).toMatchObject({ day: 1, passed: false, missing: ['day-1-javascript-basics'] });
+		expect(s[0]).toMatchObject({ day: 1, passed: false, missing: ['day-1-recap'] });
 		expect(s.slice(1).every((d) => d.passed)).toBe(true);
 	});
 
