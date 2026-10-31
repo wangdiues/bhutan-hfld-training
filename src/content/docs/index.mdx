@@ -15,6 +15,7 @@ hero:
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import WorkflowMap from '~/components/WorkflowMap.astro';
 
 ## Five days, one workflow
 
@@ -27,6 +28,12 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 	<LinkCard title="Capstone" description="Map a Dzongkhag, sample it, interpret it, and report accuracy and adjusted areas." href="/bhutan-hfld-training/capstone/" />
 </CardGrid>
 
+## The method, step by step
+
+From satellite images to a reported area with its uncertainty. Choose a step to see what goes in, what comes out, the assets it uses, and where to learn it. The steps follow the method; the label shows the day each one is taught.
+
+<WorkflowMap />
+
 ## Built to be used
 
 <CardGrid>
@@ -34,10 +41,10 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 		Sample-size and accuracy calculators that reproduce the workshop spreadsheets, plus explorers for indices, decision trees and embeddings.
 	</Card>
 	<Card title="Copy, run, adapt" icon="seti:javascript">
-		Every exercise has a tested Earth Engine script in JavaScript and a Python (geemap) version.
+		Every exercise comes with its Earth Engine script in JavaScript, and many lessons also show the Python (geemap) version.
 	</Card>
 	<Card title="Current standard" icon="approve-check">
-		Requirements are cited from ART TREES 3.0 (June 2026), with notes where TREES 2.0 differs.
+		Being aligned with ART TREES 3.0 (June 2026). The lesson on the HFLD requirements, with section citations, is in preparation.
 	</Card>
 </CardGrid>
 

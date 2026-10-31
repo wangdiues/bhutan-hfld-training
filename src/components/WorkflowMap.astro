@@ -1,0 +1,359 @@
+---
+/**
+ * Lab 7 (task M5-04): interactive workflow map for the home page. The whole method as a flow of
+ * steps; choosing a step shows its inputs, outputs and assets and links to its lesson. Built as
+ * HTML (an ordered list of buttons and panels) rather than SVG, so it reads in order with a
+ * screen reader and works with the keyboard (Tab, arrows, Home, End). Without JavaScript every
+ * panel is shown and the buttons stay inert (no aria-expanded until the script runs).
+ */
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const P = 'projects/bhutan-hfld-readiness-training/assets/';
+
+interface Step {
+	id: string;
+	day: string;
+	title: string;
+	lesson: string;
+	lessonTitle: string;
+	inputs: string[];
+	outputs: string[];
+	assets?: string[];
+	lab?: { href: string; title: string };
+}
+
+const steps: Step[] = [
+	{
+		id: 'scope',
+		day: 'Day 1',
+		title: 'Area and forest definition',
+		lesson: 'day-1/art-trees-hfld-requirements/',
+		lessonTitle: 'ART-TREES HFLD requirements (being written)',
+		inputs: ['The ART-TREES standard', "Bhutan's national forest definition", "Bhutan's boundary"],
+		outputs: ['The class system and the thresholds that put the forest definition into practice', 'The area of interest'],
+		assets: [`${P}Bhutan`],
+	},
+	{
+		id: 'composites',
+		day: 'Day 2',
+		title: 'Seasonal composites',
+		lesson: 'day-2/sentinel-2-mrv-composite/',
+		lessonTitle: 'Sentinel-2 MRV composite',
+		inputs: ['Sentinel-2 SR or Landsat 8/9 images', 'Cloud Score+ or QA_PIXEL masks', 'SRTM elevation (terrain correction)', "Bhutan's boundary"],
+		outputs: ['12-band image: six bands for January–April and six for October–December, reflectance × 10,000'],
+		assets: [`${P}sentinel2Composites/bhutan_s2_<year>_janapr_octdec_int16`, `${P}landsatComposite/bhutan_ls89_<year>_janapr_octdec`],
+	},
+	{
+		id: 'covariates',
+		day: 'Day 3',
+		title: 'Covariates',
+		lesson: 'day-3/covariates/',
+		lessonTitle: 'Calculating covariates',
+		inputs: ['The composite', 'SRTM elevation', 'JRC Global Surface Water (optional)'],
+		outputs: ['Stack of indices (NDVI, EVI, NBR …), Tasseled Cap angles and distances, elevation, slope and aspect (eastness, northness), and optional surface-water layers'],
+		lab: { href: 'labs/spectral-index-explorer/', title: 'Spectral index explorer' },
+	},
+	{
+		id: 'training',
+		day: 'Days 3–4',
+		title: 'Training data',
+		lesson: 'day-4/training-data/',
+		lessonTitle: 'Collecting training data',
+		inputs: ['The composite', 'High-resolution imagery', 'National class definitions'],
+		outputs: ['Labelled points for each class'],
+		assets: [`${P}trainingData/Bhutan_labels_multiclass`],
+	},
+	{
+		id: 'primitives',
+		day: 'Day 3',
+		title: 'Primitives',
+		lesson: 'day-3/forest-primitives/',
+		lessonTitle: 'Forest primitives',
+		inputs: ['Covariates', 'Training points (one class against the rest)'],
+		outputs: ['One probability layer (0–1) per class, from a Random Forest'],
+		assets: [`${P}primitives/ls_<Class>_<year>`, 'projects/servir-mekong/bhutan_primitives/s2_<Class>_2025'],
+		lab: { href: 'labs/decision-tree-playground/', title: 'Decision tree playground' },
+	},
+	{
+		id: 'embeddings',
+		day: 'Day 4',
+		title: 'Embeddings (alternative to steps 3–5)',
+		lesson: 'day-4/embeddings-classification-similarity/',
+		lessonTitle: 'Land cover and similarity with embeddings',
+		inputs: ['Satellite Embedding V1 (64 bands, 10 m, annual)', 'Training points'],
+		outputs: ['Primitives from embeddings', 'Similarity maps', 'Change layer: similarity between two years'],
+		lab: { href: 'labs/embedding-similarity/', title: 'Embedding similarity' },
+	},
+	{
+		id: 'assemblage',
+		day: 'Day 4',
+		title: 'Assemblage',
+		lesson: 'day-4/assemblage/',
+		lessonTitle: 'Assemblage',
+		inputs: ['Six primitives', 'Rule order and thresholds'],
+		outputs: ['Land-cover map, classes 1–6 (0 = no rule passed)'],
+		lab: { href: 'labs/assemblage-builder/', title: 'Assemblage rule builder' },
+	},
+	{
+		id: 'change',
+		day: 'Day 3',
+		title: 'Change detection',
+		lesson: 'day-3/change-strata/',
+		lessonTitle: 'Change detection and loss strata',
+		inputs: ['Forest primitives for two dates, or Hansen tree cover and loss year'],
+		outputs: ['Strata map: stable forest, loss, stable non-forest, gain, with the area of each'],
+	},
+	{
+		id: 'sample-size',
+		day: 'Day 5',
+		title: 'Strata and sample size',
+		lesson: 'day-5/sample-size/',
+		lessonTitle: 'Determining sample size',
+		inputs: [
+			'Land-cover map',
+			'Embedding change layer (forest with similarity below 0.955 = likely deforestation)',
+			'Expected proportion of deforestation p in each stratum',
+			'Target margin of error at 90% confidence (z = 1.6449)',
+		],
+		outputs: ['Strata areas (three forest strata, non-forest, deforestation)', 'Total sample size and samples per stratum'],
+		assets: [
+			'projects/carbondevelopmentteam/assets/Bhutan/BT002_Bhutan_HFLD/LULC_2024_20250812_epsg4326_10m',
+			`${P}GSEdotProd/GSEdotProd_2425`,
+		],
+		lab: { href: 'labs/sample-size-calculator/', title: 'Sample size calculator' },
+	},
+	{
+		id: 'sample',
+		day: 'Day 5',
+		title: 'Stratified sample',
+		lesson: 'day-5/stratified-sampling-gee/',
+		lessonTitle: 'Stratified sampling in GEE',
+		inputs: ['Strata map', 'Samples per stratum'],
+		outputs: ['Sample points and plots (shapefiles for CEO, and assets)'],
+		assets: [`${P}trainingData/bhutan_hfldTraining_samples_<name>`, `${P}trainingData/stratifiedPlots_<name>`],
+	},
+	{
+		id: 'reference',
+		day: 'Day 4',
+		title: 'Reference labels',
+		lesson: 'day-4/collect-earth-online/',
+		lessonTitle: 'Collect Earth Online',
+		inputs: ['Sample plots', 'High-resolution imagery', 'Response design'],
+		outputs: ['CSV of reference labels, one per sample'],
+	},
+	{
+		id: 'accuracy',
+		day: 'Day 5',
+		title: 'Accuracy and area',
+		lesson: 'day-5/accuracy-and-area/',
+		lessonTitle: 'Accuracy assessment and area adjustment',
+		inputs: ['Map class and reference class for each sample', 'Mapped area of each stratum'],
+		outputs: ["Confusion matrix, user's and producer's accuracy, adjusted areas with SE and 90% confidence intervals"],
+		lab: { href: 'labs/accuracy-area-estimator/', title: 'Accuracy and area estimator' },
+	},
+	{
+		id: 'reporting',
+		day: 'Day 5',
+		title: 'Reporting',
+		lesson: 'day-5/reporting/',
+		lessonTitle: 'Reporting and documentation',
+		inputs: ['Adjusted areas and uncertainty', 'Scripts, asset versions and assumptions'],
+		outputs: ['Activity-data table, assumptions log and a reproducible package'],
+	},
+];---
+
+<hfld-workflow class="hfld-workflow not-content">
+	<ol class="hfld-workflow__steps" aria-label="Workflow steps">
+		{
+			steps.map((s, i) => (
+				<li>
+					<button type="button" data-step={s.id} aria-controls={`wf-${s.id}`}>
+						<span class="hfld-workflow__num" aria-hidden="true">{i + 1}</span>
+						<span>
+							<span class="hfld-workflow__title">{s.title}</span>
+							<span class="hfld-workflow__day">{s.day}</span>
+						</span>
+					</button>
+				</li>
+			))
+		}
+	</ol>
+	{
+		steps.map((s, i) => (
+			<section id={`wf-${s.id}`} class="hfld-workflow__panel" data-panel={s.id} aria-labelledby={`wf-h-${s.id}`}>
+				<h3 id={`wf-h-${s.id}`}>
+					Step {i + 1}: {s.title} <span class="hfld-workflow__day">({s.day})</span>
+				</h3>
+				<div class="hfld-workflow__cols">
+					<div>
+						<h4>Inputs</h4>
+						<ul>{s.inputs.map((x) => <li>{x}</li>)}</ul>
+					</div>
+					<div>
+						<h4>Outputs</h4>
+						<ul>{s.outputs.map((x) => <li>{x}</li>)}</ul>
+					</div>
+				</div>
+				{s.assets && (
+					<>
+						<h4>Assets</h4>
+						<ul class="hfld-workflow__assets">
+							{s.assets.map((a) => (
+								<li>
+									<code>{a}</code>
+								</li>
+							))}
+						</ul>
+					</>
+				)}
+				<p>
+					<a href={`${base}${s.lesson}`}>Lesson: {s.lessonTitle}</a>
+					{s.lab && (
+						<>
+							{' · '}
+							<a href={`${base}${s.lab.href}`}>Lab: {s.lab.title}</a>
+						</>
+					)}
+				</p>
+			</section>
+		))
+	}
+	<p class="hfld-workflow__note">
+		Project assets need read access; see the <a href={`${base}reference/assets/`}>asset catalogue</a> to make your own.
+	</p>
+</hfld-workflow>
+
+<script>
+	class HfldWorkflow extends HTMLElement {
+		connectedCallback() {
+			const buttons = [...this.querySelectorAll<HTMLButtonElement>('button[data-step]')];
+			const show = (id: string) => {
+				for (const b of buttons) b.setAttribute('aria-expanded', String(b.dataset.step === id));
+				this.dataset.ready = '';
+				this.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== id));
+			};
+			for (const b of buttons)
+				b.addEventListener('click', () => {
+					show(b.dataset.step!);
+					// On narrow screens the panel is below all the steps: bring it into view.
+					const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+					this.querySelector(`[data-panel="${b.dataset.step}"]`)!.scrollIntoView({ block: 'nearest', behavior: smooth ? 'smooth' : 'auto' });
+				});
+			// Arrow keys move between steps, as in a toolbar.
+			this.querySelector('ol')!.addEventListener('keydown', (e) => {
+				const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
+				if (i < 0) return;
+				const keys: Record<string, number> = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: buttons.length - 1 };
+				const next = e.key in keys ? keys[e.key] : null;
+				if (next === null) return;
+				e.preventDefault();
+				buttons[(next + buttons.length) % buttons.length].focus();
+			});
+			show(buttons[0].dataset.step!);
+		}
+	}
+	customElements.define('hfld-workflow', HfldWorkflow);
+</script>
+
+<style>
+	.hfld-workflow {
+		display: block;
+		margin-block: 1.5rem;
+	}
+	.hfld-workflow__steps {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 1rem;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+		gap: 0.5rem;
+	}
+	.hfld-workflow__steps li {
+		position: relative;
+		margin: 0;
+	}
+	.hfld-workflow__steps button {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		gap: 0.6rem;
+		align-items: center;
+		text-align: left;
+		padding: 0.55rem 0.7rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		background: var(--sl-color-bg-nav);
+		color: var(--sl-color-white);
+		font: inherit;
+		cursor: pointer;
+	}
+	.hfld-workflow__steps button:hover {
+		border-color: var(--sl-color-accent);
+	}
+	.hfld-workflow__steps button[aria-expanded='true'] {
+		border: 2px solid var(--sl-color-accent);
+		background: var(--sl-color-accent-low);
+		font-weight: 600;
+	}
+	.hfld-workflow__steps button:focus-visible {
+		outline: 3px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+	.hfld-workflow__num {
+		flex: none;
+		display: inline-grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 50%;
+		background: var(--sl-color-gray-6);
+		font-size: var(--sl-text-sm);
+		font-weight: 700;
+	}
+	.hfld-workflow__title {
+		display: block;
+		line-height: 1.25;
+	}
+	.hfld-workflow__day {
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-2);
+		font-weight: 400;
+	}
+	.hfld-workflow__panel {
+		border: 1px solid var(--sl-color-gray-5);
+		border-left: 4px solid var(--sl-color-accent);
+		border-radius: 0.5rem;
+		padding: 0.75rem 1rem;
+		margin-bottom: 0.75rem;
+	}
+	.hfld-workflow__panel[hidden] {
+		display: none;
+	}
+	.hfld-workflow__panel h3 {
+		margin: 0 0 0.5rem;
+		font-size: var(--sl-text-lg);
+	}
+	.hfld-workflow__panel h4 {
+		margin: 0.5rem 0 0.25rem;
+		font-size: var(--sl-text-sm);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--sl-color-gray-2);
+	}
+	.hfld-workflow__panel ul {
+		margin: 0;
+		padding-left: 1.1rem;
+	}
+	.hfld-workflow__cols {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+		gap: 0 1.5rem;
+	}
+	.hfld-workflow__assets code {
+		font-size: var(--sl-text-xs);
+		overflow-wrap: anywhere;
+	}
+	.hfld-workflow__note {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+</style>
