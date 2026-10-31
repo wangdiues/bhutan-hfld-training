@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wangdiues.github.io/bhutan-hfld-training/sitemap-index.xml

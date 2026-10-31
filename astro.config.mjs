@@ -44,6 +44,13 @@ export default defineConfig({
 			lastUpdated: true,
 			// Offline use (task M6-05): web app manifest and the service worker written by integrations/offline.mjs.
 			head: [
+				// Sharing (task M7-05): one share image for every page; Starlight adds og:title and og:description.
+				{ tag: 'meta', attrs: { property: 'og:image', content: `https://${GITHUB_USER}.github.io/${REPO}/og-image.png` } },
+				{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+				{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+				{ tag: 'meta', attrs: { property: 'og:image:alt', content: "Map Bhutan's forests for ART-TREES: a free course in Google Earth Engine" } },
+				{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+				{ tag: 'meta', attrs: { name: 'twitter:image', content: `https://${GITHUB_USER}.github.io/${REPO}/og-image.png` } },
 				// Trainer mode (task M6-04): set before the page draws, so trainer notes don't flash.
 				{
 					tag: 'script',
